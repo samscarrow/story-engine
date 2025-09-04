@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\c\\Users\\sscar\\claude-workspace\\workshop\\aios/**)",
+      "Read(C:\\Users\\sscar\\claude-workspace\\workshop\\aios/**)",
+      "Read(C:\\c\\Users\\sscar\\claude-workspace/**)",
+      "Bash(python:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

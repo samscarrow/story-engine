@@ -1,0 +1,52 @@
+llm:
+  providers:
+    - name: lmstudio
+      provider: lmstudio
+      endpoint: http://localhost:1234
+      model: gemma-2-27b
+      defaults:
+        temperature: 0.8
+        max_tokens: 600
+        timeout: 180
+
+orchestrator:
+  fallback_enabled: true
+  fallback_providers: ["lmstudio"]
+  timeout: 60
+  retries:
+    attempts: 2
+    base_delay: 0.8
+
+poml:
+  template_paths: ["templates/", "components/", "gallery/"]
+  cache:
+    enabled: true
+    ttl_seconds: 3600
+  strict_mode: false
+
+simulation:
+  max_concurrent: 5
+  validate_schema: true
+  use_poml: true
+
+scene_bank:
+  enabled: true
+  path: scene_bank/pilate_md_scenes.json
+
+narrative:
+  plot_structure:
+    temperature: 0.7
+    max_tokens: 800
+    system: "You are an expert narrative architect. Write in a high historical drama tone in the style of HBO's 'Rome'."
+  scene_details:
+    temperature: 0.8
+    max_tokens: 1000
+    system: "You write vivid, concrete cinematic scenes with political nuance and gritty realism, in the style of HBO's 'Rome'."
+  dialogue:
+    temperature: 0.9
+    max_tokens: 500
+    system: "You channel the character's authentic voice and constraints. Dialogue should feel like high historical drama (HBO 'Rome' energy)."
+  evaluation:
+    temperature: 0.3
+    max_tokens: 400
+    system: "You are a rigorous story analyst returning concise, actionable metrics for historical drama."

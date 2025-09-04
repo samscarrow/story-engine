@@ -1,0 +1,40 @@
+{
+  "seed_scene": {
+    "id": "act-one-the-standards-crisis-ext-jerusalem-streets-day",
+    "title": "EXT. JERUSALEM STREETS - DAY",
+    "header": "EXT. JERUSALEM STREETS - DAY",
+    "act": "ACT ONE: THE STANDARDS CRISIS",
+    "body": "EXT. JERUSALEM STREETS - DAY\n\nPilate moves through the city with deliberate observation, his administrative eye cataloging social dynamics like engineering problems requiring systematic solutions.\n\nThe CROWD grows thicker as he approaches the Temple area. Not the usual marketplace bustle, but something more focused. More purposeful.\n\nAn ELDERLY JEWISH MAN steps forward—not confrontational, but with the dignity of someone addressing authority from moral conviction rather than political calculation.\n\nELDERLY MAN\nLord Pilate, the eagles violate the commandment against graven images. We ask for their removal.\n\nThe request is stated simply, without the complex political maneuvering Pilate expects. The directness unsettles his strategic thinking.\n\nPILATE\n(applying standard administrative response)\nRoman standards represent imperial authority. Their presence ensures order and security.\n\nELDERLY MAN\nOrder built on violation of God's law creates disorder in men's souls.\n\nThe response doesn't fit Pilate's decision trees. Not political opposition, not economic complaint, but appeal to authority beyond Roman calculation—a variable his survival mathematics cannot process.",
+    "tags": [
+      "screenplay-scene",
+      "act one: the standards crisis"
+    ],
+    "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+  },
+  "simulated_scene": {
+    "plot_point": {
+      "name": "EXT. JERUSALEM STREETS - DAY",
+      "purpose": "Use pre-authored scene context",
+      "tension": 6
+    },
+    "scene_description": "SCENE SITUATION (2-3 sentences):\nPontius Pilate navigates the increasingly dense crowd near the Temple, his practiced gaze assessing the situation – a simple, yet unsettling, protest led by an elderly Jewish man demanding the removal of the Roman eagles. The man’s appeal to religious law throws Pilate's carefully constructed calculations into disarray, forcing him to confront a force beyond Roman authority.\n\nSENSORY DETAILS:\n\nSight: The glint of polished bronze on the Roman eagles, stark against the roughspun tunics and worn leather of the crowd.\nSound: The distant, rhythmic chanting of the elderly man, weaving through the murmur of the growing throng. \nAtmosphere: The oppressive heat radiating off the stone buildings and the tightly packed bodies, amplifying the feeling of a pressure cooker about to explode.\n\n\n\nPILATE\n(Sighing, his voice carefully measured)\nThe eagles are a symbol of Rome's protection. They safeguard this city from chaos and unrest. Removing them would weaken our presence, invite instability.\n\nELDERLY MAN\nInstability is born not of Roman eagles, but of the desecration of holy ground. Your “protection” is a cage built upon blasphemy.  Do you believe true peace can exist where reverence is mocked?\n\nA ripple of murmurs passes through the crowd, some nodding in agreement with the Elder’s words. Pilate subtly scans the faces - piety mixed with simmering resentment. He feels a prickle of unease; this isn't mere rabble-rousing. \n\nPILATE\n(His tone hardening slightly)\nYou speak of reverence. Rome brought law and order to Judea – something your own leaders have failed to provide for centuries.  These eagles are not desecration, they are a testament to the strength that *prevents* further bloodshed. I will not be swayed by piety when there is security to maintain.\n\nThe Elder’s eyes, deeply lined with age and wisdom, meet Pilate's without flinching. There’s no fear in them, only a quiet sorrow. \n\nELDERLY MAN\nSecurity bought at the price of faith is a hollow victory, Lord Pilate. It merely postpones the inevitable reckoning.  You may control the legions, but you cannot command the hearts of men. And the heart of this people yearns for something more than iron and stone.\n\nA young boy in the crowd, clutching a worn wooden crucifix, steps forward hesitantly. He looks at Pilate with wide, fearful eyes. \n\nYOUNG BOY\n(Barely a whisper)\nPlease, Lord… let the eagles go.\n\nPilate's jaw tightens almost imperceptibly. The boy’s plea is not a political maneuver; it’s raw, vulnerable faith. It hits him harder than any shouted accusation or veiled threat. \n\nPILATE\n(Turning away, his voice clipped)\nThis discussion is concluded.  The eagles remain.  Disperse.\n\nHe begins to move through the crowd, forcing his way toward the Temple entrance. He doesn’t look back, but he can *feel* the Elder's gaze on him, a silent challenge echoing in his mind. \n\nSENSORY DETAILS:\n\nSight: The young boy's crucifix, small and fragile against the backdrop of Roman authority, a symbol of unwavering faith.\nSound: The sharp crack of a whip as a Roman soldier pushes through the crowd, attempting to maintain order – a stark reminder of Pilate's power. \nAtmosphere: A sudden, palpable shift in the air - a heavy, expectant silence descends upon the crowd after Pilate’s pronouncement.\n\n\n\n⚠️ This is a turning point - stakes must be life-changing\n\n**What's at Risk:**  Pilate risks alienating the Jewish population and potentially igniting further unrest that could destabilize Roman rule in Judea. The Elder risks imprisonment or worse for challenging Roman authority, but he chooses principle over self-preservation. For Pilate, the stakes are his reputation as a strong, decisive ruler – a reputation essential to maintaining his power and security within the Roman Empire. The broader implication is the growing tension between religious faith and political control, foreshadowing future conflict and unrest in Judea.\n\n\n\n",
+    "characters_present": [
+      "Pontius Pilate",
+      "Caiaphas"
+    ],
+    "name": "EXT. JERUSALEM STREETS - DAY",
+    "meta": {
+      "provider": "lmstudio",
+      "model": "google/gemma-3n-e4b",
+      "usage": {
+        "prompt_tokens": 942,
+        "completion_tokens": 882,
+        "total_tokens": 1824
+      },
+      "timestamp": "2025-09-04T12:00:04.591271",
+      "generation_time_ms": 11615.002999998978,
+      "failures_before_success": []
+    }
+  },
+  "dialogue": "```json\n{\n  \"dialogue\": {\n    \"text\": \"So, the whispers persist then? About the Galilean? A man who claimed… miracles. Such pronouncements ruffle the feathers of those who prefer order, wouldn't you agree?\",\n    \"interrupted\": false,\n    \"trails_off\": false,\n    \"emphasis\": [\"miracles\", \"order\"]\n  },\n  \"delivery\": {\n    \"tone\": \"cold\",\n    \"volume\": \"normal\",\n    \"pace\": \"slow\",\n    \"action\": \"Pilate slowly surveys the assembled soldiers and officials, his gaze lingering on each face before settling back to a distant point.\",\n    \"focus\": \"Directly at the group/audience, but not making eye contact with anyone specifically.\",\n    \"emotion\": \"weary detachment\"\n  },\n  \"subtext\": {\n    \"real_meaning\": \"Pilate is dismissing the reports of the Galilean's miracles as disruptive and potentially dangerous to his authority. He is not interested in the man’s claims, only in their potential consequences.\",\n    \"hidden_message\": \"A veiled warning to those present – a subtle reminder that challenging the established order has repercussions.\",\n    \"avoiding\": \"Pilate avoids acknowledging the moral or spiritual implications of the Galilean's teachings. He treats it as a political issue alone.\",\n    \"reve"
+}

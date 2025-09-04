@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  external-kb:
+    image: postgres:16-alpine
+    container_name: story_engine_external_kb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-story_db}
+      POSTGRES_USER: ${DB_USER:-story}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?err}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - external_kb_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  external_kb_data:
+    driver: local
+

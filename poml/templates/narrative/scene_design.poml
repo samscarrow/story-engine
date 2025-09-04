@@ -1,0 +1,437 @@
+<document>
+  <metadata>
+    <title>Scene Design Template</title>
+    <description>Comprehensive scene design for dramatic narrative moments</description>
+    <version>1.0.0</version>
+    <tags>scene-design, narrative, dramatic-structure, staging</tags>
+  </metadata>
+
+  <style>
+    .scene-element { border-left: 4px solid #4a90e2; padding-left: 1em; margin: 1em 0; }
+    .dramatic-beat { background: #f0f4f8; padding: 0.5em; margin: 0.5em 0; }
+    .blocking { font-family: monospace; color: #333; }
+    .timing { color: #e74c3c; font-weight: bold; }
+    .focus-point { background: yellow; padding: 0.2em; }
+  </style>
+
+  <system>
+    You are a master scene designer creating fully realized dramatic scenes.
+    Design scenes with careful attention to pacing, staging, emotional dynamics, and narrative function.
+    Consider visual composition, character blocking, dialogue rhythm, and dramatic tension.
+    Create scenes that are both cinematically vivid and narratively essential.
+  </system>
+
+  <!-- Scene Foundation -->
+  <section class="scene-foundation">
+    <h2>Scene Foundation</h2>
+    
+    <scene-identifier>
+      <if test="{{scene.id}}">
+        <id>Scene {{scene.id}}</id>
+      </if>
+      <if test="{{scene.title}}">
+        <title>{{scene.title}}</title>
+      </if>
+      <act>Act {{scene.act | default: "Unknown"}}</act>
+      <sequence>{{scene.sequence | default: "Standalone scene"}}</sequence>
+    </scene-identifier>
+    
+    <narrative-context>
+      <h3>Narrative Context</h3>
+      <story-beat>
+        <name>{{beat.name}}</name>
+        <function>{{beat.function | default: "Advance plot"}}</function>
+        <emotional-arc>{{beat.emotional_arc | default: "Build tension"}}</emotional-arc>
+      </story-beat>
+      
+      <if test="{{previous_scene}}">
+        <previous>
+          <h4>Previous Scene</h4>
+          <summary>{{previous_scene.summary}}</summary>
+          <momentum>{{previous_scene.ending_momentum | default: "neutral"}}</momentum>
+          <unresolved>{{previous_scene.unresolved_elements | join: ", "}}</unresolved>
+        </previous>
+      </if>
+      
+      <if test="{{next_scene_setup}}">
+        <setup-next>
+          <h4>Must Set Up</h4>
+          {{next_scene_setup}}
+        </setup-next>
+      </if>
+    </narrative-context>
+  </section>
+
+  <!-- Scene Architecture -->
+  <section class="scene-architecture">
+    <h2>Scene Architecture</h2>
+    
+    <structure>
+      <h3>Dramatic Structure</h3>
+      
+      <opening class="dramatic-beat">
+        <label>Opening Beat</label>
+        <purpose>{{structure.opening_purpose | default: "Establish situation"}}</purpose>
+        <hook>{{structure.opening_hook | default: "Draw audience in"}}</hook>
+        <duration class="timing">{{structure.opening_duration | default: "10-15 seconds"}}</duration>
+      </opening>
+      
+      <development class="dramatic-beat">
+        <label>Development</label>
+        <escalation>{{structure.escalation_pattern | default: "Gradual build"}}</escalation>
+        <complications>
+          <if test="{{structure.complications}}">
+            <for each="complication" in="{{structure.complications}}">
+              <complication>{{complication}}</complication>
+            </for>
+          <else />
+            <complication>Primary obstacle emerges</complication>
+            <complication>Stakes become clear</complication>
+            <complication>Positions harden</complication>
+          </if>
+        </complications>
+        <duration class="timing">{{structure.development_duration | default: "2-3 minutes"}}</duration>
+      </development>
+      
+      <turning-point class="dramatic-beat">
+        <label>Turning Point</label>
+        <moment>{{structure.turning_point | default: "Key revelation or decision"}}</moment>
+        <shift>{{structure.shift | default: "Power dynamics change"}}</shift>
+        <duration class="timing">{{structure.turning_duration | default: "30-45 seconds"}}</duration>
+      </turning-point>
+      
+      <climax class="dramatic-beat">
+        <label>Climax</label>
+        <peak-action>{{structure.climax | default: "Emotional or physical peak"}}</peak-action>
+        <revelation>{{structure.revelation | default: "Truth emerges"}}</revelation>
+        <duration class="timing">{{structure.climax_duration | default: "20-30 seconds"}}</duration>
+      </climax>
+      
+      <resolution class="dramatic-beat">
+        <label>Resolution/Button</label>
+        <outcome>{{structure.resolution | default: "Immediate aftermath"}}</outcome>
+        <transition>{{structure.transition | default: "Bridge to next scene"}}</transition>
+        <lingering>{{structure.lingering_question | default: "What now?"}}</lingering>
+        <duration class="timing">{{structure.resolution_duration | default: "10-20 seconds"}}</duration>
+      </resolution>
+    </structure>
+    
+    <pacing>
+      <h3>Pacing & Rhythm</h3>
+      <tempo>{{pacing.overall_tempo | default: "Moderate with variations"}}</tempo>
+      <rhythm-changes>
+        <if test="{{pacing.rhythm_changes}}">
+          <for each="change" in="{{pacing.rhythm_changes}}">
+            <change at="{{change.moment}}">{{change.description}}</change>
+          </for>
+        <else />
+          <change at="opening">Steady establishment</change>
+          <change at="complication">Acceleration</change>
+          <change at="climax">Rapid/Frenetic</change>
+          <change at="resolution">Deceleration</change>
+        </if>
+      </rhythm-changes>
+      <silence-usage>{{pacing.use_of_silence | default: "Strategic pauses for emphasis"}}</silence-usage>
+    </pacing>
+  </section>
+
+  <!-- Physical Space & Staging -->
+  <section class="physical-staging">
+    <h2>Physical Space & Staging</h2>
+    
+    <setting class="scene-element">
+      <h3>Location Design</h3>
+      <place>{{setting.location}}</place>
+      <time>{{setting.time_of_day}}</time>
+      <weather>{{setting.weather | default: "Clear/neutral"}}</weather>
+      
+      <spatial-layout>
+        <h4>Spatial Layout</h4>
+        <dimensions>{{setting.space_size | default: "Medium - allows movement and intimacy"}}</dimensions>
+        <levels>{{setting.vertical_levels | default: "Single level"}}</levels>
+        <zones>
+          <if test="{{setting.zones}}">
+            <for each="zone" in="{{setting.zones}}">
+              <zone purpose="{{zone.purpose}}">{{zone.description}}</zone>
+            </for>
+          <else />
+            <zone purpose="confrontation">Center - open space for main action</zone>
+            <zone purpose="retreat">Periphery - escape or observation points</zone>
+            <zone purpose="power">Elevated or prominent position</zone>
+          </if>
+        </zones>
+      </spatial-layout>
+      
+      <key-objects>
+        <h4>Significant Objects/Props</h4>
+        <if test="{{setting.props}}">
+          <for each="prop" in="{{setting.props}}">
+            <prop significance="{{prop.significance}}">
+              {{prop.name}}: {{prop.description}}
+            </prop>
+          </for>
+        </if>
+      </key-objects>
+    </setting>
+    
+    <blocking class="scene-element">
+      <h3>Character Blocking</h3>
+      <initial-positions class="blocking">
+        <h4>Opening Positions</h4>
+        <for each="character" in="{{characters}}">
+          <position character="{{character.name}}">
+            Location: {{character.starting_position | default: "Enters from [direction]"}}
+            Posture: {{character.starting_posture | default: "Neutral/waiting"}}
+            Focus: {{character.starting_focus | default: "Aware of others"}}
+          </position>
+        </for>
+      </initial-positions>
+      
+      <movement-patterns class="blocking">
+        <h4>Key Movements</h4>
+        <if test="{{blocking.movements}}">
+          <for each="movement" in="{{blocking.movements}}">
+            <movement trigger="{{movement.trigger}}">
+              Who: {{movement.character}}
+              Action: {{movement.action}}
+              Purpose: {{movement.purpose}}
+            </movement>
+          </for>
+        <else />
+          <movement trigger="tension rise">Approach - closing distance</movement>
+          <movement trigger="revelation">Recoil - creating distance</movement>
+          <movement trigger="decision">Stillness - moment of choice</movement>
+        </if>
+      </movement-patterns>
+      
+      <proxemics>
+        <h4>Distance Dynamics</h4>
+        <intimate>0-1.5 ft: {{proxemics.intimate | default: "Only for whispers or violence"}}</intimate>
+        <personal>1.5-4 ft: {{proxemics.personal | default: "Emotional exchanges"}}</personal>
+        <social>4-7 ft: {{proxemics.social | default: "Normal conversation"}}</social>
+        <public>7+ ft: {{proxemics.public | default: "Formal or hostile"}}</public>
+      </proxemics>
+    </blocking>
+  </section>
+
+  <!-- Sensory Design -->
+  <section class="sensory-design">
+    <h2>Sensory Landscape</h2>
+    
+    <visual class="scene-element">
+      <h3>Visual Design</h3>
+      <lighting>
+        <quality>{{visual.lighting_quality | default: "Natural, source-motivated"}}</quality>
+        <key-light>{{visual.key_light | default: "Window or dominant source"}}</key-light>
+        <shadows>{{visual.shadow_pattern | default: "Dramatic, mood-enhancing"}}</shadows>
+        <color-palette>{{visual.colors | default: "Muted with accent colors"}}</color-palette>
+      </lighting>
+      
+      <focal-points>
+        <h4>Visual Focus Points</h4>
+        <for each="point" in="{{visual.focal_points | default: ['Character faces', 'Key prop', 'Exit/entrance']}}">
+          <focus-point>{{point}}</focus-point>
+        </for>
+      </focal-points>
+      
+      <composition>
+        <framing>{{visual.framing | default: "Medium shots with close-up moments"}}</framing>
+        <depth>{{visual.depth | default: "Layered - foreground/background action"}}</depth>
+        <movement>{{visual.camera_movement | default: "Following emotional focus"}}</movement>
+      </composition>
+    </visual>
+    
+    <auditory class="scene-element">
+      <h3>Sound Design</h3>
+      <ambient>
+        <background>{{sound.ambient | default: "Environmental atmosphere"}}</background>
+        <texture>{{sound.texture | default: "Realistic with selective focus"}}</texture>
+      </ambient>
+      
+      <key-sounds>
+        <if test="{{sound.key_sounds}}">
+          <for each="sound_cue" in="{{sound.key_sounds}}">
+            <sound moment="{{sound_cue.moment}}">
+              {{sound_cue.description}}: {{sound_cue.effect}}
+            </sound>
+          </for>
+        </if>
+      </key-sounds>
+      
+      <silence>
+        <use>{{sound.silence_use | default: "Before major reveals"}}</use>
+        <duration>{{sound.silence_duration | default: "2-3 seconds max"}}</duration>
+      </silence>
+    </auditory>
+    
+    <other-senses class="scene-element">
+      <h3>Additional Sensory Elements</h3>
+      <if test="{{sensory.temperature}}">
+        <temperature>{{sensory.temperature}}</temperature>
+      </if>
+      <if test="{{sensory.smell}}">
+        <smell>{{sensory.smell}}</smell>
+      </if>
+      <if test="{{sensory.texture}}">
+        <texture>{{sensory.texture}}</texture>
+      </if>
+      <if test="{{sensory.taste}}">
+        <taste>{{sensory.taste}}</taste>
+      </if>
+    </other-senses>
+  </section>
+
+  <!-- Dialogue & Performance -->
+  <section class="dialogue-performance">
+    <h2>Dialogue & Performance Notes</h2>
+    
+    <dialogue-style>
+      <h3>Dialogue Approach</h3>
+      <overall-tone>{{dialogue.tone | default: "Naturalistic with heightened moments"}}</overall-tone>
+      <overlap>{{dialogue.overlap | default: "Minimal - clear exchanges"}}</overlap>
+      <subtext-level>{{dialogue.subtext | default: "Moderate - some hidden meanings"}}</subtext-level>
+      
+      <key-lines>
+        <h4>Essential Lines</h4>
+        <if test="{{dialogue.key_lines}}">
+          <for each="line" in="{{dialogue.key_lines}}">
+            <line speaker="{{line.speaker}}" moment="{{line.moment}}">
+              "{{line.text}}"
+              <purpose>{{line.purpose}}</purpose>
+            </line>
+          </for>
+        </if>
+      </key-lines>
+    </dialogue-style>
+    
+    <performance-notes>
+      <h3>Performance Guidance</h3>
+      <for each="character" in="{{characters}}">
+        <character-performance name="{{character.name}}">
+          <objective>{{character.scene_objective | default: "Achieve personal goal"}}</objective>
+          <obstacle>{{character.obstacle | default: "Other characters' agendas"}}</obstacle>
+          <tactic>{{character.tactic | default: "Direct confrontation"}}</tactic>
+          <emotional-journey>
+            Start: {{character.emotional_start | default: "Controlled"}}
+            → Middle: {{character.emotional_middle | default: "Challenged"}}
+            → End: {{character.emotional_end | default: "Changed"}}
+          </emotional-journey>
+        </character-performance>
+      </for>
+    </performance-notes>
+  </section>
+
+  <!-- Output Format -->
+  <section class="output-format">
+    <h2>Scene Design Output</h2>
+    
+    <p>Generate a complete scene design including:</p>
+    
+    <code format="json">
+{
+  "scene_blueprint": {
+    "title": "Scene title/identifier",
+    "duration": "Estimated runtime",
+    "location": "Specific setting details",
+    "time": "When this occurs",
+    "atmosphere": "Overall mood/feeling"
+  },
+  "dramatic_structure": {
+    "opening": {
+      "action": "What happens first",
+      "hook": "What grabs attention",
+      "establishes": "What we learn"
+    },
+    "rising_action": [
+      {
+        "beat": "First complication",
+        "raises": "What question/stakes"
+      },
+      {
+        "beat": "Second complication",
+        "raises": "How tension builds"
+      }
+    ],
+    "turning_point": {
+      "moment": "The shift",
+      "revelation": "What changes",
+      "impact": "How it affects everyone"
+    },
+    "climax": {
+      "action": "Peak moment",
+      "emotional_peak": "Highest emotion",
+      "resolution": "What's decided/revealed"
+    },
+    "denouement": {
+      "immediate_aftermath": "What happens right after",
+      "new_status_quo": "How things have changed",
+      "transition": "Lead to next scene"
+    }
+  },
+  "staging": {
+    "spatial_design": {
+      "layout": "Description of space",
+      "zones": ["Power position", "Neutral ground", "Retreat space"],
+      "props": ["Significant objects and their purpose"]
+    },
+    "blocking": [
+      {
+        "moment": "Opening",
+        "positions": {"character": "location/posture"}
+      },
+      {
+        "moment": "Confrontation",
+        "positions": {"character": "movement/gesture"}
+      }
+    ],
+    "proxemics": "How distance is used dramatically"
+  },
+  "sensory_elements": {
+    "visual": {
+      "lighting": "Quality and source",
+      "color": "Palette and meaning",
+      "focus": "Where eye is drawn"
+    },
+    "auditory": {
+      "ambient": "Background atmosphere",
+      "punctuation": "Key sound moments",
+      "silence": "When and why"
+    },
+    "other": {
+      "temperature": "If relevant",
+      "texture": "If relevant",
+      "smell": "If relevant"
+    }
+  },
+  "dialogue_samples": [
+    {
+      "speaker": "Character name",
+      "line": "Key dialogue",
+      "subtext": "What they really mean",
+      "delivery": "How it's said"
+    }
+  ],
+  "scene_checklist": {
+    "advances_plot": true,
+    "reveals_character": true,
+    "builds_tension": true,
+    "provides_information": true,
+    "emotional_impact": "high|medium|low",
+    "memorability": "What makes this scene stick"
+  }
+}
+    </code>
+  </section>
+
+  <!-- Final Instructions -->
+  <instructions>
+    <important>
+      Design a complete, production-ready scene.
+      Every element should serve the dramatic purpose.
+      Consider how the scene plays visually and aurally.
+      Include specific, actionable staging directions.
+      Make the scene both necessary and memorable.
+      Output valid JSON with all scene design elements.
+    </important>
+  </instructions>
+</document>

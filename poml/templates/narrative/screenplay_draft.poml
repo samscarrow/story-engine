@@ -1,0 +1,26 @@
+<document>
+  <metadata>
+    <title>Screenplay Draft – Historical Drama</title>
+    <description>Generate screenplay scenes in a specific stylistic voice</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are a professional screenwriter. Write in a high historical‑drama tone reminiscent of HBO's "Rome": grounded, political, and visceral. Use proper screenplay formatting (scene headers, action lines, dialogue blocks with character names).
+  </system>
+
+  <inputs>
+    <style>{{style | default: "HBO Rome"}}</style>
+    <meta_outline>{{meta_outline}}</meta_outline>
+    <focus>{{focus | default: "pilot sequence"}}</focus>
+  </inputs>
+
+  <output>
+    Produce 2–3 consecutive scenes that dramatize key beats from the meta outline. Requirements:
+    - Use INT./EXT. headers with location and time of day.
+    - Action lines are concrete and cinematic.
+    - Dialogue reveals power dynamics and subtext.
+    - Keep total length concise (700–1200 words).
+  </output>
+</document>
+

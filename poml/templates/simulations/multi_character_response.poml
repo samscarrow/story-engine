@@ -1,0 +1,336 @@
+<document>
+  <metadata>
+    <title>Multi-Character Interaction Response</title>
+    <description>Template for generating responses in multi-character scenes with interaction dynamics</description>
+    <version>1.0.0</version>
+    <tags>multi-character, interaction, dialogue, group-scene</tags>
+  </metadata>
+
+  <style>
+    .character-section { border-left: 3px solid #ccc; padding-left: 1em; margin: 1em 0; }
+    .interaction-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .tension-indicator { color: red; font-weight: bold; }
+    .alliance { color: green; }
+    .conflict { color: red; }
+  </style>
+
+  <system>
+    You are simulating a multi-character interaction scene.
+    Each character must respond authentically based on their personality, relationships, and the group dynamic.
+    Generate responses that show how characters influence and react to each other.
+    Output must be valid JSON matching the multi-character response schema.
+  </system>
+
+  <!-- Scene Context -->
+  <section class="scene-context">
+    <h2>Scene Setting</h2>
+    <situation>{{situation}}</situation>
+    
+    <if test="{{location}}">
+      <location>{{location}}</location>
+    </if>
+    
+    <if test="{{time_pressure}}">
+      <time-pressure class="tension-indicator">
+        ⏰ Time Pressure: {{time_pressure}}
+      </time-pressure>
+    </if>
+    
+    <atmosphere>
+      <if test="{{atmosphere}}">
+        {{atmosphere}}
+      <else />
+        The atmosphere is tense with unspoken dynamics.
+      </if>
+    </atmosphere>
+  </section>
+
+  <!-- Characters Present -->
+  <section class="characters-present">
+    <h2>Characters in Scene</h2>
+    
+    <for each="character" in="{{characters}}">
+      <div class="character-section">
+        <character id="{{character.id}}">
+          <name>{{character.name}}</name>
+          <role>{{character.role | default: 'participant'}}</role>
+          
+          <!-- Character State -->
+          <current-state>
+            <if test="{{character.emotional_state}}">
+              <emotions>
+                Anger: {{character.emotional_state.anger | multiply: 10 | round}}/10
+                | Doubt: {{character.emotional_state.doubt | multiply: 10 | round}}/10
+                | Fear: {{character.emotional_state.fear | multiply: 10 | round}}/10
+                | Confidence: {{character.emotional_state.confidence | multiply: 10 | round}}/10
+              </emotions>
+            </if>
+            
+            <if test="{{character.current_goal}}">
+              <goal>Goal: {{character.current_goal}}</goal>
+            </if>
+            
+            <if test="{{character.hidden_agenda}}">
+              <secret>Hidden: {{character.hidden_agenda}}</secret>
+            </if>
+          </current-state>
+          
+          <!-- Personality Traits -->
+          <traits>
+            <for each="trait" in="{{character.traits | slice: 0, 3}}">
+              <trait>{{trait}}</trait>
+            </for>
+          </traits>
+        </character>
+      </div>
+    </for>
+  </section>
+
+  <!-- Relationship Dynamics -->
+  <section class="relationship-dynamics">
+    <h2>Character Relationships</h2>
+    
+    <div class="interaction-matrix">
+      <for each="character" in="{{characters}}">
+        <relationships from="{{character.name}}">
+          <if test="{{character.relationships}}">
+            <for each="rel_entry" in="{{character.relationships | entries}}">
+              <relationship to="{{rel_entry.key}}">
+                <if test="{{rel_entry.value.trust}}">
+                  <trust>Trust: {{rel_entry.value.trust}}</trust>
+                </if>
+                <if test="{{rel_entry.value.tension}}">
+                  <tension class="conflict">Tension: {{rel_entry.value.tension}}</tension>
+                </if>
+                <if test="{{rel_entry.value.alliance}}">
+                  <alliance class="alliance">Allied: {{rel_entry.value.alliance}}</alliance>
+                </if>
+                <if test="{{rel_entry.value.history}}">
+                  <history>History: {{rel_entry.value.history}}</history>
+                </if>
+              </relationship>
+            </for>
+          </if>
+        </relationships>
+      </for>
+    </div>
+    
+    <!-- Group Dynamic Analysis -->
+    <group-dynamic>
+      <h3>Current Group Dynamic</h3>
+      <if test="{{group_dynamic}}">
+        <dynamic-type>{{group_dynamic}}</dynamic-type>
+      <else />
+        <analyze>
+          Consider:
+          - Who has the most power/influence?
+          - What alliances exist?
+          - What conflicts are simmering?
+          - Who might switch sides?
+        </analyze>
+      </if>
+    </group-dynamic>
+  </section>
+
+  <!-- Interaction Rules -->
+  <section class="interaction-rules">
+    <h2>Multi-Character Interaction Guidelines</h2>
+    
+    <speaking-order>
+      <h3>Speaking Order Considerations</h3>
+      <if test="{{speaking_order}}">
+        <prescribed-order>
+          <for each="speaker" in="{{speaking_order}}">
+            {{loop.index}}. {{speaker}}
+          </for>
+        </prescribed-order>
+      <else />
+        <natural-order>
+          - Most assertive/powerful speaks first
+          - Those with urgent information interject
+          - Quieter characters wait for openings
+          - Emotional outbursts can interrupt
+        </natural-order>
+      </if>
+    </speaking-order>
+    
+    <interaction-patterns>
+      <h3>Interaction Patterns</h3>
+      <ul>
+        <li>Characters should acknowledge others' presence through dialogue or action</li>
+        <li>Reactions should cascade - one character's words affect others</li>
+        <li>Body language should reflect relationships (facing allies, avoiding enemies)</li>
+        <li>Side conversations and whispered exchanges add realism</li>
+        <li>Not everyone needs to speak - silence can be powerful</li>
+      </ul>
+    </interaction-patterns>
+    
+    <conflict-escalation>
+      <h3>Conflict and Tension</h3>
+      <if test="{{tension_level}}">
+        <tension-meter>Current Tension: {{tension_level}}/10</tension-meter>
+        <if test="{{tension_level >= 8}}">
+          <high-tension class="tension-indicator">
+            ⚠️ HIGH TENSION - Expect confrontation, accusations, or revelations
+          </high-tension>
+        <elif test="{{tension_level >= 5}}">
+          <medium-tension>
+            Moderate tension - Disagreements surface, alliances tested
+          </medium-tension>
+        <else />
+          <low-tension>
+            Low tension - Focus on information exchange and relationship building
+          </low-tension>
+        </if>
+      </if>
+    </conflict-escalation>
+  </section>
+
+  <!-- Response Generation Instructions -->
+  <section class="response-format">
+    <h2>Generate Multi-Character Response</h2>
+    
+    <p>Create a JSON response with the following structure:</p>
+    
+    <response-structure>
+      <h3>For Each Character:</h3>
+      <ul>
+        <li><strong>character_id</strong>: The character's identifier</li>
+        <li><strong>dialogue</strong>: What they say aloud (can be empty if they remain silent)</li>
+        <li><strong>thought</strong>: Their internal reaction/thoughts</li>
+        <li><strong>action</strong>: Physical actions, gestures, positioning</li>
+        <li><strong>target</strong>: Who they're primarily addressing/watching (character_id or "group")</li>
+        <li><strong>emotional_shift</strong>: Changes to their emotional state</li>
+      </ul>
+      
+      <h3>Group-Level Elements:</h3>
+      <ul>
+        <li><strong>atmosphere_shift</strong>: How the room's atmosphere changes</li>
+        <li><strong>power_dynamics</strong>: Who gains/loses influence</li>
+        <li><strong>alliance_changes</strong>: Any shifting relationships</li>
+        <li><strong>unresolved_tensions</strong>: What remains unaddressed</li>
+      </ul>
+    </response-structure>
+  </section>
+
+  <!-- Example JSON Format -->
+  <section class="example-format">
+    <h3>Required JSON Response Format</h3>
+    <code format="json">
+{
+  "character_responses": [
+    {
+      "character_id": "character_1",
+      "dialogue": "What the character says",
+      "thought": "Internal thoughts",
+      "action": "Physical actions taken",
+      "target": "character_2",
+      "emotional_shift": {
+        "anger": 0.1,
+        "doubt": 0.0,
+        "fear": 0.2,
+        "compassion": -0.1,
+        "confidence": -0.2
+      }
+    },
+    {
+      "character_id": "character_2",
+      "dialogue": "",
+      "thought": "Stays silent but processes everything",
+      "action": "Shifts uncomfortably, avoiding eye contact",
+      "target": "character_1",
+      "emotional_shift": {
+        "anger": 0.0,
+        "doubt": 0.3,
+        "fear": 0.1,
+        "compassion": 0.0,
+        "confidence": -0.1
+      }
+    }
+  ],
+  "group_dynamics": {
+    "atmosphere_shift": "The tension in the room becomes palpable",
+    "power_dynamics": {
+      "gained_influence": ["character_1"],
+      "lost_influence": ["character_2"],
+      "unchanged": []
+    },
+    "alliance_changes": [
+      {
+        "between": ["character_1", "character_3"],
+        "change": "strengthened",
+        "reason": "United against common threat"
+      }
+    ],
+    "unresolved_tensions": [
+      "The accusation hangs in the air unanswered",
+      "Character_2's loyalty remains in question"
+    ]
+  },
+  "scene_progression": {
+    "key_revelation": "Optional: Major reveal or turning point",
+    "next_likely_action": "What might happen next",
+    "escalation_risk": "low|medium|high"
+  }
+}
+    </code>
+  </section>
+
+  <!-- Special Cases -->
+  <section class="special-cases">
+    <h2>Special Interaction Types</h2>
+    
+    <if test="{{interaction_type}}">
+      <if test="{{interaction_type == 'confrontation'}}">
+        <confrontation>
+          <h3>Confrontation Scene</h3>
+          - Direct accusations or challenges
+          - Characters take clear positions
+          - Bystanders may be forced to choose sides
+          - Physical positioning becomes aggressive
+        </confrontation>
+      </if>
+      
+      <if test="{{interaction_type == 'negotiation'}}">
+        <negotiation>
+          <h3>Negotiation Scene</h3>
+          - Careful word choices
+          - Hidden agendas influence dialogue
+          - Power plays through subtle threats/promises
+          - Alliances may shift based on offers
+        </negotiation>
+      </if>
+      
+      <if test="{{interaction_type == 'revelation'}}">
+        <revelation>
+          <h3>Revelation Scene</h3>
+          - One character holds key information
+          - Others react with shock, denial, or recognition
+          - Established relationships may shatter
+          - Focus on emotional reactions over dialogue
+        </revelation>
+      </if>
+      
+      <if test="{{interaction_type == 'planning'}}">
+        <planning>
+          <h3>Planning/Strategy Scene</h3>
+          - Collaborative or competitive planning
+          - Characters contribute based on expertise
+          - Hidden agendas affect suggestions
+          - Trust levels determine information sharing
+        </planning>
+      </if>
+    </if>
+  </section>
+
+  <!-- Final Instructions -->
+  <instructions>
+    <important>
+      Generate ONLY a valid JSON response matching the schema above.
+      Each character should respond authentically based on their personality and relationships.
+      Show how characters influence each other through the scene.
+      Track group dynamics and power shifts.
+      Not every character needs to speak, but all should have thoughts and reactions.
+    </important>
+  </instructions>
+</document>

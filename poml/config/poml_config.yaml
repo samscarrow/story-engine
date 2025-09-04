@@ -1,0 +1,205 @@
+# POML Configuration for Story Engine
+# This file configures the POML runtime for prompt template processing
+
+# Template search paths
+template_paths:
+  - templates/
+  - components/
+  - gallery/
+
+# Default parameters for all templates
+defaults:
+  temperature: 0.8
+  max_tokens: 500
+  top_p: 0.95
+  presence_penalty: 0.1
+  frequency_penalty: 0.1
+
+# LLM Provider configurations
+providers:
+  # LMStudio local configuration
+  lmstudio:
+    endpoint: "http://localhost:1234/v1"
+    structured_output: true
+    timeout: 60
+    model: null  # Auto-detect loaded model
+    
+  # OpenAI configuration
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    model: "gpt-4"
+    base_url: "https://api.openai.com/v1"
+    structured_output: true
+    
+  # Mock provider for testing
+  mock:
+    enabled: true
+    response_delay: 0.1
+    
+# Template rendering settings
+rendering:
+  # Enable template caching
+  cache_templates: true
+  
+  # Validation settings
+  validate_data: true
+  strict_mode: false  # Allow missing optional fields
+  
+  # Debug output
+  debug: false
+  log_level: "INFO"
+  
+# Data processing
+data:
+  # Default values for common fields
+  defaults:
+    emphasis: "neutral"
+    temperature_modifier: 0.0
+    max_memory_events: 5
+    
+  # Type coercion rules
+  coercion:
+    numbers_as_strings: true
+    none_as_empty: true
+    
+# Caching configuration
+cache:
+  enabled: true
+  provider: "memory"  # Options: memory, redis, file
+  
+  memory:
+    max_size_mb: 100
+    ttl_seconds: 3600
+    
+  file:
+    directory: ".poml_cache"
+    ttl_seconds: 86400
+    
+  redis:
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: "${REDIS_PASSWORD}"
+    ttl_seconds: 3600
+    
+# Component library settings
+components:
+  # Auto-import common components
+  auto_import:
+    - emotional_state
+    - character_memory
+    - sensory_details
+    
+  # Component validation
+  validate_imports: true
+  allow_remote: false  # Security: don't load remote components
+  
+# Schema validation
+schemas:
+  # Validate outputs against schemas
+  validate_responses: true
+  
+  # Schema file locations
+  response_schemas:
+    simulation: "templates/schemas/simulation_response.poml"
+    narrative: "templates/schemas/narrative_response.poml"
+    
+  # Strict JSON mode
+  strict_json: true
+  allow_additional_properties: false
+  
+# Environment-specific overrides
+environments:
+  development:
+    debug: true
+    cache:
+      enabled: false
+    rendering:
+      log_level: "DEBUG"
+      
+  testing:
+    providers:
+      active: "mock"
+    cache:
+      enabled: false
+      
+  production:
+    debug: false
+    cache:
+      enabled: true
+      provider: "redis"
+    rendering:
+      log_level: "WARNING"
+      
+# Performance optimizations
+performance:
+  # Parallel template processing
+  parallel_rendering: true
+  max_workers: 4
+  
+  # Batch processing
+  batch_size: 10
+  batch_timeout: 5.0
+  
+  # Resource limits
+  max_template_size_kb: 100
+  max_render_time_seconds: 2.0
+  
+# Monitoring and metrics
+monitoring:
+  enabled: true
+  
+  # Metrics to track
+  metrics:
+    - template_render_time
+    - cache_hit_rate
+    - data_validation_errors
+    - llm_response_time
+    
+  # Export settings
+  export:
+    format: "prometheus"  # Options: prometheus, json, csv
+    endpoint: "/metrics"
+    interval_seconds: 60
+    
+# Security settings
+security:
+  # Template sandboxing
+  sandbox_templates: true
+  
+  # Allowed template functions
+  allowed_functions:
+    - slice
+    - default
+    - capitalize
+    - lowercase
+    - uppercase
+    - truncate
+    
+  # Data sanitization
+  sanitize_output: true
+  escape_html: true
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+    
+# Experimental features
+experimental:
+  # Enable new POML features
+  async_components: false
+  streaming_templates: false
+  template_hot_reload: true
+  
+# Template metadata
+metadata:
+  # Track template usage
+  track_usage: true
+  
+  # Template versioning
+  version_templates: true
+  
+  # Auto-generate documentation
+  auto_docs: true
+  docs_output: "docs/templates/"

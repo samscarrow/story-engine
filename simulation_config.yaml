@@ -1,0 +1,188 @@
+# Character Simulation Engine Configuration
+# Production-ready configuration file
+
+# LLM Provider Settings
+llm:
+  provider: "mock"  # Options: mock, openai, lmstudio, anthropic
+  
+  # Provider-specific settings
+  openai:
+    api_key: "${OPENAI_API_KEY}"  # Use environment variable
+    model: "gpt-4"
+    base_url: "https://api.openai.com/v1"
+    timeout: 30
+    
+  lmstudio:
+    endpoint: "http://localhost:1234/v1"
+    timeout: 60
+    
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY}"
+    model: "claude-3-opus-20240229"
+    max_tokens: 1000
+
+# Simulation Parameters
+simulation:
+  max_concurrent: 10  # Maximum concurrent simulations
+  default_temperature: 0.7
+  temperature_bounds:
+    min: 0.5
+    max: 1.3
+    
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    base_delay: 1.0
+    exponential_backoff: true
+    
+  # Emphasis options for character simulations
+  emphases:
+    - power
+    - doubt
+    - fear
+    - duty
+    - compassion
+    - pragmatic
+    - survival
+    - justice
+
+# Character Settings
+character:
+  memory_limit: 5  # Maximum recent events to store
+  
+  # Emotional state bounds
+  emotional_bounds:
+    min: 0.0
+    max: 1.0
+    
+  # Emotional weight factors for temperature calculation
+  emotional_weights:
+    anger: 1.2
+    fear: 1.0
+    doubt: 0.8
+    compassion: 0.6
+    confidence: 0.7
+    
+  # Default trait modifiers
+  trait_modifiers:
+    pragmatic:
+      doubt: -0.1
+      confidence: 0.1
+    anxious:
+      fear: 0.2
+      confidence: -0.1
+    authoritarian:
+      anger: 0.1
+      compassion: -0.1
+
+# Narrative Evaluation Scoring
+evaluation:
+  scoring_weights:
+    character_consistency: 0.25
+    dramatic_tension: 0.30
+    emotional_authenticity: 0.20
+    originality: 0.15
+    thematic_resonance: 0.10
+    
+  # Tension detection markers
+  tension_markers:
+    - "but"
+    - "yet"
+    - "however"
+    - "cannot"
+    - "must"
+    - "trapped"
+    - "impossible"
+    - "torn"
+    
+  # Cliché phrases to avoid
+  cliche_phrases:
+    - "no choice"
+    - "it is what it is"
+    - "the die is cast"
+    - "between a rock and a hard place"
+    - "only time will tell"
+    
+  # Thematic keywords for resonance scoring
+  thematic_keywords:
+    - truth
+    - power
+    - justice
+    - duty
+    - conscience
+    - authority
+    - sacrifice
+    - mercy
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # File logging
+  file:
+    enabled: true
+    path: "logs/simulation.log"
+    max_size_mb: 10
+    backup_count: 5
+    
+  # Console logging
+  console:
+    enabled: true
+    colorize: true
+
+# Cache Configuration
+cache:
+  enabled: true
+  ttl_seconds: 3600  # Cache time-to-live
+  max_size_mb: 100
+  
+  # Redis cache (optional)
+  redis:
+    enabled: false
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: "${REDIS_PASSWORD}"
+
+# Performance Monitoring
+monitoring:
+  enabled: true
+  
+  # Metrics to track
+  metrics:
+    - simulation_duration
+    - llm_response_time
+    - cache_hit_rate
+    - error_rate
+    
+  # Alerting thresholds
+  alerts:
+    error_rate_threshold: 0.1  # Alert if error rate > 10%
+    response_time_threshold: 5.0  # Alert if response > 5 seconds
+
+# Output Configuration
+output:
+  # Default output format
+  format: "json"  # Options: json, yaml, markdown
+  
+  # File output settings
+  save_results: true
+  output_directory: "simulation_results"
+  
+  # Screenplay formatting
+  screenplay:
+    include_stage_directions: true
+    include_internal_thoughts: true
+    include_alternatives: true
+    max_alternatives: 3
+
+# Development/Production Mode
+environment: "development"  # Options: development, staging, production
+
+# Feature Flags
+features:
+  enable_historical_validation: true
+  enable_multi_character_interaction: false
+  enable_narrative_branching: false
+  enable_audience_simulation: false

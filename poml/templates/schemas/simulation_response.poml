@@ -1,0 +1,275 @@
+<schema name="simulation-response">
+  <metadata>
+    <title>Character Simulation Response Schema</title>
+    <description>JSON schema for structured character simulation responses</description>
+    <version>1.0.0</version>
+    <format>json-schema-draft-07</format>
+  </metadata>
+
+  <!-- JSON Schema Definition -->
+  <json-schema>
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Character Simulation Response",
+      "description": "Structured response from character simulation",
+      "type": "object",
+      "required": ["dialogue", "thought", "action", "emotional_shift"],
+      "additionalProperties": false,
+      "properties": {
+        "dialogue": {
+          "type": "string",
+          "description": "What the character says aloud",
+          "minLength": 1,
+          "maxLength": 500,
+          "examples": [
+            "I find no fault in this man.",
+            "The crowd demands justice, and I must maintain order.",
+            "What is truth? You speak of things I cannot grasp."
+          ]
+        },
+        "thought": {
+          "type": "string",
+          "description": "Internal monologue revealing true feelings",
+          "minLength": 1,
+          "maxLength": 500,
+          "examples": [
+            "This situation spirals beyond my control.",
+            "Rome will have my head if this goes wrong.",
+            "There's something different about this man."
+          ]
+        },
+        "action": {
+          "type": "string",
+          "description": "Physical actions and body language",
+          "minLength": 1,
+          "maxLength": 300,
+          "examples": [
+            "Paces nervously, avoiding eye contact",
+            "Grips the arms of his chair until knuckles whiten",
+            "Waves dismissively while turning away"
+          ]
+        },
+        "emotional_shift": {
+          "type": "object",
+          "description": "Changes to emotional state",
+          "required": ["anger", "doubt", "fear", "compassion"],
+          "additionalProperties": true,
+          "properties": {
+            "anger": {
+              "type": "number",
+              "description": "Change in anger level",
+              "minimum": -1.0,
+              "maximum": 1.0,
+              "examples": [0.1, -0.2, 0.0]
+            },
+            "doubt": {
+              "type": "number",
+              "description": "Change in uncertainty",
+              "minimum": -1.0,
+              "maximum": 1.0,
+              "examples": [0.3, -0.1, 0.0]
+            },
+            "fear": {
+              "type": "number",
+              "description": "Change in fear level",
+              "minimum": -1.0,
+              "maximum": 1.0,
+              "examples": [0.2, -0.3, 0.0]
+            },
+            "compassion": {
+              "type": "number",
+              "description": "Change in empathy",
+              "minimum": -1.0,
+              "maximum": 1.0,
+              "examples": [0.1, -0.2, 0.0]
+            },
+            "confidence": {
+              "type": "number",
+              "description": "Change in confidence (optional)",
+              "minimum": -1.0,
+              "maximum": 1.0,
+              "examples": [-0.2, 0.1, 0.0]
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Optional metadata about the response",
+          "properties": {
+            "emphasis_reflected": {
+              "type": "string",
+              "description": "Which emphasis mode was primarily reflected",
+              "enum": ["power", "doubt", "fear", "compassion", "duty", "pragmatic", "survival", "justice", "neutral"]
+            },
+            "emotional_intensity": {
+              "type": "number",
+              "description": "Overall emotional intensity of response",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "key_decision": {
+              "type": "boolean",
+              "description": "Whether this response represents a key decision"
+            },
+            "relationship_impact": {
+              "type": "object",
+              "description": "Impact on relationships with other characters",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  </json-schema>
+
+  <!-- Validation Rules -->
+  <validation-rules>
+    <rule name="dialogue-quality">
+      <description>Dialogue must sound natural and character-appropriate</description>
+      <checks>
+        - No out-of-character modern phrases
+        - Reflects character's education and background
+        - Matches emotional state
+        - Incorporates verbal tics or patterns if established
+      </checks>
+    </rule>
+    
+    <rule name="thought-authenticity">
+      <description>Thoughts must reveal genuine internal state</description>
+      <checks>
+        - Can contradict dialogue (showing deception or conflict)
+        - More honest than spoken words
+        - Reveals deeper motivations
+        - Acknowledges fears and desires
+      </checks>
+    </rule>
+    
+    <rule name="action-specificity">
+      <description>Actions must be concrete and observable</description>
+      <checks>
+        - Specific physical movements, not vague descriptions
+        - Observable by other characters
+        - Consistent with emotional state
+        - Reveals character through body language
+      </checks>
+    </rule>
+    
+    <rule name="emotional-shift-realism">
+      <description>Emotional changes must be realistic</description>
+      <checks>
+        - No extreme swings without justification
+        - Changes reflect the situation's impact
+        - Cumulative effect shouldn't exceed believable limits
+        - Some emotions may move in opposition (e.g., fear up, confidence down)
+      </checks>
+    </rule>
+  </validation-rules>
+
+  <!-- Example Responses -->
+  <examples>
+    <example emphasis="power">
+      <json>
+{
+  "dialogue": "Enough! I am the authority here. This man's fate rests in my hands alone.",
+  "thought": "I must reassert control before this situation deteriorates further.",
+  "action": "Stands abruptly, hand moving to the seal of office on his chest",
+  "emotional_shift": {
+    "anger": 0.2,
+    "doubt": -0.1,
+    "fear": 0.0,
+    "compassion": -0.1,
+    "confidence": 0.1
+  }
+}
+      </json>
+    </example>
+    
+    <example emphasis="doubt">
+      <json>
+{
+  "dialogue": "What is truth? You speak of certainties in a world of shadows.",
+  "thought": "Every choice before me seems wrong. How can I judge when I understand nothing?",
+  "action": "Turns away, staring at the morning sky through the window",
+  "emotional_shift": {
+    "anger": 0.0,
+    "doubt": 0.3,
+    "fear": 0.1,
+    "compassion": 0.1,
+    "confidence": -0.2
+  }
+}
+      </json>
+    </example>
+    
+    <example emphasis="fear">
+      <json>
+{
+  "dialogue": "The crowd grows dangerous. We must act quickly to prevent a riot.",
+  "thought": "Tiberius will have me recalled—or worse—if this explodes into rebellion.",
+  "action": "Glances nervously at the door, sweat beading on his forehead",
+  "emotional_shift": {
+    "anger": 0.1,
+    "doubt": 0.1,
+    "fear": 0.4,
+    "compassion": -0.1,
+    "confidence": -0.3
+  }
+}
+      </json>
+    </example>
+    
+    <example emphasis="compassion">
+      <json>
+{
+  "dialogue": "I have examined this man and find no basis for your charges.",
+  "thought": "There is an innocence here that cuts through all political calculation.",
+  "action": "Steps closer to the accused, voice softening despite himself",
+  "emotional_shift": {
+    "anger": -0.1,
+    "doubt": 0.1,
+    "fear": 0.0,
+    "compassion": 0.3,
+    "confidence": 0.0
+  }
+}
+      </json>
+    </example>
+  </examples>
+
+  <!-- Integration Notes -->
+  <integration>
+    <usage>
+      This schema is used by the LLM when structured output is enabled.
+      It ensures consistent response format for character simulations.
+    </usage>
+    
+    <python-integration>
+      ```python
+      # In character_simulation_engine_v2.py
+      response_schema = {
+        "type": "json_schema",
+        "json_schema": {
+          # Contents of the JSON schema above
+        }
+      }
+      
+      # Parse response
+      response_data = json.loads(llm_response.content)
+      # response_data will match this schema
+      ```
+    </python-integration>
+    
+    <validation>
+      Use jsonschema library to validate responses:
+      ```python
+      from jsonschema import validate
+      
+      validate(instance=response_data, schema=schema)
+      ```
+    </validation>
+  </integration>
+</schema>

@@ -1,0 +1,263 @@
+<document>
+  <metadata>
+    <title>Scene Crafting Template</title>
+    <description>Generate rich, dramatic scenes for narrative sequences</description>
+    <version>1.0.0</version>
+    <tags>narrative, scene, drama, storytelling</tags>
+  </metadata>
+
+  <style>
+    .scene-header { font-size: 1.2em; font-weight: bold; }
+    .tension-meter { color: red; }
+    .character-list { margin: 0.5em 0; }
+    .sensory-detail { font-style: italic; color: #666; }
+  </style>
+
+  <system>
+    You are a master storyteller crafting a dramatic scene. 
+    Create vivid, tension-filled situations that give characters opportunities for meaningful interaction and conflict.
+    Focus on specific details that bring the scene to life.
+  </system>
+
+  <!-- Scene Context -->
+  <section class="scene-context">
+    <h1 class="scene-header">Scene: {{beat.name}}</h1>
+    
+    <beat-information>
+      <purpose>{{beat.purpose}}</purpose>
+      <narrative-function>{{beat.narrative_function | default: "Advance the plot"}}</narrative-function>
+      
+      <tension-level class="tension-meter">
+        Tension Level: {{beat.tension}}/10
+        <if test="{{beat.tension >= 8}}">
+          <alert>⚡ CRITICAL DRAMATIC MOMENT - Maximum tension required!</alert>
+        </if>
+        <if test="{{beat.tension >= 6 and beat.tension < 8}}">
+          <note>🔥 High tension - Stakes are escalating</note>
+        </if>
+        <if test="{{beat.tension >= 4 and beat.tension < 6}}">
+          <note>💧 Moderate tension - Building pressure</note>
+        </if>
+        <if test="{{beat.tension < 4}}">
+          <note>🌊 Low tension - Character development moment</note>
+        </if>
+      </tension-level>
+    </beat-information>
+  </section>
+
+  <!-- Characters in Scene -->
+  <section class="character-list">
+    <h2>Characters Present</h2>
+    <characters>
+      <for each="character" in="{{characters}}">
+        <character role="{{character.role | default: 'participant'}}">
+          <name>{{character.name}}</name>
+          <if test="{{character.motivation}}">
+            <motivation>{{character.motivation}}</motivation>
+          </if>
+          <if test="{{character.goal_in_scene}}">
+            <scene-goal>{{character.goal_in_scene}}</scene-goal>
+          </if>
+          <if test="{{character.emotional_state}}">
+            <entering-emotion>{{character.emotional_state}}</entering-emotion>
+          </if>
+        </character>
+      </for>
+    </characters>
+    
+    <character-dynamics>
+      <p>Consider these character dynamics:</p>
+      <ul>
+        <li>Who has the most power in this scene?</li>
+        <li>What does each character want from the others?</li>
+        <li>What are they willing to do to get it?</li>
+        <li>What are they afraid of losing?</li>
+      </ul>
+    </character-dynamics>
+  </section>
+
+  <!-- Previous Context -->
+  <section class="story-continuity">
+    <h2>Story Context</h2>
+    
+    <if test="{{previous_context}}">
+      <previous-scene>
+        <h3>What Just Happened</h3>
+        <p>{{previous_context}}</p>
+        <continuation-note>
+          This scene should flow naturally from the previous events while escalating or shifting the dramatic tension.
+        </continuation-note>
+      </previous-scene>
+    <else />
+      <opening-scene>
+        <h3>Opening Scene</h3>
+        <p>This is the beginning of the narrative. Establish:</p>
+        <ul>
+          <li>The world and its rules</li>
+          <li>The immediate situation</li>
+          <li>The central conflict or question</li>
+          <li>The mood and tone</li>
+        </ul>
+      </opening-scene>
+    </if>
+    
+    <if test="{{future_implications}}">
+      <foreshadowing>
+        <h3>This Scene Must Set Up</h3>
+        <p>{{future_implications}}</p>
+      </foreshadowing>
+    </if>
+  </section>
+
+  <!-- Scene Requirements -->
+  <section class="scene-requirements">
+    <h2>Scene Creation Instructions</h2>
+    
+    <requirements>
+      <h3>Essential Elements</h3>
+      
+      <setting>
+        <h4>Location and Time</h4>
+        <p>Provide specific details about:</p>
+        <ul>
+          <li>Exact location (not just "a room" but "the prefect's private chamber")</li>
+          <li>Time of day and how it affects the scene</li>
+          <li>Environmental conditions that add pressure or atmosphere</li>
+          <if test="{{beat.required_location}}">
+            <li>Required: {{beat.required_location}}</li>
+          </if>
+        </ul>
+      </setting>
+      
+      <conflict>
+        <h4>Immediate Conflict or Tension</h4>
+        <p>Clearly establish:</p>
+        <ul>
+          <li>What is happening RIGHT NOW that demands response</li>
+          <li>Why this moment cannot be avoided or delayed</li>
+          <li>What forces are in opposition</li>
+          <li>What decision or action is required</li>
+        </ul>
+      </conflict>
+      
+      <stakes>
+        <h4>What's at Risk</h4>
+        <p>Make clear:</p>
+        <ul>
+          <li>What each character stands to gain or lose</li>
+          <li>The immediate consequences of action/inaction</li>
+          <li>The broader implications for the story</li>
+          <if test="{{beat.tension >= 7}}">
+            <li>⚠️ This is a turning point - stakes must be life-changing</li>
+          </if>
+        </ul>
+      </stakes>
+      
+      <opportunities>
+        <h4>Character Expression Opportunities</h4>
+        <p>Ensure the scene allows characters to:</p>
+        <ul>
+          <li>Reveal their true nature through choices</li>
+          <li>Express their unique voice and perspective</li>
+          <li>Interact meaningfully with others</li>
+          <li>Face their fears or desires</li>
+        </ul>
+      </opportunities>
+    </requirements>
+  </section>
+
+  <!-- Sensory Details Section -->
+  <section class="sensory-enhancement">
+    <h2>Sensory Details</h2>
+    
+    <instruction>
+      After describing the situation, provide THREE specific sensory details that enhance the scene:
+    </instruction>
+    
+    <sensory-categories>
+      <sight class="sensory-detail">
+        <label>Visual Detail:</label>
+        <prompt>One striking visual element that captures the scene's essence</prompt>
+        <example>The flickering torchlight casting dancing shadows on stone walls</example>
+      </sight>
+      
+      <sound class="sensory-detail">
+        <label>Auditory Detail:</label>
+        <prompt>A sound that adds tension or atmosphere</prompt>
+        <example>The distant roar of the crowd growing louder</example>
+      </sound>
+      
+      <atmosphere class="sensory-detail">
+        <label>Atmospheric Detail:</label>
+        <prompt>A feeling, smell, or environmental element</prompt>
+        <example>The oppressive heat making everyone's tempers shorter</example>
+      </atmosphere>
+    </sensory-categories>
+  </section>
+
+  <!-- Genre and Tone Considerations -->
+  <if test="{{genre}}">
+    <section class="genre-guidance">
+      <h2>Genre: {{genre | capitalize}}</h2>
+      
+      <if test="{{genre == 'historical'}}">
+        <historical-notes>
+          - Include period-appropriate details
+          - Reference historical context and constraints
+          - Use language that evokes the era without being archaic
+        </historical-notes>
+      </if>
+      
+      <if test="{{genre == 'thriller'}}">
+        <thriller-notes>
+          - Maintain constant forward momentum
+          - Include time pressure or ticking clock elements
+          - Layer in uncertainty and paranoia
+        </thriller-notes>
+      </if>
+      
+      <if test="{{genre == 'drama'}}">
+        <drama-notes>
+          - Focus on emotional truth and character psychology
+          - Let silence and subtext carry weight
+          - Build to emotional revelations
+        </drama-notes>
+      </if>
+    </section>
+  </if>
+
+  <!-- Output Format -->
+  <section class="output-format">
+    <h2>Response Format</h2>
+    
+    <format>
+      <p>Provide your response in this structure:</p>
+      
+      <h3>SCENE SITUATION (2-3 sentences):</h3>
+      <p>[Describe the immediate situation with specific location, time, and conflict]</p>
+      
+      <h3>SENSORY DETAILS:</h3>
+      <ul>
+        <li>Sight: [One vivid visual detail]</li>
+        <li>Sound: [One evocative sound]</li>
+        <li>Atmosphere: [One environmental/feeling detail]</li>
+      </ul>
+      
+      <if test="{{include_dialogue_starter}}">
+        <h3>OPENING LINE (Optional):</h3>
+        <p>[A powerful line of dialogue that launches the scene]</p>
+      </if>
+    </format>
+  </section>
+
+  <!-- Final Generation Prompt -->
+  <generate>
+    <p><strong>Now create a powerful scene for "{{beat.name}}" that:</strong></p>
+    <ul>
+      <li>Fulfills the purpose: {{beat.purpose}}</li>
+      <li>Maintains tension level {{beat.tension}}/10</li>
+      <li>Gives {{characters | map: 'name' | join: ', '}} meaningful dramatic opportunities</li>
+      <li>Flows naturally from: {{previous_context | truncate: 50 | default: "the beginning"}}</li>
+    </ul>
+  </generate>
+</document>

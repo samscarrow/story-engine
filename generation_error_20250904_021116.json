@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-09-04T02:11:16.985930",
+  "prompt_preview": "You are an expert narrative architect. Create a concise, clear plot structure\n    that can be used to craft scenes. Prefer specificity over vagueness.\n\n    Story Overview\n    Title: The Trial Before D",
+  "providers_tried": [
+    "lmstudio"
+  ],
+  "all_failures": [
+    {
+      "provider": "lmstudio",
+      "error_type": "TimeoutError",
+      "error": "Generation failed on lmstudio: ",
+      "timestamp": "2025-09-04T02:11:15.085999",
+      "prompt_preview": "You are an expert narrative architect. Create a concise, clear plot structure\n    that can be used to craft scenes. Prefer specificity over vagueness.\n\n    Story Overview\n    Title: The Trial Before D...",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sscar\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\aiohttp\\client_reqrep.py\", line 532, in start\n    message, payload = await protocol.read()  # type: ignore[union-attr]\n                       ^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\sscar\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\aiohttp\\streams.py\", line 672, in read\n    await self._waiter\nasyncio.exceptions.CancelledError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\orchestration\\llm_orchestrator.py\", line 184, in generate\n    async with session.post(\n               ~~~~~~~~~~~~^\n        url,\n        ^^^^\n        json=payload,\n        ^^^^^^^^^^^^^\n        timeout=aiohttp.ClientTimeout(total=self.config.timeout)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ) as response:\n    ^\n  File \"C:\\Users\\sscar\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\aiohttp\\client.py\", line 1488, in __aenter__\n    self._resp: _RetType = await self._coro\n                           ^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\sscar\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\aiohttp\\client.py\", line 770, in _request\n    resp = await handler(req)\n           ^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\sscar\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\aiohttp\\client.py\", line 748, in _connect_and_send_request\n    await resp.start(conn)\n  File \"C:\\Users\\sscar\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\aiohttp\\client_reqrep.py\", line 527, in start\n    with self._timer:\n         ^^^^^^^^^^^\n  File \"C:\\Users\\sscar\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\aiohttp\\helpers.py\", line 685, in __exit__\n    raise asyncio.TimeoutError from exc_val\nTimeoutError\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\orchestration\\llm_orchestrator.py\", line 456, in generate\n    response = await provider.generate(prompt, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\orchestration\\llm_orchestrator.py\", line 225, in generate\n    raise GenerationError(\"lmstudio\", e, {\"failure\": failure.to_dict()})\ncore.orchestration.llm_orchestrator.GenerationError: Generation failed on lmstudio: \n"
+    }
+  ]
+}

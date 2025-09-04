@@ -1,0 +1,421 @@
+<document>
+  <metadata>
+    <title>Dialogue Generation Template</title>
+    <description>Generate character dialogue with subtext, emotion, and narrative purpose</description>
+    <version>1.0.0</version>
+    <tags>dialogue, conversation, character-voice, subtext</tags>
+  </metadata>
+
+  <style>
+    .dialogue-line { margin: 0.5em 0; padding-left: 2em; }
+    .stage-direction { font-style: italic; color: #666; }
+    .subtext { color: #888; font-size: 0.9em; }
+    .emphasis { font-weight: bold; }
+    .internal { opacity: 0.7; font-style: italic; }
+  </style>
+
+  <system>
+    You are a master dialogue writer creating authentic character conversations.
+    Generate dialogue that serves multiple purposes: advancing plot, revealing character, building tension, and providing subtext.
+    Each line should feel natural while carrying narrative weight.
+  </system>
+
+  <!-- Scene Context -->
+  <section class="scene-context">
+    <h2>Scene Setting</h2>
+    
+    <location>{{scene.location | default: "Unspecified location"}}</location>
+    <time>{{scene.time | default: "Present moment"}}</time>
+    <atmosphere>{{scene.atmosphere | default: "Neutral atmosphere"}}</atmosphere>
+    
+    <if test="{{scene.previous_beat}}">
+      <previous-beat>
+        <h3>What Just Happened</h3>
+        {{scene.previous_beat}}
+      </previous-beat>
+    </if>
+    
+    <scene-purpose>
+      <h3>Scene Purpose</h3>
+      <if test="{{scene.purpose}}">
+        {{scene.purpose}}
+      <else />
+        <ul>
+          <li>Reveal character relationships</li>
+          <li>Advance the plot</li>
+          <li>Build tension</li>
+          <li>Provide information</li>
+        </ul>
+      </if>
+    </scene-purpose>
+  </section>
+
+  <!-- Character in Focus -->
+  <section class="character-focus">
+    <h2>Speaking Character</h2>
+    
+    <character>
+      <name>{{character.name}}</name>
+      
+      <voice-characteristics>
+        <h3>Voice & Speech Patterns</h3>
+        <if test="{{character.voice}}">
+          <for each="trait" in="{{character.voice}}">
+            <voice-trait>{{trait}}</voice-trait>
+          </for>
+        <else />
+          <ul>
+            <li>Vocabulary level: {{character.education | default: "average"}}</li>
+            <li>Speech tempo: {{character.temperament | default: "moderate"}}</li>
+            <li>Formality: {{character.formality | default: "contextual"}}</li>
+            <li>Directness: {{character.directness | default: "varies"}}</li>
+          </ul>
+        </if>
+        
+        <if test="{{character.verbal_tics}}">
+          <verbal-tics>
+            <h4>Verbal Tics & Patterns</h4>
+            <for each="tic" in="{{character.verbal_tics}}">
+              <tic>{{tic}}</tic>
+            </for>
+          </verbal-tics>
+        </if>
+      </voice-characteristics>
+      
+      <current-state>
+        <h3>Current State</h3>
+        <emotional>
+          Emotional: 
+          <if test="{{character.emotional_state}}">
+            <for each="emotion" in="{{character.emotional_state | entries | slice: 0, 3}}">
+              {{emotion.key}}: {{emotion.value | multiply: 10 | round}}/10
+            </for>
+          <else />
+            Neutral/Controlled
+          </if>
+        </emotional>
+        
+        <if test="{{character.physical_state}}">
+          <physical>Physical: {{character.physical_state}}</physical>
+        </if>
+        
+        <if test="{{character.current_goal}}">
+          <goal>Immediate Goal: {{character.current_goal}}</goal>
+        </if>
+        
+        <if test="{{character.secret}}">
+          <secret class="internal">Secret: {{character.secret}}</secret>
+        </if>
+      </current-state>
+    </character>
+  </section>
+
+  <!-- Conversation Context -->
+  <section class="conversation-context">
+    <h2>Conversation Dynamics</h2>
+    
+    <conversation-partner>
+      <h3>Speaking To</h3>
+      <if test="{{dialogue_context.partner}}">
+        <partner>
+          <name>{{dialogue_context.partner.name}}</name>
+          <relationship>
+            Relationship: {{dialogue_context.partner.relationship | default: "Acquaintance"}}
+          </relationship>
+          <if test="{{dialogue_context.partner.power_dynamic}}">
+            <power>Power Dynamic: {{dialogue_context.partner.power_dynamic}}</power>
+          </if>
+          <if test="{{dialogue_context.partner.current_position}}">
+            <position>Their Position: {{dialogue_context.partner.current_position}}</position>
+          </if>
+        </partner>
+      <else />
+        <group>Speaking to the group/audience</group>
+      </if>
+    </conversation-partner>
+    
+    <conversation-flow>
+      <h3>Conversation Flow</h3>
+      
+      <if test="{{dialogue_context.previous_lines}}">
+        <previous-exchange>
+          <h4>Previous Exchange</h4>
+          <for each="line" in="{{dialogue_context.previous_lines | slice: -3}}">
+            <dialogue-line>
+              <speaker>{{line.speaker}}:</speaker> "{{line.text}}"
+              <if test="{{line.subtext}}">
+                <subtext>[Subtext: {{line.subtext}}]</subtext>
+              </if>
+            </dialogue-line>
+          </for>
+        </previous-exchange>
+      </if>
+      
+      <if test="{{dialogue_context.topic}}">
+        <current-topic>Current Topic: {{dialogue_context.topic}}</current-topic>
+      </if>
+      
+      <if test="{{dialogue_context.tension_level}}">
+        <tension>
+          Tension Level: {{dialogue_context.tension_level}}/10
+          <if test="{{dialogue_context.tension_level >= 8}}">
+            <high-tension class="emphasis">⚡ Confrontational</high-tension>
+          <elif test="{{dialogue_context.tension_level >= 5}}">
+            <medium-tension>Strained</medium-tension>
+          <else />
+            <low-tension>Relaxed</low-tension>
+          </if>
+        </tension>
+      </if>
+    </conversation-flow>
+  </section>
+
+  <!-- Dialogue Purposes -->
+  <section class="dialogue-purposes">
+    <h2>Dialogue Functions</h2>
+    
+    <primary-function>
+      <h3>Primary Function</h3>
+      <if test="{{dialogue_context.primary_function}}">
+        {{dialogue_context.primary_function}}
+      <else />
+        <options>
+          <li>Reveal information</li>
+          <li>Express emotion</li>
+          <li>Make request/demand</li>
+          <li>Respond to question</li>
+          <li>Challenge/confront</li>
+          <li>Deflect/evade</li>
+          <li>Build rapport</li>
+          <li>Threaten/intimidate</li>
+        </options>
+      </if>
+    </primary-function>
+    
+    <subtext-layer>
+      <h3>Subtext & Hidden Meanings</h3>
+      <if test="{{dialogue_context.subtext_goal}}">
+        Hidden Goal: {{dialogue_context.subtext_goal}}
+      </if>
+      
+      <subtext-techniques>
+        <ul>
+          <li>Say opposite of what is meant (irony)</li>
+          <li>Speak around the real issue (deflection)</li>
+          <li>Use coded language (hidden meaning)</li>
+          <li>Employ double meanings (ambiguity)</li>
+          <li>Trail off meaningfully (implication)</li>
+          <li>Repeat key phrases (emphasis)</li>
+          <li>Use silence strategically (withholding)</li>
+        </ul>
+      </subtext-techniques>
+    </subtext-layer>
+  </section>
+
+  <!-- Dialogue Style Options -->
+  <section class="dialogue-styles">
+    <h2>Dialogue Style Guide</h2>
+    
+    <if test="{{dialogue_style}}">
+      <if test="{{dialogue_style == 'naturalistic'}}">
+        <naturalistic>
+          <h3>Naturalistic Style</h3>
+          - Include interruptions, hesitations
+          - Use contractions and colloquialisms
+          - Fragment sentences naturally
+          - Add filler words sparingly
+          - Overlap and talk over others
+        </naturalistic>
+      </if>
+      
+      <if test="{{dialogue_style == 'theatrical'}}">
+        <theatrical>
+          <h3>Theatrical Style</h3>
+          - Heightened, dramatic language
+          - Complete, well-formed sentences
+          - Clear emotional peaks
+          - Memorable, quotable lines
+          - Strong declarations
+        </theatrical>
+      </if>
+      
+      <if test="{{dialogue_style == 'minimalist'}}">
+        <minimalist>
+          <h3>Minimalist Style</h3>
+          - Short, clipped responses
+          - Loaded pauses
+          - Single word answers
+          - Subtext over text
+          - What's unsaid matters most
+        </minimalist>
+      </if>
+      
+      <if test="{{dialogue_style == 'verbose'}}">
+        <verbose>
+          <h3>Verbose Style</h3>
+          - Long, winding speeches
+          - Multiple clauses and asides
+          - Philosophical tangents
+          - Rich vocabulary
+          - Layers of meaning
+        </verbose>
+      </if>
+    </if>
+  </section>
+
+  <!-- Response Format -->
+  <section class="response-format">
+    <h2>Generate Dialogue Response</h2>
+    
+    <p>Create dialogue that includes:</p>
+    
+    <response-components>
+      <component name="line">
+        <h3>The Dialogue Line</h3>
+        <requirements>
+          - Natural to the character's voice
+          - Serves the scene purpose
+          - Appropriate length for context
+          - Contains personality and emotion
+        </requirements>
+      </component>
+      
+      <component name="delivery">
+        <h3>Delivery Instructions</h3>
+        <requirements>
+          - How the line is spoken (tone, volume, pace)
+          - Physical actions while speaking
+          - Where attention is focused
+          - Emotional coloring
+        </requirements>
+      </component>
+      
+      <component name="subtext">
+        <h3>Subtext</h3>
+        <requirements>
+          - What the character really means
+          - What they're not saying
+          - Hidden agenda or emotion
+          - Relationship dynamics
+        </requirements>
+      </component>
+      
+      <component name="impact">
+        <h3>Expected Impact</h3>
+        <requirements>
+          - How this moves the scene forward
+          - What response it might provoke
+          - Emotional effect on listener(s)
+          - Plot implications
+        </requirements>
+      </component>
+    </response-components>
+  </section>
+
+  <!-- JSON Output Format -->
+  <section class="json-format">
+    <h3>Required JSON Response Format</h3>
+    <code format="json">
+{
+  "dialogue": {
+    "text": "The actual spoken words",
+    "interrupted": false,
+    "trails_off": false,
+    "emphasis": ["words", "to", "emphasize"]
+  },
+  "delivery": {
+    "tone": "angry|sarcastic|gentle|cold|passionate|etc",
+    "volume": "whispered|quiet|normal|loud|shouted",
+    "pace": "slow|deliberate|normal|quick|rushed",
+    "action": "Physical action while speaking",
+    "focus": "Where character looks/attention goes",
+    "emotion": "Primary emotion coloring the delivery"
+  },
+  "subtext": {
+    "real_meaning": "What the character actually means",
+    "hidden_message": "Any coded meaning for specific listeners",
+    "avoiding": "What topic/truth they're avoiding",
+    "revealing": "What this accidentally reveals about them"
+  },
+  "alternatives": [
+    {
+      "text": "Alternative line option 1",
+      "tone": "Different approach",
+      "why": "When to use this instead"
+    },
+    {
+      "text": "Alternative line option 2",
+      "tone": "Another approach",
+      "why": "Situational usage"
+    }
+  ],
+  "impact": {
+    "advances_plot": "How this moves story forward",
+    "reveals_character": "What we learn about the speaker",
+    "affects_relationship": "How this changes dynamics",
+    "likely_response": "What the listener might say/do next",
+    "tension_change": -2 to +2
+  },
+  "stage_direction": "Optional: Important action or pause after the line"
+}
+    </code>
+  </section>
+
+  <!-- Special Dialogue Situations -->
+  <section class="special-situations">
+    <h2>Special Dialogue Situations</h2>
+    
+    <if test="{{situation_type}}">
+      <if test="{{situation_type == 'confession'}}">
+        <confession>
+          - Building to revelation
+          - Difficulty finding words
+          - Emotional weight
+          - Fear of judgment
+          - Relief or regret after
+        </confession>
+      </if>
+      
+      <if test="{{situation_type == 'deception'}}">
+        <deception>
+          - Maintaining the lie
+          - Avoiding direct answers
+          - Controlling tells
+          - Believable details
+          - Misdirection tactics
+        </deception>
+      </if>
+      
+      <if test="{{situation_type == 'negotiation'}}">
+        <negotiation>
+          - Strategic reveals
+          - Power positioning
+          - Finding leverage
+          - Reading the room
+          - Tactical concessions
+        </negotiation>
+      </if>
+      
+      <if test="{{situation_type == 'farewell'}}">
+        <farewell>
+          - Things left unsaid
+          - Finality or hope
+          - Emotional restraint/release
+          - Last impressions
+          - Subtext of return/permanence
+        </farewell>
+      </if>
+    </if>
+  </section>
+
+  <!-- Final Instructions -->
+  <instructions>
+    <important>
+      Generate ONLY valid JSON matching the schema above.
+      The dialogue must sound natural for this specific character.
+      Include subtext that adds depth to the conversation.
+      Consider what the character wants from this exchange.
+      Make every word count toward character or plot development.
+    </important>
+  </instructions>
+</document>

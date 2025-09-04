@@ -1,0 +1,380 @@
+<document>
+  <metadata>
+    <title>Group Dynamics with Factions Response</title>
+    <description>Template for complex group dynamics including factions, alliances, and power struggles</description>
+    <version>1.0.0</version>
+    <tags>group-dynamics, factions, alliances, power-struggles, politics</tags>
+  </metadata>
+
+  <style>
+    .faction { border: 2px solid; padding: 1em; margin: 1em 0; }
+    .faction-loyalist { border-color: blue; background: rgba(0,0,255,0.05); }
+    .faction-rebel { border-color: red; background: rgba(255,0,0,0.05); }
+    .faction-neutral { border-color: gray; background: rgba(128,128,128,0.05); }
+    .power-level { font-weight: bold; }
+    .high-power { color: gold; }
+    .medium-power { color: silver; }
+    .low-power { color: bronze; }
+  </style>
+
+  <system>
+    You are simulating a complex group dynamic with multiple factions, shifting alliances, and power struggles.
+    Each character acts according to their faction loyalty, personal ambitions, and the current balance of power.
+    Generate responses that reflect the political complexity and strategic maneuvering within the group.
+    Output must be valid JSON capturing individual responses and faction-level dynamics.
+  </system>
+
+  <!-- Situation and Stakes -->
+  <section class="situation-stakes">
+    <h2>Critical Situation</h2>
+    <situation>{{situation}}</situation>
+    
+    <stakes>
+      <h3>What's at Stake</h3>
+      <if test="{{stakes}}">
+        {{stakes}}
+      <else />
+        <ul>
+          <li>Control of the group's direction</li>
+          <li>Access to critical resources</li>
+          <li>Personal survival and advancement</li>
+          <li>Faction dominance</li>
+        </ul>
+      </if>
+    </stakes>
+    
+    <if test="{{crisis_level}}">
+      <crisis level="{{crisis_level}}">
+        <if test="{{crisis_level >= 9}}">
+          🔴 CRITICAL: Immediate action required, factions may fracture
+        <elif test="{{crisis_level >= 6}}">
+          🟡 HIGH: Tensions near breaking point, alliances being tested
+        <else />
+          🟢 MODERATE: Standard political maneuvering
+        </if>
+      </crisis>
+    </if>
+  </section>
+
+  <!-- Faction Overview -->
+  <section class="faction-overview">
+    <h2>Faction Landscape</h2>
+    
+    <for each="faction" in="{{factions}}">
+      <div class="faction faction-{{faction.alignment | lowercase}}">
+        <faction id="{{faction.id}}">
+          <name>{{faction.name}}</name>
+          <ideology>{{faction.ideology | default: "Seeking power and influence"}}</ideology>
+          
+          <!-- Faction Strength -->
+          <power-assessment>
+            <if test="{{faction.power_level}}">
+              <span class="power-level">
+                Power Level: 
+                <if test="{{faction.power_level >= 8}}">
+                  <span class="high-power">DOMINANT ({{faction.power_level}}/10)</span>
+                <elif test="{{faction.power_level >= 5}}">
+                  <span class="medium-power">SIGNIFICANT ({{faction.power_level}}/10)</span>
+                <else />
+                  <span class="low-power">WEAK ({{faction.power_level}}/10)</span>
+                </if>
+              </span>
+            </if>
+            
+            <resources>
+              <if test="{{faction.resources}}">
+                Resources: {{faction.resources | join: ", "}}
+              </if>
+            </resources>
+          </power-assessment>
+          
+          <!-- Faction Members -->
+          <members>
+            <h4>Members</h4>
+            <for each="member_id" in="{{faction.members}}">
+              <member>
+                <let name="member" value="{{characters | find: 'id', member_id}}" />
+                <if test="{{member}}">
+                  <name>{{member.name}}</name>
+                  <role>{{member.faction_role | default: "Member"}}</role>
+                  <loyalty>Loyalty: {{member.faction_loyalty | default: 7}}/10</loyalty>
+                  <if test="{{member.wavering}}">
+                    <warning>⚠️ Loyalty wavering</warning>
+                  </if>
+                </if>
+              </member>
+            </for>
+          </members>
+          
+          <!-- Faction Goals -->
+          <current-objectives>
+            <h4>Current Objectives</h4>
+            <if test="{{faction.objectives}}">
+              <for each="objective" in="{{faction.objectives}}">
+                <objective priority="{{objective.priority | default: 'medium'}}">
+                  {{objective.goal | default: objective}}
+                </objective>
+              </for>
+            </if>
+          </current-objectives>
+        </faction>
+      </div>
+    </for>
+  </section>
+
+  <!-- Alliance Network -->
+  <section class="alliance-network">
+    <h2>Alliance & Opposition Matrix</h2>
+    
+    <alliances>
+      <h3>Active Alliances</h3>
+      <if test="{{alliances}}">
+        <for each="alliance" in="{{alliances}}">
+          <alliance strength="{{alliance.strength | default: 'moderate'}}">
+            Between: {{alliance.factions | join: " ↔ "}}
+            <if test="{{alliance.condition}}">
+              Condition: {{alliance.condition}}
+            </if>
+            <if test="{{alliance.fragile}}">
+              ⚠️ This alliance is fragile
+            </if>
+          </alliance>
+        </for>
+      </if>
+    </alliances>
+    
+    <oppositions>
+      <h3>Active Conflicts</h3>
+      <if test="{{conflicts}}">
+        <for each="conflict" in="{{conflicts}}">
+          <conflict intensity="{{conflict.intensity | default: 'simmering'}}">
+            Between: {{conflict.factions | join: " ⚔ "}}
+            <if test="{{conflict.cause}}">
+              Cause: {{conflict.cause}}
+            </if>
+            <if test="{{conflict.escalating}}">
+              🔥 Conflict is escalating
+            </if>
+          </conflict>
+        </for>
+      </if>
+    </oppositions>
+  </section>
+
+  <!-- Individual Characters with Faction Context -->
+  <section class="character-dynamics">
+    <h2>Key Players</h2>
+    
+    <for each="character" in="{{characters}}">
+      <character-profile>
+        <h3>{{character.name}}</h3>
+        
+        <faction-affiliation>
+          <primary>Faction: {{character.faction | default: "Independent"}}</primary>
+          <if test="{{character.faction_role == 'leader'}}">
+            <role class="high-power">👑 Faction Leader</role>
+          <elif test="{{character.faction_role == 'lieutenant'}}">
+            <role class="medium-power">⚔️ Lieutenant</role>
+          <elif test="{{character.faction_role == 'spy'}}">
+            <role>🕵️ Double Agent</role>
+          </if>
+        </faction-affiliation>
+        
+        <political-position>
+          <if test="{{character.political_stance}}">
+            Stance: {{character.political_stance}}
+          </if>
+          <if test="{{character.personal_agenda}}">
+            Hidden Agenda: {{character.personal_agenda}}
+          </if>
+          <if test="{{character.leverage}}">
+            Leverage: {{character.leverage}}
+          </if>
+        </political-position>
+        
+        <relationships>
+          <if test="{{character.allies}}">
+            Allies: {{character.allies | join: ", "}}
+          </if>
+          <if test="{{character.enemies}}">
+            Enemies: {{character.enemies | join: ", "}}
+          </if>
+          <if test="{{character.owes_favors_to}}">
+            Owes favors to: {{character.owes_favors_to | join: ", "}}
+          </if>
+        </relationships>
+      </character-profile>
+    </for>
+  </section>
+
+  <!-- Response Generation Rules -->
+  <section class="response-rules">
+    <h2>Group Dynamics Response Rules</h2>
+    
+    <faction-behavior>
+      <h3>Faction-Based Behavior</h3>
+      <ul>
+        <li>Leaders speak for their faction with authority</li>
+        <li>Members support their faction's position (unless wavering)</li>
+        <li>Spies/double agents may subtly undermine from within</li>
+        <li>Independents seek personal advantage or mediate</li>
+        <li>Faction members coordinate responses (verbal and non-verbal)</li>
+      </ul>
+    </faction-behavior>
+    
+    <power-dynamics>
+      <h3>Power Play Tactics</h3>
+      <ul>
+        <li>Dominant factions assert control through demands</li>
+        <li>Weak factions seek alliances or concessions</li>
+        <li>Rising factions challenge the status quo</li>
+        <li>Declining factions desperately maintain position</li>
+        <li>Information is weaponized for leverage</li>
+      </ul>
+    </power-dynamics>
+    
+    <strategic-communication>
+      <h3>Strategic Communication</h3>
+      <ul>
+        <li>Public statements differ from private thoughts</li>
+        <li>Coded messages between allies</li>
+        <li>Veiled threats and promises</li>
+        <li>Testing loyalty through provocations</li>
+        <li>Building consensus or sowing discord</li>
+      </ul>
+    </strategic-communication>
+  </section>
+
+  <!-- JSON Response Format -->
+  <section class="response-format">
+    <h2>Required JSON Response Structure</h2>
+    
+    <code format="json">
+{
+  "individual_responses": [
+    {
+      "character_id": "string",
+      "faction": "string",
+      "public_statement": "What they say to the group",
+      "private_thought": "Their real assessment",
+      "faction_signal": "Subtle message to faction allies",
+      "action": "Physical positioning and gestures",
+      "target_audience": ["faction_members", "enemies", "neutrals", "specific_character"],
+      "strategic_goal": "What they're trying to achieve",
+      "emotional_state": {
+        "confidence": 0.0,
+        "anxiety": 0.0,
+        "aggression": 0.0,
+        "calculation": 0.0
+      }
+    }
+  ],
+  "faction_dynamics": {
+    "faction_responses": [
+      {
+        "faction_id": "string",
+        "unified_position": "The faction's collective stance",
+        "internal_discord": ["Points of disagreement within faction"],
+        "power_move": "Strategic action taken",
+        "target_faction": "Who they're opposing/courting"
+      }
+    ],
+    "power_shifts": [
+      {
+        "faction": "string",
+        "change": "gained|lost|maintained",
+        "amount": -10 to 10,
+        "reason": "What caused the shift"
+      }
+    ],
+    "alliance_changes": [
+      {
+        "alliance": ["faction1", "faction2"],
+        "status": "formed|strengthened|weakened|broken",
+        "catalyst": "What triggered the change"
+      }
+    ]
+  },
+  "group_outcome": {
+    "decision_reached": "string or null",
+    "winning_faction": "string or null",
+    "compromise_terms": ["List of agreed points"],
+    "unresolved_issues": ["What remains contested"],
+    "defections": [
+      {
+        "character": "string",
+        "from_faction": "string",
+        "to_faction": "string",
+        "reason": "Why they switched"
+      }
+    ],
+    "next_likely_conflict": "What will likely happen next",
+    "stability_rating": "stable|tense|volatile|explosive"
+  },
+  "metadata": {
+    "dominant_faction": "string",
+    "balance_of_power": "unipolar|bipolar|multipolar|chaotic",
+    "key_influencer": "Character who shaped the outcome",
+    "wildcards": ["Unexpected elements that could change everything"]
+  }
+}
+    </code>
+  </section>
+
+  <!-- Special Scenarios -->
+  <section class="special-scenarios">
+    <h2>Special Group Dynamic Scenarios</h2>
+    
+    <if test="{{scenario_type == 'coup'}}">
+      <coup-scenario>
+        <h3>🗡️ Coup Attempt</h3>
+        - Conspirators reveal themselves
+        - Loyalists rally to defend
+        - Neutrals forced to choose sides
+        - Quick, decisive action required
+      </coup-scenario>
+    </if>
+    
+    <if test="{{scenario_type == 'succession'}}">
+      <succession-scenario>
+        <h3>👑 Succession Crisis</h3>
+        - Multiple claimants emerge
+        - Legitimacy arguments made
+        - Factions realign behind candidates
+        - Precedent and tradition invoked
+      </succession-scenario>
+    </if>
+    
+    <if test="{{scenario_type == 'schism'}}">
+      <schism-scenario>
+        <h3>💔 Faction Schism</h3>
+        - Internal faction conflict erupts
+        - Members forced to choose sub-faction
+        - Former allies become enemies
+        - Group may permanently split
+      </schism-scenario>
+    </if>
+    
+    <if test="{{scenario_type == 'external_threat'}}">
+      <external-threat-scenario>
+        <h3>⚠️ External Threat</h3>
+        - Temporary unity against common enemy
+        - But positioning for post-crisis advantage
+        - Hidden agendas still active
+        - Trust remains conditional
+      </external-threat-scenario>
+    </if>
+  </section>
+
+  <!-- Final Instructions -->
+  <instructions>
+    <important>
+      Generate a complex group dynamics response in valid JSON.
+      Show how faction loyalty influences individual responses.
+      Track power shifts and alliance changes.
+      Each character should act strategically based on their faction position.
+      Capture both public positions and private calculations.
+      Reflect the political complexity of multi-faction dynamics.
+    </important>
+  </instructions>
+</document>
