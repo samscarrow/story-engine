@@ -1,0 +1,19 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local env and secrets
+.env
+client-cert.pem
+client-key.pem
+gcloud-sql-mc3.pem
+
+# Generated artifacts
+feedback/
+generation_error_*.json
+scene_bank/*.json
+
+# OS
+.DS_Store
+

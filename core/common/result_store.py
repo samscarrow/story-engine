@@ -11,23 +11,25 @@ def store_workflow_output(workflow_name: str, output: Dict[str, Any]) -> None:
     If credentials are missing or connection fails, this function is a no-op.
     """
     try:
-        from core.storage import get_database_connection
+from core.storage import get_database_connection
+from .dotenv_loader import load_dotenv_keys
     except Exception:
         return
 
-    password = os.getenv("DB_PASSWORD")
-    if not password:
-        # No credentials provided; skip silently
-        return
-
     try:
+        # Ensure DB_* env vars are populated from .env if present
+        load_dotenv_keys()
         db = get_database_connection(
             db_type="postgresql",
             db_name=os.getenv("DB_NAME", "story_db"),
             user=os.getenv("DB_USER", "story"),
-            password=password,
+            password=os.getenv("DB_PASSWORD"),
             host=os.getenv("DB_HOST", "localhost"),
             port=int(os.getenv("DB_PORT", "5432")),
+            sslmode=os.getenv("DB_SSLMODE"),
+            sslrootcert=os.getenv("DB_SSLROOTCERT"),
+            sslcert=os.getenv("DB_SSLCERT"),
+            sslkey=os.getenv("DB_SSLKEY"),
         )
         db.connect()
         db.store_output(workflow_name, output)
@@ -40,4 +42,3 @@ def store_workflow_output(workflow_name: str, output: Dict[str, Any]) -> None:
                 db.disconnect()
         except Exception:
             pass
-

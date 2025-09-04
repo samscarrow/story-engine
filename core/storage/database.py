@@ -109,7 +109,18 @@ class SQLiteConnection(DatabaseConnection):
 class PostgreSQLConnection(DatabaseConnection):
     """PostgreSQL database connection."""
 
-    def __init__(self, db_name: str, user: str, password: str, host: str, port: int = 5432):
+    def __init__(
+        self,
+        db_name: str,
+        user: str,
+        password: str | None,
+        host: str,
+        port: int = 5432,
+        sslmode: str | None = None,
+        sslrootcert: str | None = None,
+        sslcert: str | None = None,
+        sslkey: str | None = None,
+    ):
         if not psycopg2:
             raise ImportError("psycopg2-binary is not installed. Please run 'pip install psycopg2-binary'")
         self.db_name = db_name
@@ -118,17 +129,35 @@ class PostgreSQLConnection(DatabaseConnection):
         self.host = host
         self.port = port
         self.conn = None
+        # SSL params (optional)
+        self.sslmode = sslmode
+        self.sslrootcert = sslrootcert
+        self.sslcert = sslcert
+        self.sslkey = sslkey
 
     def connect(self):
         """Connect to the PostgreSQL database."""
         try:
-            self.conn = psycopg2.connect(
+            conn_kwargs = dict(
                 dbname=self.db_name,
                 user=self.user,
-                password=self.password,
                 host=self.host,
-                port=self.port
+                port=self.port,
             )
+            # Password may be None if using IAM/other auth, psycopg2 allows missing
+            if self.password is not None:
+                conn_kwargs["password"] = self.password
+            # Attach SSL parameters if provided
+            if self.sslmode:
+                conn_kwargs["sslmode"] = self.sslmode
+            if self.sslrootcert:
+                conn_kwargs["sslrootcert"] = self.sslrootcert
+            if self.sslcert:
+                conn_kwargs["sslcert"] = self.sslcert
+            if self.sslkey:
+                conn_kwargs["sslkey"] = self.sslkey
+
+            self.conn = psycopg2.connect(**conn_kwargs)
             self._create_table()
         except psycopg2.Error as e:
             print(f"Error connecting to PostgreSQL database: {e}")
@@ -199,4 +228,3 @@ def get_database_connection(db_type: str, **kwargs) -> DatabaseConnection:
         return PostgreSQLConnection(**kwargs)
     else:
         raise ValueError(f"Unsupported database type: {db_type}")
-

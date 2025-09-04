@@ -25,6 +25,7 @@ from core.story_engine.scene_bank import SceneBank  # noqa: E402
 from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent  # noqa: E402
 from core.domain.models import StoryRequest  # noqa: E402
 from core.common.result_store import store_workflow_output  # noqa: E402
+from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
 
 
 async def simulate_from_scene(scene: Dict[str, Any]) -> Dict[str, Any]:
@@ -77,6 +78,8 @@ def main() -> None:
     p.add_argument("--out", help="Write JSON result to this file", default=None)
     args = p.parse_args()
 
+    # Load DB_* env vars from .env for auto-store
+    load_dotenv_keys()
     bank = SceneBank(args.bank)
 
     if args.list or not args.id:

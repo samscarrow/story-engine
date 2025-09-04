@@ -23,6 +23,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
 from core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline  # noqa: E402
+from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
 
 
 def load_character(name: str) -> dict:
@@ -45,6 +46,8 @@ def load_character(name: str) -> dict:
 
 
 async def run(character_name: str, situations: List[str], runs: int, out: str, store_db: bool = False, workflow_name: str = "meta_pipeline") -> None:
+    # Load DB_* from .env so auto-store works without manual export
+    load_dotenv_keys()
     pipeline = MetaNarrativePipeline(use_poml=True)
     char_dict = load_character(character_name)
     char_state = pipeline.character_from_dict(char_dict)
@@ -102,6 +105,10 @@ async def run(character_name: str, situations: List[str], runs: int, out: str, s
                 password=os.getenv("DB_PASSWORD"),
                 host=os.getenv("DB_HOST", "localhost"),
                 port=int(os.getenv("DB_PORT", "5432")),
+                sslmode=os.getenv("DB_SSLMODE"),
+                sslrootcert=os.getenv("DB_SSLROOTCERT"),
+                sslcert=os.getenv("DB_SSLCERT"),
+                sslkey=os.getenv("DB_SSLKEY"),
             )
             db.connect()
             db.store_output(workflow_name, result)

@@ -34,6 +34,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pa
 
 from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine  # noqa: E402
 from core.common.result_store import store_workflow_output  # noqa: E402
+from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
 
 
 def _read_inputs(args: argparse.Namespace) -> List[Dict[str, Any]]:
@@ -62,6 +63,8 @@ def _read_inputs(args: argparse.Namespace) -> List[Dict[str, Any]]:
 
 
 async def _evaluate_items(items: List[Dict[str, Any]], use_poml: bool) -> List[Dict[str, Any]]:
+    # Load DB_* from .env for auto-store
+    load_dotenv_keys()
     engine = OrchestratedStoryEngine(use_poml=use_poml)
     out: List[Dict[str, Any]] = []
 
