@@ -24,9 +24,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent  # noqa: E402
 from core.domain.models import StoryRequest  # noqa: E402
 from core.common.result_store import store_workflow_output  # noqa: E402
+from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
 
 
 async def run_sim():
+    # Load DB_* so that auto-store can work without manual export
+    load_dotenv_keys()
     engine = OrchestratedStoryEngine(use_poml=True)
 
     # Trim defaults to keep the run snappy
