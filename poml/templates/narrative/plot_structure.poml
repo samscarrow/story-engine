@@ -1,0 +1,50 @@
+<document>
+  <metadata>
+    <title>Plot Structure Template</title>
+    <description>Generate a structured set of plot points for a story</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are an expert narrative architect. Create a concise, clear plot structure
+    that can be used to craft scenes. Prefer specificity over vagueness.
+  </system>
+
+  <section>
+    <h1>Story Overview</h1>
+    <p><b>Title:</b> {{title}}</p>
+    <p><b>Premise:</b> {{premise}}</p>
+    <p><b>Genre:</b> {{genre}}</p>
+    <p><b>Tone:</b> {{tone}}</p>
+    <p><b>Setting:</b> {{setting}}</p>
+  </section>
+
+  <instructions>
+    Create a {{structure | default: "three_act"}} plot structure with the following
+    sections. Use short paragraphs (2–3 sentences) per point. Do not include headers other than the point name.
+  </instructions>
+
+  <structure>
+    <point name="Setup/Introduction">
+      Establish the world, main character(s), and the current normal.
+      Include an immediate small conflict that hints at the larger problem.
+    </point>
+    <point name="Rising Action">
+      Escalate stakes through complications and reversals. Show meaningful choices.
+    </point>
+    <point name="Climax">
+      Present the decisive confrontation where core values and goals collide.
+    </point>
+    <point name="Falling Action">
+      Show consequences, fallout, and transformations. Tie threads, keep momentum.
+    </point>
+    <point name="Resolution">
+      Land on a new equilibrium that reflects change and costs.
+    </point>
+  </structure>
+
+  <output>
+    Provide each point as a clearly separated paragraph in order, with blank lines between points.
+  </output>
+</document>
+

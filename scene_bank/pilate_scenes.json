@@ -1,0 +1,379 @@
+{
+  "scenes": [
+    {
+      "id": "act-cold-open-the-report",
+      "title": "COLD OPEN: THE REPORT",
+      "header": "COLD OPEN: THE REPORT",
+      "act": null,
+      "body": "COLD OPEN: THE REPORT",
+      "tags": [],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-int-roman-villa-private-study-night",
+      "title": "INT. ROMAN VILLA - PRIVATE STUDY - NIGHT",
+      "header": "INT. ROMAN VILLA - PRIVATE STUDY - NIGHT",
+      "act": null,
+      "body": "",
+      "tags": [
+        "screenplay-scene"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-one-the-standards-crisis-act-one-the-standards-crisis",
+      "title": "ACT ONE: THE STANDARDS CRISIS",
+      "header": "ACT ONE: THE STANDARDS CRISIS",
+      "act": "ACT ONE: THE STANDARDS CRISIS",
+      "body": "",
+      "tags": [
+        "act one: the standards crisis"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-one-the-standards-crisis-ext-jerusalem-fortress-antonia-day",
+      "title": "EXT. JERUSALEM - FORTRESS ANTONIA - DAY",
+      "header": "EXT. JERUSALEM - FORTRESS ANTONIA - DAY",
+      "act": "ACT ONE: THE STANDARDS CRISIS",
+      "body": "EXT. JERUSALEM - FORTRESS ANTONIA - DAY\n\nRoman eagles crown the fortress walls—symbols of imperial power that gleam in the Judean sun. Below, the city spreads like a complex equation waiting to be solved.",
+      "tags": [
+        "screenplay-scene",
+        "act one: the standards crisis"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-one-the-standards-crisis-int-fortress-antonia-command-chamber-continuous",
+      "title": "INT. FORTRESS ANTONIA - COMMAND CHAMBER - CONTINUOUS",
+      "header": "INT. FORTRESS ANTONIA - COMMAND CHAMBER - CONTINUOUS",
+      "act": "ACT ONE: THE STANDARDS CRISIS",
+      "body": "INT. FORTRESS ANTONIA - COMMAND CHAMBER - CONTINUOUS\n\nPilate retreats to analyze this unprecedented challenge to his administrative framework.\n\nPILATE\n(to himself, working through decision trees)\nConventional suppression: predictable escalation, potential martyrdom, increased resistance. Unconventional approach required.\n\nFor the first time in his career, standard protocols prove inadequate. His engineering success depended on materials that yielded to proper pressure, but these people seem willing to die rather than compromise.\n\nPILATE (CONT'D)\n(reluctant recognition)\nRemove the eagles.\n\nMARCUS AURELIUS\nSir? Remove them?\n\nPILATE\n(controlled breathing, strategic pause)\nTemporary tactical adjustment. Administrative flexibility demonstrates strength, not weakness.\n\nBut even as he speaks, Pilate recognizes that his decision represents more than tactical flexibility—it's acknowledgment that his survival calculations encountered something they couldn't predict or control.",
+      "tags": [
+        "screenplay-scene",
+        "act one: the standards crisis"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-one-the-standards-crisis-ext-jerusalem-streets-day",
+      "title": "EXT. JERUSALEM STREETS - DAY",
+      "header": "EXT. JERUSALEM STREETS - DAY",
+      "act": "ACT ONE: THE STANDARDS CRISIS",
+      "body": "EXT. JERUSALEM STREETS - DAY\n\nPilate moves through the city with deliberate observation, his administrative eye cataloging social dynamics like engineering problems requiring systematic solutions.\n\nThe CROWD grows thicker as he approaches the Temple area. Not the usual marketplace bustle, but something more focused. More purposeful.\n\nAn ELDERLY JEWISH MAN steps forward—not confrontational, but with the dignity of someone addressing authority from moral conviction rather than political calculation.\n\nELDERLY MAN\nLord Pilate, the eagles violate the commandment against graven images. We ask for their removal.\n\nThe request is stated simply, without the complex political maneuvering Pilate expects. The directness unsettles his strategic thinking.\n\nPILATE\n(applying standard administrative response)\nRoman standards represent imperial authority. Their presence ensures order and security.\n\nELDERLY MAN\nOrder built on violation of God's law creates disorder in men's souls.\n\nThe response doesn't fit Pilate's decision trees. Not political opposition, not economic complaint, but appeal to authority beyond Roman calculation—a variable his survival mathematics cannot process.",
+      "tags": [
+        "screenplay-scene",
+        "act one: the standards crisis"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-one-the-standards-crisis-int-fortress-antonia-private-chambers-evening",
+      "title": "INT. FORTRESS ANTONIA - PRIVATE CHAMBERS - EVENING",
+      "header": "INT. FORTRESS ANTONIA - PRIVATE CHAMBERS - EVENING",
+      "act": "ACT ONE: THE STANDARDS CRISIS",
+      "body": "INT. FORTRESS ANTONIA - PRIVATE CHAMBERS - EVENING\n\nPilate reviews reports while Claudia observes his methodical work with growing concern.\n\nPILATE\n(calculating aloud)\nOption one: maintain standards, accept increased unrest, apply additional security measures. Cost: elevated military expense, potential escalation.\n\nHe draws connecting lines between variables like solving engineering problems.\n\nPILATE (CONT'D)\nOption two: remove standards, signal weakness, invite further challenges to Roman authority. Cost: political capital, precedent for future concessions.\n\nCLAUDIA\nWhat about option three?\n\nPILATE\n(pausing his calculations)\nThere is no option three.\n\nCLAUDIA\nUnderstanding why the eagles matter to them before deciding how to use them against them.\n\nThe suggestion introduces complexity his administrative framework struggles to incorporate. Understanding versus calculation, human motivation versus tactical advantage.\n\nPILATE\nUnderstanding is a luxury for philosophers. Administration requires decisions based on measurable outcomes.\n\nCLAUDIA\nAnd if measurable outcomes miss the most important variables?\n\nThe question probes the forbidden thought—that his engineering approach may be fundamentally inadequate for human complexity.\n\nPILATE\n(slight pause, then returning to calculations)\nThen we adjust the measurements.\n\nBut his voice lacks complete conviction.",
+      "tags": [
+        "screenplay-scene",
+        "act one: the standards crisis"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-one-the-standards-crisis-ext-temple-mount-dawn",
+      "title": "EXT. TEMPLE MOUNT - DAWN",
+      "header": "EXT. TEMPLE MOUNT - DAWN",
+      "act": "ACT ONE: THE STANDARDS CRISIS",
+      "body": "EXT. TEMPLE MOUNT - DAWN\n\nPilate arrives to find thousands of Jews prostrated before the fortress. Not protesting, not rioting, but demonstrating through organized submission—a tactic his conflict management algorithms haven't anticipated.\n\nPILATE\n(to Marcus Aurelius)\nDuration of this... demonstration?\n\nMARCUS AURELIUS\nFive days, sir. They remain here day and night.\n\nFive days. Pilate's administrative experience provides no template for managing sustained passive resistance to religious principle rather than political advantage.\n\nA YOUNG RABBI approaches, his face bearing the strain of prolonged fasting but radiating moral certainty that troubles Pilate's strategic calculations.\n\nYOUNG RABBI\nProcurator, we will remain until the eagles are removed or until we die here. These are our only options.\n\nThe statement presents binary choice—success or death—with no middle ground for negotiation or compromise. Pilate's survival algorithms require flexibility for optimal outcomes.\n\nPILATE\n(attempting to introduce rational negotiation)\nSurely reasonable men can find accommodation that respects both Roman authority and Jewish custom.\n\nYOUNG RABBI\nGod's commandments are not subject to accommodation.\n\nThe response eliminates negotiation as a viable strategy. Absolute principles resist the systematic pressure that made Pilate successful in Samnium.",
+      "tags": [
+        "screenplay-scene",
+        "act one: the standards crisis"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-one-the-standards-crisis-ext-temple-mount-day",
+      "title": "EXT. TEMPLE MOUNT - DAY",
+      "header": "EXT. TEMPLE MOUNT - DAY",
+      "act": "ACT ONE: THE STANDARDS CRISIS",
+      "body": "",
+      "tags": [
+        "screenplay-scene",
+        "act one: the standards crisis"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-two-claudias-warning-act-two-claudias-warning",
+      "title": "ACT TWO: CLAUDIA'S WARNING",
+      "header": "ACT TWO: CLAUDIA'S WARNING",
+      "act": "ACT TWO: CLAUDIA'S WARNING",
+      "body": "",
+      "tags": [
+        "act two: claudia's warning"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-two-claudias-warning-int-roman-praetorium-private-chambers-night",
+      "title": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - NIGHT",
+      "header": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - NIGHT",
+      "act": "ACT TWO: CLAUDIA'S WARNING",
+      "body": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - NIGHT\n\nClaudia tosses restlessly in sleep, her face contorted by visions that defy rational explanation. Pilate observes her distress with the analytical detachment he applies to all problems requiring solution.\n\nCLAUDIA\n(in her sleep)\nNo... not him... the innocent blood...\n\nThe words emerge from depths beyond conscious calculation. Pilate's administrative mind catalogs them as stress symptoms requiring management rather than prophecy requiring attention.\n\nPILATE\n(gently shaking her awake)\nClaudia. Another dream.\n\nShe wakes with the startled clarity of someone returning from visions more real than waking consciousness.\n\nCLAUDIA\nThey're getting stronger, Marcus. More... specific.\n\nPILATE\nDreams reflect psychological stress. Your concerns about our situation here manifest in symbolic imagery.\n\nHis explanation applies familiar analytical frameworks to phenomena beyond his understanding—a survival strategy that worked for engineering problems but proves inadequate for experiences that resist rational categorization.\n\nCLAUDIA\n(with growing urgency)\nThis isn't stress, Marcus. This is warning.\n\nPILATE\nWarning of what?\n\nCLAUDIA\nA choice you'll face. A man you'll judge. And blood that will stain more than your hands.\n\nThe precision of her vision disturbs Pilate's comfort with explanatory analysis. Dreams shouldn't contain specific prophetic information—yet hers consistently do.\n\nPILATE\n(strategic pause, processing implications)\nProphetic dreams violate natural law. Administrative decisions based on supernatural claims lack rational foundation.\n\nCLAUDIA\nWhat if rational foundation isn't sufficient for what's coming?\n\nThe question probes the forbidden thought growing stronger since the eagle crisis—that his analytical approach may miss variables crucial for survival.",
+      "tags": [
+        "screenplay-scene",
+        "act two: claudia's warning"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-two-claudias-warning-ext-judean-countryside-day",
+      "title": "EXT. JUDEAN COUNTRYSIDE - DAY",
+      "header": "EXT. JUDEAN COUNTRYSIDE - DAY",
+      "act": "ACT TWO: CLAUDIA'S WARNING",
+      "body": "EXT. JUDEAN COUNTRYSIDE - DAY\n\nPilate travels with a small escort, observing agricultural systems with his characteristic systematic attention. The efficiency of irrigation, the productivity of terracing, the organization of labor—all evidence of human engineering that confirms his worldview.\n\nA GALILEAN FARMER approaches, his face weathered by years of working soil that requires both technical skill and intuitive wisdom.\n\nFARMER\nLord Pilate, they say a teacher has come who speaks with authority we've never heard before.\n\nPILATE\n(applying standard analytical categories)\nReligious teacher or political agitator?\n\nFARMER\nNeither. Both. Something else entirely.\n\nThe response doesn't fit Pilate's classification system. Religious or political he can manage through established protocols, but \"something else entirely\" introduces uncertainty his survival algorithms can't process.\n\nFARMER (CONT'D)\nHe speaks of kingdoms not built by human hands, authority not granted by Caesar, truth that sets men free.\n\nEach phrase challenges fundamental assumptions of Pilate's administrative framework—kingdoms without territory, authority without imperial sanction, truth as liberating force rather than political tool.\n\nPILATE\n(controlled response)\nTruth serves those who shape it properly. Freedom serves those strong enough to defend it.\n\nFARMER\nHe says truth serves itself, and freedom comes to those brave enough to receive it.\n\nThe statement inverts Pilate's understanding of power dynamics. In his experience, truth and freedom are resources to be managed, not forces with independent existence.",
+      "tags": [
+        "screenplay-scene",
+        "act two: claudia's warning"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-two-claudias-warning-int-roman-praetorium-evening",
+      "title": "INT. ROMAN PRAETORIUM - EVENING",
+      "header": "INT. ROMAN PRAETORIUM - EVENING",
+      "act": "ACT TWO: CLAUDIA'S WARNING",
+      "body": "",
+      "tags": [
+        "screenplay-scene",
+        "act two: claudia's warning"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-three-caiaphass-game-act-three-caiaphass-game",
+      "title": "ACT THREE: CAIAPHAS'S GAME",
+      "header": "ACT THREE: CAIAPHAS'S GAME",
+      "act": "ACT THREE: CAIAPHAS'S GAME",
+      "body": "",
+      "tags": [
+        "act three: caiaphas's game"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-three-caiaphass-game-int-temple-complex-high-priests-chamber-day",
+      "title": "INT. TEMPLE COMPLEX - HIGH PRIEST'S CHAMBER - DAY",
+      "header": "INT. TEMPLE COMPLEX - HIGH PRIEST'S CHAMBER - DAY",
+      "act": "ACT THREE: CAIAPHAS'S GAME",
+      "body": "INT. TEMPLE COMPLEX - HIGH PRIEST'S CHAMBER - DAY\n\nCAIAPHAS, the High Priest, reviews documents with the same methodical precision Pilate applies to administrative analysis. At 45, he possesses political sophistication that matches Pilate's engineering background—two masters of systematic thinking preparing for strategic engagement.\n\nANNAS, the former High Priest and Caiaphas's father-in-law, observes with the satisfaction of a master watching his student surpass his teaching.\n\nCAIAPHAS\nThe Galilean teacher presents a problem requiring coordinated solution.\n\nANNAS\nReligious problem or political problem?\n\nCAIAPHAS\n(with calculating precision)\nBoth. Which makes him Roman problem as well as Jewish problem.\n\nThe analysis demonstrates political sophistication Pilate would recognize and respect—identification of mutual interests creating opportunity for strategic alliance.\n\nCAIAPHAS (CONT'D)\nPilate's weakness: he calculates human behavior like engineering problems. His strength: he values stability over ideology.\n\nANNAS\nAnd our approach?\n\nCAIAPHAS\nPresent the Galilean as threat to stability requiring administrative solution. Let Roman efficiency solve Jewish problem.\n\nThe strategy reveals understanding of Pilate's psychological framework superior to Pilate's understanding of Jewish religious dynamics—an asymmetric advantage in their coming confrontation.",
+      "tags": [
+        "screenplay-scene",
+        "act three: caiaphas's game"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-three-caiaphass-game-int-roman-praetorium-audience-chamber-day",
+      "title": "INT. ROMAN PRAETORIUM - AUDIENCE CHAMBER - DAY",
+      "header": "INT. ROMAN PRAETORIUM - AUDIENCE CHAMBER - DAY",
+      "act": "ACT THREE: CAIAPHAS'S GAME",
+      "body": "INT. ROMAN PRAETORIUM - AUDIENCE CHAMBER - DAY\n\nPilate receives Caiaphas with the formal courtesy due a crucial ally in provincial administration. Their relationship represents successful engineering of religious-political cooperation.\n\nCAIAPHAS\nProcurator, we must discuss the Galilean.\n\nPILATE\n(immediate administrative attention)\nJesus of Nazareth. My reports indicate growing influence but no direct challenge to Roman authority.\n\nCAIAPHAS\nIndirect challenges often prove more destabilizing than direct ones.\n\nThe observation demonstrates strategic thinking Pilate appreciates—recognition that threats to stability can emerge from unexpected directions requiring sophisticated countermeasures.\n\nPILATE\nExplain the specific concern.\n\nCAIAPHAS\nHe claims authority higher than Caesar's. He disrupts established religious order. He attracts followers who speak of kingdoms not subject to Roman law.\n\nEach point is crafted to resonate with Pilate's survival calculations—challenges to imperial authority, disruption of administrative systems, emergence of alternative power structures.\n\nPILATE\n(processing the information systematically)\nReligious enthusiasm typically dissipates without active suppression. Martyrdom often strengthens rather than eliminates movement.\n\nCAIAPHAS\n(revealing superior strategic understanding)\nUnless the martyrdom serves Roman interests rather than movement interests.\n\nThe suggestion intrigues Pilate's analytical mind—transformation of apparent defeat into actual victory through superior positioning of variables.\n\nCAIAPHAS (CONT'D)\nPresent him as political threat requiring Roman justice. Let his followers see Roman power, not Jewish authority, as responsible for his elimination.\n\nPILATE\n(recognizing elegant solution)\nAdministrative efficiency serving mutual stability interests.\n\nCAIAPHAS\nPrecisely.\n\nBut as Pilate processes the proposal's strategic advantages, a troubling thought emerges—the same analytical capability that made him successful in engineering may be making him complicit in something beyond engineering calculation.\n\nCAIAPHAS (CONT'D)\nThere is... additional information you should consider.\n\nPILATE\nSpecify.\n\nCAIAPHAS\n(revealing his tactical superiority)\nThe tribute discrepancies from last quarter's collection.\n\nThe phrase hits Pilate like physical impact. Tribute discrepancies suggest administrative failure—the one thing his survival calculations cannot tolerate.\n\nPILATE\n(careful control masking internal alarm)\nWhat discrepancies?\n\nCAIAPHAS\n(savoring his advantage)\nMinor computational errors. Easily corrected through cooperative adjustment of records. Completely undetectable if handled with mutual discretion.\n\nThe revelation transforms their relationship. No longer cooperation between equals, but dependence of compromised administrator on ally with superior information position.\n\nPILATE\n(long pause, recognizing his tactical defeat)\nWhat adjustment do you propose?\n\nCAIAPHAS\nHandle the Galilean problem with Roman efficiency. Tribute calculations remain administratively clean.\n\nThe exchange reveals Caiaphas's superior understanding of power dynamics—he's maneuvered Pilate into position where survival depends on cooperation rather than independent judgment.\n\nPILATE\n(quiet recognition of his position)\nElegant solution.\n\nCAIAPHAS\nAdministrative efficiency serving mutual interests, as you said.\n\nBut Pilate recognizes that his words have been turned back on him in service of interests he may not fully understand—a masterful demonstration of strategic manipulation that leaves him questioning who is actually controlling their relationship.",
+      "tags": [
+        "screenplay-scene",
+        "act three: caiaphas's game"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-three-caiaphass-game-ext-temple-mount-day",
+      "title": "EXT. TEMPLE MOUNT - DAY",
+      "header": "EXT. TEMPLE MOUNT - DAY",
+      "act": "ACT THREE: CAIAPHAS'S GAME",
+      "body": "EXT. TEMPLE MOUNT - DAY\n\nPilate observes Jesus teaching in the Temple courts, surrounded by crowds that respond with engagement unlike anything in his administrative experience.\n\nJESUS\n(to the crowd)\nThe truth will set you free.\n\nThe phrase echoes Claudia's dreams and the farmer's report. Truth as liberating force rather than administrative tool—a concept that challenges the fundamental assumptions of Pilate's worldview.\n\nPILATE\n(to Marcus Aurelius)\nAssessment of crowd dynamics.\n\nMARCUS AURELIUS\nUnusual patterns, sir. Not political rally, not religious ceremony. Something... different.\n\nPILATE\nDefine \"different.\"\n\nMARCUS AURELIUS\nThey listen like people discovering something they've always known but never heard articulated.\n\nThe observation disturbs Pilate's analytical comfort. Political speech he can categorize, religious enthusiasm he can manage, but recognition of unspoken truth introduces variables his decision trees cannot process.\n\nAs Jesus's eyes meet his across the courtyard, Pilate experiences something beyond calculation—the recognition that this man represents everything his survival algorithms cannot understand or control.\n\nThe moment passes, but leaves Pilate with growing awareness that his strategic alliance with Caiaphas may be leading him toward decisions that his engineering precision cannot justify.",
+      "tags": [
+        "screenplay-scene",
+        "act three: caiaphas's game"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-three-caiaphass-game-int-roman-praetorium-private-chambers-evening",
+      "title": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - EVENING",
+      "header": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - EVENING",
+      "act": "ACT THREE: CAIAPHAS'S GAME",
+      "body": "",
+      "tags": [
+        "screenplay-scene",
+        "act three: caiaphas's game"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-four-the-calculation-act-four-the-calculation",
+      "title": "ACT FOUR: THE CALCULATION",
+      "header": "ACT FOUR: THE CALCULATION",
+      "act": "ACT FOUR: THE CALCULATION",
+      "body": "",
+      "tags": [
+        "act four: the calculation"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-four-the-calculation-int-roman-praetorium-private-chambers-night",
+      "title": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - NIGHT",
+      "header": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - NIGHT",
+      "act": "ACT FOUR: THE CALCULATION",
+      "body": "",
+      "tags": [
+        "screenplay-scene",
+        "act four: the calculation"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-four-the-calculation-int-roman-praetorium-audience-chamber-dawn",
+      "title": "INT. ROMAN PRAETORIUM - AUDIENCE CHAMBER - DAWN",
+      "header": "INT. ROMAN PRAETORIUM - AUDIENCE CHAMBER - DAWN",
+      "act": "ACT FOUR: THE CALCULATION",
+      "body": "INT. ROMAN PRAETORIUM - AUDIENCE CHAMBER - DAWN\n\nPilate reviews final preparations as MARCUS AURELIUS, his aide, approaches with new intelligence.\n\nMARCUS AURELIUS\nProcurator, urgent dispatch from Rome. Tiberius's patience with Judean unrest is... exhausted.\n\nHe hands Pilate a sealed message. Pilate breaks the seal, reads, his face maintaining perfect administrative composure even as his survival calculations recalibrate in real time.\n\nPILATE\n(strategic pause, processing)\nTimeline accelerated. Political margin for error: eliminated.\n\nMARCUS AURELIUS\nSir, there's more. The Galilean's followers are growing. Some say he claims authority higher than Caesar's.\n\nThe forbidden thought surfaces briefly—what if there are authorities his calculations cannot measure? Pilate suppresses it through practiced mental discipline.\n\nPILATE\nAuthority higher than Caesar's is treason. Treason has fixed penalties under Roman law.\n\nBut his voice lacks its usual mathematical certainty.",
+      "tags": [
+        "screenplay-scene",
+        "act four: the calculation"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-four-the-calculation-ext-jerusalem-streets-day",
+      "title": "EXT. JERUSALEM STREETS - DAY",
+      "header": "EXT. JERUSALEM STREETS - DAY",
+      "act": "ACT FOUR: THE CALCULATION",
+      "body": "EXT. JERUSALEM STREETS - DAY\n\nPilate moves through the city with his usual measured pace, but his observational algorithm notices patterns his calculations didn't predict: faces filled with expectation rather than the usual resignation, conversations that stop when Roman soldiers approach, an energy he cannot quantify.\n\nHe stops before the Temple, watching the complex social dynamics his engineering mind has always been able to map and manipulate.\n\nPILATE\n(to himself)\nVariables multiplying beyond predictable parameters.\n\nA YOUNG JEWISH MOTHER approaches, her child clinging to her robes.\n\nYOUNG MOTHER\nLord Procurator, they say the Messiah walks among us. What should we do?\n\nThe question is asked with innocent directness—no political calculation, no hidden agenda. Pure human uncertainty seeking guidance from authority.\n\nFor the first time in his career, Pilate has no algorithmic response.\n\nPILATE\n(long pause, then with careful precision)\nFollow Roman law. It provides... clarity.\n\nBut as he walks away, the forbidden thought grows stronger: What if clarity isn't enough?",
+      "tags": [
+        "screenplay-scene",
+        "act four: the calculation"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-act-five-what-is-truth",
+      "title": "ACT FIVE: WHAT IS TRUTH?",
+      "header": "ACT FIVE: WHAT IS TRUTH?",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "",
+      "tags": [
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-ext-roman-praetorium-dawn",
+      "title": "EXT. ROMAN PRAETORIUM - DAWN",
+      "header": "EXT. ROMAN PRAETORIUM - DAWN",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "EXT. ROMAN PRAETORIUM - DAWN\n\nThe courtyard fills with an unusual crowd. Not the typical political theater of Roman justice, but something charged with expectation. Pilate observes from his balcony, his administrative mind cataloging the variables but finding no familiar patterns.\n\nPILATE\n(to Marcus Aurelius)\nStandard crowd management protocols?\n\nMARCUS AURELIUS\nSir, this isn't a standard crowd. They're... waiting for something.",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-int-roman-praetorium-judgment-hall-continuous",
+      "title": "INT. ROMAN PRAETORIUM - JUDGMENT HALL - CONTINUOUS",
+      "header": "INT. ROMAN PRAETORIUM - JUDGMENT HALL - CONTINUOUS",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "INT. ROMAN PRAETORIUM - JUDGMENT HALL - CONTINUOUS\n\nPilate brings Jesus inside again, away from the crowd's orchestrated fury.\n\nPILATE\n(with desperate urgency)\nWhere are you from?\n\nJesus remains silent, his eyes holding depths that Pilate's analytical mind cannot fathom.\n\nPILATE (CONT'D)\n(falling back on institutional power)\nYou won't speak to me? Don't you know that I have authority to release you, and authority to crucify you?\n\nJESUS\n(with quiet certainty)\nYou would have no authority over me, unless it were given to you from above. Therefore he who delivered me to you has greater sin.\n\nThe response shatters Pilate's remaining certainty. Authority from above. Greater sin. A moral framework that makes his political calculations meaningless.",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-ext-roman-praetorium-continuous",
+      "title": "EXT. ROMAN PRAETORIUM - CONTINUOUS",
+      "header": "EXT. ROMAN PRAETORIUM - CONTINUOUS",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "EXT. ROMAN PRAETORIUM - CONTINUOUS\n\nPilate addresses the crowd, his voice carrying administrative authority despite his internal uncertainty.\n\nPILATE\nI find no crime in him. But you have a custom that I should release someone to you at the Passover. Will you therefore have me release to you the King of the Jews?\n\nThe crowd's response erupts with coordinated precision that Pilate's political instincts immediately recognize as orchestrated.\n\nCROWD\nNot this man, but Barabbas!\n\nBarabbas—a rebel, a murderer, everything Rome opposes. Yet the crowd chooses violence over this teacher who speaks of truth. The irony isn't lost on Pilate's administrative mind.",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-int-roman-praetorium-private-chamber-continuous",
+      "title": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBER - CONTINUOUS",
+      "header": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBER - CONTINUOUS",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBER - CONTINUOUS\n\nPilate retreats to calculate his options, but Claudia intercepts him, her face bearing the strain of prophetic dreams.\n\nCLAUDIA\nHave nothing to do with this just man, for I have suffered many things today in a dream because of him.\n\nPILATE\n(grasping for familiar analytical ground)\nJustice is a legal concept. Roman law provides clear frameworks for determining guilt or innocence.\n\nCLAUDIA\nThis isn't about Roman law, Marcus. This is about something higher.\n\nPILATE\nHigher than Caesar? Higher than Rome? There is no authority higher than—\n\nHe stops, remembering Jesus's words about kingdoms not of this world. The forbidden thought completes itself: what if there are authorities his calculations cannot reach?\n\nCLAUDIA\nYou asked him what truth is. Did he answer?\n\nPILATE\n(long pause)\nHe didn't need to. I saw it in his eyes.\n\nThe admission costs him. For the first time, Pilate acknowledges encountering something beyond the reach of his survival algorithms.",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-ext-roman-praetorium-judgment-seat-day",
+      "title": "EXT. ROMAN PRAETORIUM - JUDGMENT SEAT - DAY",
+      "header": "EXT. ROMAN PRAETORIUM - JUDGMENT SEAT - DAY",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "EXT. ROMAN PRAETORIUM - JUDGMENT SEAT - DAY\n\nPilate returns to the crowd, his internal calculation running desperately through scenarios. Political survival versus... something he cannot name but recognizes as more important.\n\nPILATE\n(to the crowd)\nBehold, I bring him out to you, so that you may know that I find no crime in him.\n\nJesus is brought forward, wearing the crown of thorns the soldiers mockingly placed on his head. Blood runs down his face, but his eyes remain clear, fixed on something beyond the immediate pain.\n\nPILATE (CONT'D)\n(presenting Jesus)\nBehold the man!\n\nThe words emerge with more weight than Pilate intended. Not political theater, but genuine recognition of something profound in this broken figure.\n\nCROWD\nCrucify him! Crucify him!\n\nPILATE\n(his voice cracking with the strain)\nYou take him and crucify him, for I find no crime in him.\n\nTEMPLE ELDERS\nWe have a law, and according to our law he ought to die, because he made himself the Son of God.\n\nThe phrase hits Pilate like a physical blow. Son of God. His Roman mind rejects it as religious superstition, but something deeper recognizes a claim that transcends all his categories.",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-ext-roman-praetorium-judgment-seat-continuous",
+      "title": "EXT. ROMAN PRAETORIUM - JUDGMENT SEAT - CONTINUOUS",
+      "header": "EXT. ROMAN PRAETORIUM - JUDGMENT SEAT - CONTINUOUS",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "EPILOGUE: THE WASHING",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-ext-golgotha-day-later",
+      "title": "EXT. GOLGOTHA - DAY (LATER)",
+      "header": "EXT. GOLGOTHA - DAY (LATER)",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "EXT. GOLGOTHA - DAY (LATER)\n\nThree crosses stand against the darkening sky. From the praetorium, Pilate watches the execution he authorized but cannot reconcile with his deeper understanding.\n\nThe sky grows unnaturally dark. Even his Roman pragmatism cannot dismiss the atmospheric wrongness of this moment.\n\nMARCUS AURELIUS approaches, his face troubled.\n\nMARCUS AURELIUS\nProcurator, there are... unusual reports from the execution site.\n\nPILATE\nDefine \"unusual.\"\n\nMARCUS AURELIUS\nThe condemned spoke of forgiveness. For his executioners. For... everyone.\n\nThe information hits Pilate's analytical mind but cannot be processed by his survival algorithms. Forgiveness for executioners violates every framework he understands.\n\nPILATE\n(barely audible)\nForgiveness.",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-int-roman-praetorium-private-chambers-evening",
+      "title": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - EVENING",
+      "header": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - EVENING",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "INT. ROMAN PRAETORIUM - PRIVATE CHAMBERS - EVENING\n\nPilate sits alone, staring at his hands. The same hands that signed the execution order. The same hands that have calculated their way through a career of administrative decisions.\n\nA basin of water sits before him, brought for his evening ablutions. But tonight, the water carries different significance.\n\nClaudia enters quietly, her prophetic dreams finally quiet for the first time in days.\n\nCLAUDIA\nIt's finished.\n\nPILATE\n(not looking up)\nThe execution? Yes. Standard Roman efficiency.\n\nCLAUDIA\nNo, Marcus. Something else is finished. Something in you.\n\nHe finally meets her eyes, and she sees a depth of recognition that wasn't there before.\n\nPILATE\nI asked him what truth was. I thought I was being philosophical. Clever. But he... he was truth. Standing in front of me. And I...\n\nHe trails off, unable to complete the sentence that would indict his entire worldview.\n\nCLAUDIA\nYou chose survival.\n\nPILATE\nI chose survival. I always choose survival. It's the only calculation that matters.\n\nCLAUDIA\nAnd yet you're still here, calculating the cost of a decision that your conscience knows was wrong.\n\nPilate looks at his hands again, then at the basin of water.\n\nPILATE\nThere's no calculation for this, is there? No algorithm for washing away the weight of choosing wrongly when you knew better.\n\nHe dips his hands into the water, not with the mechanical routine of daily ablution, but with the desperate hope that water might somehow dissolve more than physical stains.\n\nPILATE (CONT'D)\n(as he washes)\nI am innocent of this man's blood. See to it yourselves.\n\nBut the words ring hollow even as he speaks them. Institutional absolution cannot touch personal recognition of moral failure.\n\nCLAUDIA\n(gently)\nInnocence isn't something you can calculate your way into, Marcus. And guilt isn't something you can wash away.\n\nPilate's hands remain in the water, but he knows she's right. The washing is theater—political necessity dressed as moral absolution.\n\nPILATE\nThen what is it for?\n\nCLAUDIA\nPerhaps... acknowledgment. That some choices change us permanently. That some truths, once recognized, can never be unknown.\n\nPilate lifts his hands from the basin. They're clean, but he feels no lighter.\n\nPILATE\n(with quiet devastation)\nThe calculation failed, Claudia. Everything I built my life on... it failed when I needed it most.\n\nCLAUDIA\nMaybe that's not failure, Marcus. Maybe that's the beginning of something more honest.",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    },
+    {
+      "id": "act-five-what-is-truth-ext-roman-praetorium-balcony-night",
+      "title": "EXT. ROMAN PRAETORIUM - BALCONY - NIGHT",
+      "header": "EXT. ROMAN PRAETORIUM - BALCONY - NIGHT",
+      "act": "ACT FIVE: WHAT IS TRUTH?",
+      "body": "PRODUCTION NOTES:\n\nThis screenplay explores the psychological journey of Pontius Pilate as a Roman administrator whose survival-based decision-making algorithms prove inadequate when confronted with ultimate truth and moral complexity.\n\nThe dramatic arc moves from confident calculation through growing uncertainty to final recognition of calculation's limits. The character framework treats Pilate as an engineer-administrator who applies systematic analysis to human problems, only to discover that the most important human realities cannot be quantified or calculated.\n\nKey themes:\n- The limits of purely rational approaches to moral complexity\n- The tension between institutional survival and personal integrity\n- The collision between administrative efficiency and ultimate truth\n- The psychological cost of choosing survival over conscience\n\nThe screenplay maintains historical accuracy while exploring the universal human struggle between pragmatic calculation and moral recognition—the choice between what works and what's right when the two cannot be reconciled.\n\nRuntime: Approximately 90-120 minutes\nFormat: Feature film or television movie\nGenre: Historical psychological drama\nRating: PG-13 for thematic content and brief violence",
+      "tags": [
+        "screenplay-scene",
+        "act five: what is truth?"
+      ],
+      "source": "pontius-pilate-screenplay\\pontius_pilate_screenplay.txt"
+    }
+  ]
+}

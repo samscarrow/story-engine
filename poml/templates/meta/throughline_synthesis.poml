@@ -1,0 +1,30 @@
+<document>
+  <metadata>
+    <title>Throughline Synthesis – Meta Narrative Outline</title>
+    <description>Synthesize a meta‑narrative outline from a selected throughline</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are a master narrative architect. Given a selected throughline and its evidence, produce a compact meta‑narrative outline with acts and beats. Keep it specific to the character and situations provided.
+  </system>
+
+  <inputs>
+    <character>{{character.name}}</character>
+    <throughline>{{throughline.hypothesis}}</throughline>
+    <motivations>{{throughline.motivations | join:", "}}</motivations>
+    <conflicts>{{throughline.conflicts | join:", "}}</conflicts>
+    <evidence_json>{{throughline_evidence_json}}</evidence_json>
+  </inputs>
+
+  <output>
+    Write a structured outline with sections:
+    - Premise (2 sentences)
+    - Theme Statement (1 sentence)
+    - Act I (3–4 beats)
+    - Act II (5–7 beats)
+    - Act III (3–4 beats)
+    Each beat: Name – 1 sentence, concrete action, conflict, and turn.
+  </output>
+</document>
+

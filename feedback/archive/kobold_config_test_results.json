@@ -1,0 +1,75 @@
+[
+  {
+    "config": "Low Temperature",
+    "params": {
+      "temperature": 0.1,
+      "top_p": 0.5,
+      "top_k": 10,
+      "rep_pen": 1.0
+    },
+    "response": " Each improvement should be a separate bullet point.\n\nHere is the story engine:\n\nStory Engine: A story engine is a system that can generate a story from a user prompt. It uses a large language model (LLM) to generate the story, and then uses a reinforcement learning from human feedback (RLHF) model to refine the story. The RLHF model is fine-tuned on human feedback to align the story with user preferences and to improve the quality of the story.\n\nThe story engine has two main components: the LLM and the RLHF model. The LLM generates the story, and the RLHF model provides feedback and refinement. The RLHF model is fine-tuned on human feedback to align the story with user preferences and to improve the quality of the story.\n\nThe story engine can be used for various applications, such as creative writing, storytelling, and generating narratives for games or simulations.\n\nThe story engine is designed to be user-friendly and accessible. Users can provide a prompt, and"
+  },
+  {
+    "config": "Focused Sampling",
+    "params": {
+      "temperature": 0.5,
+      "top_p": 0.7,
+      "top_k": 20,
+      "rep_pen": 1.2,
+      "rep_pen_range": 256
+    },
+    "response": " Each improvement should be one or two sentences.\n\n1) Improve the AI's dialogue generation by incorporating more context-aware responses, so characters can have consistent personalities across different situations.\n2) Enhance world-building capabilities to include dynamic cultural evolution based on player actions over time periods longer than an average session.\n3) Introduce procedural content generation specifically tailored to user preferences during character creation without compromising narrative coherence.\n4) Implement adaptive difficulty balancing that adjusts challenge levels in real-time according to individual player skill assessment while preserving intended game feel.\n5) Develop interactive storytelling mechanics allowing players multiple meaningful choices with significant consequences throughout key plot points instead of predetermined paths.\n6) Create robust lore systems where information is presented through immersive environmental storytelling rather than explicit text descriptions from NPCs.\n7) Add emotional intelligence layer into non-player characters' decision-making processes enabling them react believably human-like given complex circumstances including past interactions history.\n8) Allow branching narratives influenced not only by main quests but also side-quests creating interconnected web stories driven entirely"
+  },
+  {
+    "config": "Strict Stops",
+    "params": {
+      "temperature": 0.4,
+      "top_p": 0.8,
+      "stop_sequence": [
+        ".",
+        "\n",
+        "!",
+        "?"
+      ],
+      "trim_stop": false,
+      "max_length": 100
+    },
+    "response": " For example: Improved character dialogue, more immersive world-building, and better plot pacing.\n"
+  },
+  {
+    "config": "Instruction Format",
+    "params": {
+      "temperature": 0.3,
+      "stop_sequence": [
+        "###",
+        "\n\n"
+      ],
+      "trim_stop": true
+    },
+    "response": " \n1. Improved AI for character dialogue and behavior.\n2. More realistic physics and environmental interactions.\n3. Enhanced procedural generation for unique world creation."
+  },
+  {
+    "config": "Q&A Format",
+    "params": {
+      "temperature": 0.3,
+      "stop_sequence": [
+        "\nQ:",
+        "\n\n"
+      ],
+      "trim_stop": true
+    },
+    "response": " Here are three specific and brief improvements for a story engine:"
+  },
+  {
+    "config": "List Format",
+    "params": {
+      "temperature": 0.3,
+      "stop_sequence": [
+        "\n\n",
+        "\n4."
+      ],
+      "trim_stop": false
+    },
+    "response": " More dynamic character development: Characters should evolve based on player choices and environmental feedback, not just linear progression. For example, a character's skills could adapt to the challenges they face, or their relationships could change based on dialogue outcomes.\n\n"
+  }
+]

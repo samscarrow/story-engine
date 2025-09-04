@@ -1,0 +1,201 @@
+{
+  "character": {
+    "id": "pontius_pilate",
+    "name": "Pontius Pilate",
+    "backstory": {
+      "origin": "Roman equestrian from Samnium",
+      "career": "Prefect of Judaea"
+    },
+    "traits": [
+      "pragmatic",
+      "ambitious",
+      "anxious"
+    ],
+    "values": [
+      "order",
+      "duty",
+      "Roman law"
+    ],
+    "fears": [
+      "rebellion",
+      "imperial disfavor"
+    ],
+    "desires": [
+      "peace",
+      "advancement"
+    ],
+    "emotional_state": {
+      "anger": 0.4,
+      "doubt": 0.6,
+      "fear": 0.5,
+      "compassion": 0.3,
+      "confidence": 0.5
+    },
+    "memory": {
+      "recent_events": [
+        "Wife's warning dream",
+        "Crowd agitation"
+      ]
+    },
+    "current_goal": "Maintain order without rebellion",
+    "internal_conflict": "Duty to Rome vs. sense of justice"
+  },
+  "situations": [
+    "The crowd surges at dawn outside the Praetorium",
+    "Claudia requests a private audience"
+  ],
+  "simulations": [
+    {
+      "character_id": "pontius_pilate",
+      "situation": "The crowd surges at dawn outside the Praetorium",
+      "emphasis": "fear",
+      "temperature": 1.0,
+      "response": {
+        "dialogue": "I cannot respond properly at this time.",
+        "thought": "System error in processing.",
+        "action": "Pauses uncertainly",
+        "emotional_shift": {
+          "anger": 0,
+          "doubt": 0,
+          "fear": 0,
+          "compassion": 0
+        }
+      },
+      "metadata": {
+        "used_poml": true,
+        "template": "character_response.poml"
+      },
+      "timestamp": "2025-09-04T12:40:15.881501"
+    },
+    {
+      "character_id": "pontius_pilate",
+      "situation": "Claudia requests a private audience",
+      "emphasis": "duty",
+      "temperature": 1.0,
+      "response": {
+        "dialogue": "I cannot respond properly at this time.",
+        "thought": "System error in processing.",
+        "action": "Pauses uncertainly",
+        "emotional_shift": {
+          "anger": 0,
+          "doubt": 0,
+          "fear": 0,
+          "compassion": 0
+        }
+      },
+      "metadata": {
+        "used_poml": true,
+        "template": "character_response.poml"
+      },
+      "timestamp": "2025-09-04T12:40:22.619702"
+    }
+  ],
+  "throughlines": [
+    {
+      "id": "system_failure_and_powerlessness",
+      "hypothesis": "Pilate's inability to respond effectively suggests a deeper systemic issue impacting his authority and agency.",
+      "evidence": [
+        {
+          "index": 0,
+          "quote": "I cannot respond properly at this time."
+        }
+      ],
+      "conflicts": [
+        "internal (authority vs. responsibility)"
+      ],
+      "motivations": [
+        "duty",
+        "fear of consequences"
+      ],
+      "arc_strength": 75
+    },
+    {
+      "id": "duty_vs_personal_agency",
+      "hypothesis": "Claudia's request highlights a conflict between Pilate's official duties and potential personal considerations, hinting at internal struggle.",
+      "evidence": [
+        {
+          "index": 1,
+          "quote": "I cannot respond properly at this time."
+        }
+      ],
+      "conflicts": [
+        "internal (duty vs. compassion)"
+      ],
+      "motivations": [
+        "duty",
+        "potential empathy"
+      ],
+      "arc_strength": 60
+    },
+    {
+      "id": "uncertainty_and_error",
+      "hypothesis": "The repeated 'system error' responses indicate a fundamental instability or malfunction affecting Pilate's decision-making process.",
+      "evidence": [
+        {
+          "index": 0,
+          "quote": "System error in processing."
+        }
+      ],
+      "conflicts": [
+        "internal (cognitive dissonance)"
+      ],
+      "motivations": [
+        "uncertainty",
+        "fear of making the wrong decision"
+      ],
+      "arc_strength": 55
+    },
+    {
+      "id": "authority_erosion",
+      "hypothesis": "Pilate's inability to function suggests a gradual erosion of his authority, possibly due to external pressures or internal failings.",
+      "evidence": [
+        {
+          "index": 0,
+          "quote": "Pauses uncertainly"
+        }
+      ],
+      "conflicts": [
+        "external (crowd pressure)"
+      ],
+      "motivations": [
+        "fear",
+        "duty"
+      ],
+      "arc_strength": 45
+    }
+  ],
+  "selected_throughline": {
+    "id": "system_failure_and_powerlessness",
+    "hypothesis": "Pilate's inability to respond effectively suggests a deeper systemic issue impacting his authority and agency.",
+    "evidence": [
+      {
+        "index": 0,
+        "quote": "I cannot respond properly at this time."
+      }
+    ],
+    "conflicts": [
+      "internal (authority vs. responsibility)"
+    ],
+    "motivations": [
+      "duty",
+      "fear of consequences"
+    ],
+    "arc_strength": 75
+  },
+  "meta_outline": "## Meta-Narrative Outline: Pontius Pilate - The Weight of Authority\n\n**Premise:** Governor Pontius Pilate, tasked with maintaining Roman order in Judea, finds his carefully constructed authority crumbling under the pressure of a volatile populace and the demands of the powerful Temple authorities. His internal conflict between personal responsibility and fear of political repercussions ultimately paralyzes him when faced with a revolutionary figure. \n\n**Theme Statement:** True leadership isn't about wielding power, but about confronting moral dilemmas even when it means sacrificing personal gain.\n\n---\n\n**Act I: The Seeds of Doubt**\n\n*   **Beat 1 – The Arrival:** Pilate arrives in Jerusalem, eager to assert Roman control and maintain peace, but immediately senses underlying tension and resistance. *Action:* He addresses the Sanhedrin, demanding adherence to Roman law. *Conflict:*  He is met with veiled hostility and subtle challenges to his authority. *Turn:* A prophecy about a \"King of the Jews\" is presented, hinting at unrest.\n*   **Beat 2 – The Crowd's Rising:** Rumors of a charismatic preacher named Jesus begin to spread, attracting large crowds and challenging the established religious order. *Action:* Pilate observes Jesus' growing popularity and the escalating fervor amongst his followers. *Conflict:*  The rising crowd presents a potential threat to Roman stability and undermines Pilate’s position. *Turn:* The Temple authorities express concern over Jesus' teachings potentially inciting rebellion.\n*   **Beat 3 – Initial Investigation:** Pilate attempts to understand the situation by questioning Jesus, but finds him evasive and focused on spiritual matters rather than political ones.  *Action:* Pilate interrogates Jesus about claims of kingship and his impact on Roman rule. *Conflict:* Jesus' philosophical responses frustrate Pilate’s desire for a clear legal justification for action. *Turn:* Pilate dismisses Jesus as a harmless agitator, but feels uneasy.\n\n**Act II: The Point of No Return**\n\n*   **Beat 4 – The Sanhedrin's Accusation:**  The Sanhedrin formally accuses Jesus of sedition and claims he threatens Roman authority, pressuring Pilate to deliver a verdict. *Action:* The Sanhedrin presents formal charges against Jesus, emphasizing the potential consequences for Rome if the preacher is not dealt with. *Conflict:* Pilate is caught between his duty to uphold Roman law and the growing public pressure to maintain order. *Turn:*  The Sanhedrin subtly implies that failure to act decisively could be interpreted as weakness by Rome.\n*   **Beat 5 – The Trial:** Pilate conducts a trial, but struggles to find legal grounds for condemnation; Jesus' innocence is evident, yet politically inconvenient. *Action:* Pilate questions witnesses and examines the evidence against Jesus, finding inconsistencies and lack of concrete proof of wrongdoing. *Conflict:*  Pilate recognizes Jesus’s peaceful nature and absence of violent intent, but fears repercussions from the Sanhedrin. *Turn:* He feels trapped by a situation where justice seems impossible to achieve without causing widespread unrest.\n*   **Beat 6 – The Crowd's Demand:** The crowd, fueled by religious fervor and manipulated by the Temple authorities, demands Jesus’ crucifixion.  *Action:* A mob incites violence and loudly proclaims \"Crucify him!\" *Conflict:* Pilate is overwhelmed by the sheer power of the mob and fears for his own safety if he resists their demand. *Turn:* He realizes that maintaining order might require sacrificing his own sense of justice.\n*   **Beat 7 – The Internal Struggle:**  Pilate wrestles with his conscience, acknowledging Jesus's innocence but fearing the political fallout of refusing the crowd’s will. *Action:* Pilate contemplates the implications of condemning an innocent man and the potential consequences for himself and Rome. *Conflict:* He battles between his personal sense of responsibility and his fear of losing power and influence within the Roman administration.  *Turn:* Overwhelmed by fear, he yields to the pressure.\n\n**Act III: The Aftermath**\n\n*   **Beat 8 – The Yielding:** Pilate washes his hands, symbolically absolving himself of responsibility for Jesus's death. *Action:* Pilate publicly declares \"I am innocent of the blood of this man!\" while washing his hands in front of the crowd. *Conflict:* He attempts",
+  "meta_evaluation": {
+    "evaluation_text": "Narrative Coherence: 8/10 - The outline presents a logical progression of events and escalating conflict, creating a clear story structure.\nCharacter Development: 6/10 - Pilate's internal conflict is established but lacks depth in terms of nuanced motivations and evolving personality.\nPlot Structure: 7/10 - The three-act structure is well-defined with clear inciting incidents, rising action, and turning points.\nTheme Exploration: 7/10 - The theme of leadership and moral dilemmas is explicitly stated and consistently hinted at throughout the outline.\nConflict & Tension: 8/10 -  The outline effectively establishes both external (political unrest) and internal (Pilate's dilemma) conflicts, generating tension.\nPacing: 7/10 - The pacing feels appropriate for an initial setup, with each beat building upon the previous one without feeling rushed or slow.\nOriginality: 6/10 - The premise of Pilate's internal struggle is a classic and well-explored topic, but the outline offers a fresh perspective on it.\nWorldbuilding: 5/10 -  The worldbuilding is functional, providing context for the conflict, but lacks detailed descriptions of the setting and culture.\n\n\n\n",
+    "scores": {
+      "Narrative Coherence": 8.0,
+      "Character Development": 6.0,
+      "Plot Structure": 7.0,
+      "Theme Exploration": 7.0,
+      "Conflict & Tension": 8.0,
+      "Pacing": 7.0,
+      "Originality": 6.0,
+      "Worldbuilding": 5.0
+    }
+  },
+  "meta_enhanced": "## Meta-Narrative Outline: Pontius Pilate - The Weight of Authority\n\n**Premise:** Governor Pontius Pilate, tasked with maintaining Roman order in Judea, finds his carefully constructed authority crumbling under the pressure of a volatile populace and the demands of the powerful Temple authorities. His internal conflict between personal responsibility and fear of political repercussions ultimately paralyzes him when faced with a revolutionary figure. \n\n**Theme Statement:** True leadership isn't about wielding power, but about confronting moral dilemmas even when it means sacrificing personal gain.\n\n---\n\n**Act I: The Seeds of Doubt**\n\n*   **Beat 1 – The Arrival:** Pilate arrives in Jerusalem, eager to assert Roman control and maintain peace, but immediately senses underlying tension and resistance. *Action:* He addresses the Sanhedrin, demanding adherence to Roman law. *Conflict:* He is met with veiled hostility and subtle challenges to his authority, a palpable undercurrent of resentment simmering beneath polite words. *Turn:* A prophecy about a \"King of the Jews\" is presented, hinting at unrest and fueling existing anxieties. \n*   **Beat 2 – The Crowd's Rising:** Rumors of a charismatic preacher named Jesus begin to spread, attracting large crowds and challenging the established religious order. *Action:* Pilate observes Jesus' growing popularity and the escalating fervor amongst his followers, noting the unsettling devotion in their eyes. *Conflict:*  The rising crowd presents a potential threat to Roman stability and undermines Pilate’s position; he sees not just a preacher but a potential catalyst for rebellion. *Turn:* The Temple authorities express concern over Jesus' teachings potentially inciting rebellion, their words laced with veiled threats.\n*   **Beat 3 – Initial Investigation:** Pilate attempts to understand the situation by questioning Jesus, but finds him evasive and focused on spiritual matters rather than political ones.  *Action:* Pilate interrogates Jesus about claims of kingship and his impact on Roman rule, attempting to draw a direct line between faith and sedition. *Conflict:* Jesus' philosophical responses frustrate Pilate’s desire for a clear legal justification for action; he avoids direct answers, speaking in riddles that seem designed to disarm rather than defend. *Turn:* Pilate dismisses Jesus as a harmless agitator, but feels uneasy, a prickle of unease at the sincerity radiating from the man.\n\n**Act II: The Point of No Return**\n\n*   **Beat 4 – The Sanhedrin's Accusation:**  The Sanhedrin formally accuses Jesus of sedition and claims he threatens Roman authority, pressuring Pilate to deliver a verdict. *Action:* The Sanhedrin presents formal charges against Jesus, emphasizing the potential consequences for Rome if the preacher is not dealt with; their accusations are carefully worded, designed to appeal to Pilate's self-interest. *Conflict:* Pilate is caught between his duty to uphold Roman law and the growing public pressure to maintain order, feeling increasingly isolated in his position. *Turn:*  The Sanhedrin subtly implies that failure to act decisively could be interpreted as weakness by Rome, a direct challenge to Pilate's authority and future prospects.\n*   **Beat 5 – The Trial:** Pilate conducts a trial, but struggles to find legal grounds for condemnation; Jesus' innocence is evident, yet politically inconvenient. *Action:* Pilate questions witnesses and examines the evidence against Jesus, finding inconsistencies and lack of concrete proof of wrongdoing; he sees through the manufactured accusations, recognizing them as driven by fear and religious zealotry. *Conflict:*  Pilate recognizes Jesus’s peaceful nature and absence of violent intent, but fears repercussions from the Sanhedrin and potential unrest. *Turn:* He feels trapped by a situation where justice seems impossible to achieve without causing widespread unrest, a terrifying prospect for a governor.\n*   **Beat 6 – The Crowd's Demand:** The crowd, fueled by religious fervor and manipulated by the Temple authorities, demands Jesus’ crucifixion.  *Action:* A mob incites violence and loudly proclaims \"Crucify him!\" their voices rising to a deafening roar. *Conflict:* Pilate is overwhelmed by the sheer power of the mob and fears for his own safety if he resists their demand; the crowd's fervor is a palpable force, threatening to engulf him. *Turn:* He realizes that maintaining order might require sacrificing his own sense of justice, a realization that chills him to the bone.\n*   **Beat 7 – The Internal Struggle:**  Pilate wrestles with his conscience, acknowledging Jesus's innocence but fearing the political fallout of refusing the crowd’s will. *Action:* Pilate contemplates the implications of condemning an innocent man and the potential consequences for himself and Rome, haunted by visions of future unrest and accusations of cowardice. *Conflict:* He battles between his personal sense of responsibility – a",
+  "screenplay_draft": "## Meta-Narrative Outline: Pontius Pilate - The Weight of Authority\n\n**Premise:** Governor Pontius Pilate, tasked with maintaining Roman order in Judea, finds his carefully constructed authority crumbling under the pressure of a volatile populace and the demands of the powerful Temple authorities. His internal conflict between personal responsibility and fear of political repercussions ultimately paralyzes him when faced with a revolutionary figure. \n\n**Theme Statement:** True leadership isn't about wielding power, but about confronting moral dilemmas even when it means sacrificing personal gain.\n\n---\n\n**Act I: The Seeds of Doubt**\n\n*   **Beat 1 – The Arrival:** Pilate arrives in Jerusalem, eager to assert Roman control and maintain peace, but immediately senses underlying tension and resistance. *Action:* He addresses the Sanhedrin, demanding adherence to Roman law. *Conflict:* He is met with veiled hostility and subtle challenges to his authority, a palpable undercurrent of resentment simmering beneath polite words. *Turn:* A prophecy about a \"King of the Jews\" is presented, hinting at unrest and fueling existing anxieties. \n*   **Beat 2 – The Crowd's Rising:** Rumors of a charismatic preacher named Jesus begin to spread, attracting large crowds and challenging the established religious order. *Action:* Pilate observes Jesus' growing popularity and the escalating fervor amongst his followers, noting the unsettling devotion in their eyes. *Conflict:*  The rising crowd presents a potential threat to Roman stability and undermines Pilate’s position; he sees not just a preacher but a potential catalyst for rebellion. *Turn:* The Temple authorities express concern over Jesus' teachings potentially inciting rebellion, their words laced with veiled threats.\n*   **Beat 3 – Initial Investigation:** Pilate attempts to understand the situation by questioning Jesus, but finds him evasive and focused on spiritual matters rather than political ones.  *Action:* Pilate interrogates Jesus about claims of kingship and his impact on Roman rule, attempting to draw a direct line between faith and sedition. *Conflict:* Jesus' philosophical responses frustrate Pilate’s desire for a clear legal justification for action; he avoids direct answers, speaking in riddles that seem designed to disarm rather than defend. *Turn:* Pilate dismisses Jesus as a harmless agitator, but feels uneasy, a prickle of unease at the sincerity radiating from the man.\n\n**Act II: The Point of No Return**\n\n*   **Beat 4 – The Sanhedrin's Accusation:**  The Sanhedrin formally accuses Jesus of sedition and claims he threatens Roman authority, pressuring Pilate to deliver a verdict. *Action:* The Sanhedrin presents formal charges against Jesus, emphasizing the potential consequences for Rome if the preacher is not dealt with; their accusations are carefully worded, designed to appeal to Pilate's self-interest. *Conflict:* Pilate is caught between his duty to uphold Roman law and the growing public pressure to maintain order, feeling increasingly isolated in his position. *Turn:*  The Sanhedrin subtly implies that failure to act decisively could be interpreted as weakness by Rome, a direct challenge to Pilate's authority and future prospects.\n*   **Beat 5 – The Trial:** Pilate conducts a trial, but struggles to find legal grounds for condemnation; Jesus' innocence is evident, yet politically inconvenient. *Action:* Pilate questions witnesses and examines the evidence against Jesus, finding inconsistencies and lack of concrete proof of wrongdoing; he sees through the manufactured accusations, recognizing them as driven by fear and religious zealotry. *Conflict:*  Pilate recognizes Jesus’s peaceful nature and absence of violent intent, but fears repercussions from the Sanhedrin and potential unrest. *Turn:* He feels trapped by a situation where justice seems impossible to achieve without causing widespread unrest, a terrifying prospect for a governor.\n*   **Beat 6 – The Crowd's Demand:** The crowd, fueled by religious fervor and manipulated by the Temple authorities, demands Jesus’ crucifixion.  *Action:* A mob incites violence and loudly proclaims \"Crucify him!\" their voices rising to a deafening roar. *Conflict:* Pilate is overwhelmed by the sheer power of the mob and fears for his own safety if he resists their demand; the crowd's fervor is a palpable force, threatening to engulf him. *Turn:* He realizes that maintaining order might require sacrificing his own sense of justice, a realization that chills him to the bone.\n*   **Beat 7 – The Internal Struggle:**  Pilate wrestles with his conscience, acknowledging Jesus's innocence but fearing the political fallout of refusing the crowd’s will. *Action:* Pilate contemplates the implications of condemning an innocent man and the potential consequences for himself and Rome, haunted by visions of future unrest and accusations of cowardice. *Conflict:* He battles between his personal sense of responsibility and a pragmatic fear of losing his position, his reputation, and potentially his life.\n\n---\n\n## SCENE START ##\n\n**INT. PILATE’S CHAMBERS - DAY**\n\nSunlight streams through high windows, illuminating dust motes dancing in the air. The room is sparsely furnished: a heavy oak desk cluttered with scrolls, a low stool, and a bronze statue of Caesar overlooking the city. PONTIUS PILATE (50s, weary, dressed in a simple toga) paces"
+}

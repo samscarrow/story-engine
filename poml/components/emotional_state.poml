@@ -1,0 +1,241 @@
+<component name="emotional-state">
+  <metadata>
+    <title>Emotional State Component</title>
+    <description>Reusable component for visualizing and describing character emotional states</description>
+    <version>1.0.0</version>
+    <parameters>
+      <param name="state" type="object" required="true">Character's emotional state object</param>
+      <param name="show_indicators" type="boolean" default="true">Show visual indicators</param>
+      <param name="show_description" type="boolean" default="true">Show text descriptions</param>
+      <param name="format" type="string" default="detailed">Output format (detailed, compact, numeric)</param>
+    </parameters>
+  </metadata>
+
+  <style>
+    .emotion-grid { display: grid; grid-template-columns: 150px 100px auto; gap: 0.5em; }
+    .emotion-name { font-weight: bold; }
+    .emotion-value { text-align: center; }
+    .emotion-bar { display: inline-block; }
+    .high-emotion { color: red; }
+    .medium-emotion { color: orange; }
+    .low-emotion { color: blue; }
+  </style>
+
+  <!-- Detailed Format -->
+  <if test="{{format == 'detailed'}}">
+    <section class="emotional-state-detailed">
+      <h3>Emotional State Analysis</h3>
+      
+      <div class="emotion-grid">
+        <!-- Anger -->
+        <emotion-item>
+          <span class="emotion-name">Anger</span>
+          <span class="emotion-value">{{state.anger | multiply: 10 | round: 1}}/10</span>
+          <if test="{{show_indicators}}">
+            <span class="emotion-indicator">
+              <if test="{{state.anger < 0.2}}">🧊 Calm</if>
+              <elif test="{{state.anger < 0.4}}">❄️ Irritated</elif>
+              <elif test="{{state.anger < 0.6}}">💧 Frustrated</elif>
+              <elif test="{{state.anger < 0.8}}">🌡️ Angry</elif>
+              <else>🔥 Furious</else>
+            </span>
+          </if>
+          <if test="{{show_description}}">
+            <emotion-bar class="emotion-bar">
+              <for count="{{state.anger | multiply: 10 | round}}" as="i">▓</for>
+              <for count="{{10 - (state.anger | multiply: 10 | round)}}" as="i">░</for>
+            </emotion-bar>
+          </if>
+        </emotion-item>
+
+        <!-- Doubt -->
+        <emotion-item>
+          <span class="emotion-name">Doubt</span>
+          <span class="emotion-value">{{state.doubt | multiply: 10 | round: 1}}/10</span>
+          <if test="{{show_indicators}}">
+            <span class="emotion-indicator">
+              <if test="{{state.doubt < 0.2}}">🧊 Certain</if>
+              <elif test="{{state.doubt < 0.4}}">❄️ Questioning</elif>
+              <elif test="{{state.doubt < 0.6}}">💧 Uncertain</elif>
+              <elif test="{{state.doubt < 0.8}}">🌡️ Doubtful</elif>
+              <else>🔥 Lost</else>
+            </span>
+          </if>
+          <if test="{{show_description}}">
+            <emotion-bar class="emotion-bar">
+              <for count="{{state.doubt | multiply: 10 | round}}" as="i">▓</for>
+              <for count="{{10 - (state.doubt | multiply: 10 | round)}}" as="i">░</for>
+            </emotion-bar>
+          </if>
+        </emotion-item>
+
+        <!-- Fear -->
+        <emotion-item>
+          <span class="emotion-name">Fear</span>
+          <span class="emotion-value">{{state.fear | multiply: 10 | round: 1}}/10</span>
+          <if test="{{show_indicators}}">
+            <span class="emotion-indicator">
+              <if test="{{state.fear < 0.2}}">🧊 Brave</if>
+              <elif test="{{state.fear < 0.4}}">❄️ Uneasy</elif>
+              <elif test="{{state.fear < 0.6}}">💧 Anxious</elif>
+              <elif test="{{state.fear < 0.8}}">🌡️ Afraid</elif>
+              <else>🔥 Terrified</else>
+            </span>
+          </if>
+          <if test="{{show_description}}">
+            <emotion-bar class="emotion-bar">
+              <for count="{{state.fear | multiply: 10 | round}}" as="i">▓</for>
+              <for count="{{10 - (state.fear | multiply: 10 | round)}}" as="i">░</for>
+            </emotion-bar>
+          </if>
+        </emotion-item>
+
+        <!-- Compassion -->
+        <emotion-item>
+          <span class="emotion-name">Compassion</span>
+          <span class="emotion-value">{{state.compassion | multiply: 10 | round: 1}}/10</span>
+          <if test="{{show_indicators}}">
+            <span class="emotion-indicator">
+              <if test="{{state.compassion < 0.2}}">🧊 Cold</if>
+              <elif test="{{state.compassion < 0.4}}">❄️ Detached</elif>
+              <elif test="{{state.compassion < 0.6}}">💧 Sympathetic</elif>
+              <elif test="{{state.compassion < 0.8}}">🌡️ Caring</elif>
+              <else>🔥 Deeply Moved</else>
+            </span>
+          </if>
+          <if test="{{show_description}}">
+            <emotion-bar class="emotion-bar">
+              <for count="{{state.compassion | multiply: 10 | round}}" as="i">▓</for>
+              <for count="{{10 - (state.compassion | multiply: 10 | round)}}" as="i">░</for>
+            </emotion-bar>
+          </if>
+        </emotion-item>
+
+        <!-- Confidence -->
+        <emotion-item>
+          <span class="emotion-name">Confidence</span>
+          <span class="emotion-value">{{state.confidence | multiply: 10 | round: 1}}/10</span>
+          <if test="{{show_indicators}}">
+            <span class="emotion-indicator">
+              <if test="{{state.confidence < 0.2}}">🧊 Broken</if>
+              <elif test="{{state.confidence < 0.4}}">❄️ Shaken</elif>
+              <elif test="{{state.confidence < 0.6}}">💧 Uncertain</elif>
+              <elif test="{{state.confidence < 0.8}}">🌡️ Assured</elif>
+              <else>🔥 Commanding</else>
+            </span>
+          </if>
+          <if test="{{show_description}}">
+            <emotion-bar class="emotion-bar">
+              <for count="{{state.confidence | multiply: 10 | round}}" as="i">▓</for>
+              <for count="{{10 - (state.confidence | multiply: 10 | round)}}" as="i">░</for>
+            </emotion-bar>
+          </if>
+        </emotion-item>
+      </div>
+
+      <!-- Emotional Summary -->
+      <emotional-summary>
+        <let name="total_intensity" value="{{(state.anger + state.doubt + state.fear) / 3}}" />
+        <let name="dominant_emotion" value="{{state | max_by_value}}" />
+        
+        <p class="summary">
+          <strong>Overall Intensity:</strong> 
+          <if test="{{total_intensity > 0.7}}">
+            <span class="high-emotion">HIGH - Character is in extreme emotional state</span>
+          <elif test="{{total_intensity > 0.4}}">
+            <span class="medium-emotion">MODERATE - Character is emotionally engaged</span>
+          <else>
+            <span class="low-emotion">LOW - Character is relatively composed</span>
+          </if>
+        </p>
+        
+        <if test="{{dominant_emotion}}">
+          <p><strong>Dominant Emotion:</strong> {{dominant_emotion.name | capitalize}} ({{dominant_emotion.value | multiply: 10 | round: 1}}/10)</p>
+        </if>
+      </emotional-summary>
+    </section>
+  </if>
+
+  <!-- Compact Format -->
+  <if test="{{format == 'compact'}}">
+    <section class="emotional-state-compact">
+      <emotions-inline>
+        Anger: {{state.anger | multiply: 10 | round}}/10 
+        <if test="{{show_indicators}}">
+          <if test="{{state.anger >= 0.8}}">🔥</if>
+          <elif test="{{state.anger >= 0.5}}">🌡️</elif>
+          <else>❄️</else>
+        </if>
+        | Doubt: {{state.doubt | multiply: 10 | round}}/10
+        <if test="{{show_indicators}}">
+          <if test="{{state.doubt >= 0.8}}">🔥</if>
+          <elif test="{{state.doubt >= 0.5}}">🌡️</elif>
+          <else>❄️</else>
+        </if>
+        | Fear: {{state.fear | multiply: 10 | round}}/10
+        <if test="{{show_indicators}}">
+          <if test="{{state.fear >= 0.8}}">🔥</if>
+          <elif test="{{state.fear >= 0.5}}">🌡️</elif>
+          <else>❄️</else>
+        </if>
+        | Compassion: {{state.compassion | multiply: 10 | round}}/10
+        <if test="{{show_indicators}}">
+          <if test="{{state.compassion >= 0.8}}">🔥</if>
+          <elif test="{{state.compassion >= 0.5}}">🌡️</elif>
+          <else>❄️</else>
+        </if>
+        | Confidence: {{state.confidence | multiply: 10 | round}}/10
+        <if test="{{show_indicators}}">
+          <if test="{{state.confidence >= 0.8}}">🔥</if>
+          <elif test="{{state.confidence >= 0.5}}">🌡️</elif>
+          <else>❄️</else>
+        </if>
+      </emotions-inline>
+    </section>
+  </if>
+
+  <!-- Numeric Format -->
+  <if test="{{format == 'numeric'}}">
+    <section class="emotional-state-numeric">
+      <emotion-values>
+        - Anger: {{state.anger | round: 2}}
+        - Doubt: {{state.doubt | round: 2}}
+        - Fear: {{state.fear | round: 2}}
+        - Compassion: {{state.compassion | round: 2}}
+        - Confidence: {{state.confidence | round: 2}}
+      </emotion-values>
+    </section>
+  </if>
+
+  <!-- Temperature Calculation -->
+  <temperature-modulation>
+    <let name="anger_weight" value="1.2" />
+    <let name="fear_weight" value="1.0" />
+    <let name="doubt_weight" value="0.8" />
+    <let name="compassion_weight" value="0.6" />
+    <let name="confidence_weight" value="0.7" />
+    
+    <let name="weighted_sum" value="{{
+      (state.anger * anger_weight) + 
+      (state.fear * fear_weight) + 
+      (state.doubt * doubt_weight) + 
+      ((1 - state.compassion) * compassion_weight) + 
+      ((1 - state.confidence) * confidence_weight)
+    }}" />
+    
+    <let name="temperature_modifier" value="{{weighted_sum / 5 * 0.4}}" />
+    
+    <if test="{{show_description}}">
+      <p class="temperature-note">
+        <strong>Suggested Temperature Modifier:</strong> +{{temperature_modifier | round: 2}}
+        <if test="{{temperature_modifier > 0.2}}">
+          (High emotional volatility - increase randomness)
+        <elif test="{{temperature_modifier < -0.1}}">
+          (Low emotional intensity - decrease randomness)
+        <else>
+          (Moderate emotional state - standard randomness)
+        </if>
+      </p>
+    </if>
+  </temperature-modulation>
+</component>

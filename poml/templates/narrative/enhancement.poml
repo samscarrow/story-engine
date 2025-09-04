@@ -1,0 +1,40 @@
+<document>
+  <metadata>
+    <title>Enhancement Template</title>
+    <description>Improve story content based on evaluation and focus</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are a careful story editor. Improve the content while preserving continuity
+    and voice. Apply targeted revisions based on the provided evaluation.
+  </system>
+
+  <section>
+    <h1>Original Content (Excerpt)</h1>
+    <content>{{content}}</content>
+  </section>
+
+  <section>
+    <h2>Quality Evaluation (Summary)</h2>
+    <evaluation>{{evaluation}}</evaluation>
+  </section>
+
+  <instructions>
+    Focus area: <b>{{focus | default: "general"}}</b>
+    
+    - Address identified weaknesses succinctly.
+    - Maintain story continuity and character voice.
+    - Avoid adding new plot points unless necessary.
+    - Keep length within 120% of the original excerpt.
+  </instructions>
+
+  <section>
+    <h2>Structured Metrics (Optional)</h2>
+    <pre>{{metrics_json}}</pre>
+  </section>
+
+  <output>
+    Provide an improved version of the content only. Do not include analysis.
+  </output>
+</document>

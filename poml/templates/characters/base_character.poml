@@ -1,0 +1,223 @@
+<document>
+  <metadata>
+    <title>Base Character Template</title>
+    <description>Foundation template for character definition in story simulations</description>
+    <version>1.0.0</version>
+    <tags>character, psychology, simulation</tags>
+  </metadata>
+
+  <style>
+    identity { font-weight: bold; margin-bottom: 1em; }
+    trait { display: inline; padding: 0.2em; }
+    value { color: blue; }
+    fear { color: red; font-style: italic; }
+    desire { color: green; }
+    emotion { display: inline-block; width: 150px; }
+  </style>
+
+  <character id="{{character.id}}" class="character-profile">
+    <!-- Core Identity -->
+    <identity>
+      <name>{{character.name}}</name>
+      <role>{{character.role | default: "Undefined Role"}}</role>
+    </identity>
+
+    <!-- Backstory Section -->
+    <backstory>
+      <origin>
+        {{character.backstory.origin | default: "Origins unknown"}}
+      </origin>
+      <career>
+        {{character.backstory.career | default: "Career path undefined"}}
+      </career>
+      <if test="{{character.backstory.defining_moment}}">
+        <defining-moment>
+          {{character.backstory.defining_moment}}
+        </defining-moment>
+      </if>
+      <if test="{{character.backstory.relationships}}">
+        <relationships>
+          <for each="relationship" in="{{character.backstory.relationships}}">
+            <relationship type="{{relationship.type}}">
+              {{relationship.person}}: {{relationship.nature}}
+            </relationship>
+          </for>
+        </relationships>
+      </if>
+    </backstory>
+
+    <!-- Psychological Profile -->
+    <psychology>
+      <!-- Core Traits -->
+      <traits>
+        <for each="trait" in="{{character.traits}}">
+          <trait>{{trait}}</trait>
+        </for>
+      </traits>
+
+      <!-- Values System -->
+      <values>
+        <for each="value" in="{{character.values}}">
+          <value priority="{{value.priority | default: 'medium'}}">
+            {{value.name | default: value}}
+          </value>
+        </for>
+      </values>
+
+      <!-- Fears and Anxieties -->
+      <fears>
+        <for each="fear" in="{{character.fears}}">
+          <fear intensity="{{fear.intensity | default: 'moderate'}}">
+            {{fear.description | default: fear}}
+          </fear>
+        </for>
+      </fears>
+
+      <!-- Desires and Motivations -->
+      <desires>
+        <for each="desire" in="{{character.desires}}">
+          <desire strength="{{desire.strength | default: 'strong'}}">
+            {{desire.description | default: desire}}
+          </desire>
+        </for>
+      </desires>
+
+      <!-- Internal Conflicts -->
+      <if test="{{character.internal_conflict}}">
+        <internal-conflict>
+          <nature>{{character.internal_conflict}}</nature>
+          <if test="{{character.conflict_resolution_style}}">
+            <resolution-tendency>{{character.conflict_resolution_style}}</resolution-tendency>
+          </if>
+        </internal-conflict>
+      </if>
+    </psychology>
+
+    <!-- Current Emotional State -->
+    <emotional-state>
+      <emotion name="anger">
+        <value>{{character.emotional_state.anger | multiply: 10 | round: 1}}/10</value>
+        <indicator>
+          <if test="{{character.emotional_state.anger < 0.2}}">🧊 Calm</if>
+          <if test="{{character.emotional_state.anger >= 0.2 and character.emotional_state.anger < 0.4}}">❄️ Irritated</if>
+          <if test="{{character.emotional_state.anger >= 0.4 and character.emotional_state.anger < 0.6}}">💧 Frustrated</if>
+          <if test="{{character.emotional_state.anger >= 0.6 and character.emotional_state.anger < 0.8}}">🌡️ Angry</if>
+          <if test="{{character.emotional_state.anger >= 0.8}}">🔥 Furious</if>
+        </indicator>
+      </emotion>
+
+      <emotion name="doubt">
+        <value>{{character.emotional_state.doubt | multiply: 10 | round: 1}}/10</value>
+        <indicator>
+          <if test="{{character.emotional_state.doubt < 0.2}}">🧊 Certain</if>
+          <if test="{{character.emotional_state.doubt >= 0.2 and character.emotional_state.doubt < 0.4}}">❄️ Questioning</if>
+          <if test="{{character.emotional_state.doubt >= 0.4 and character.emotional_state.doubt < 0.6}}">💧 Uncertain</if>
+          <if test="{{character.emotional_state.doubt >= 0.6 and character.emotional_state.doubt < 0.8}}">🌡️ Doubtful</if>
+          <if test="{{character.emotional_state.doubt >= 0.8}}">🔥 Lost</if>
+        </indicator>
+      </emotion>
+
+      <emotion name="fear">
+        <value>{{character.emotional_state.fear | multiply: 10 | round: 1}}/10</value>
+        <indicator>
+          <if test="{{character.emotional_state.fear < 0.2}}">🧊 Brave</if>
+          <if test="{{character.emotional_state.fear >= 0.2 and character.emotional_state.fear < 0.4}}">❄️ Uneasy</if>
+          <if test="{{character.emotional_state.fear >= 0.4 and character.emotional_state.fear < 0.6}}">💧 Anxious</if>
+          <if test="{{character.emotional_state.fear >= 0.6 and character.emotional_state.fear < 0.8}}">🌡️ Afraid</if>
+          <if test="{{character.emotional_state.fear >= 0.8}}">🔥 Terrified</if>
+        </indicator>
+      </emotion>
+
+      <emotion name="compassion">
+        <value>{{character.emotional_state.compassion | multiply: 10 | round: 1}}/10</value>
+        <indicator>
+          <if test="{{character.emotional_state.compassion < 0.2}}">🧊 Cold</if>
+          <if test="{{character.emotional_state.compassion >= 0.2 and character.emotional_state.compassion < 0.4}}">❄️ Detached</if>
+          <if test="{{character.emotional_state.compassion >= 0.4 and character.emotional_state.compassion < 0.6}}">💧 Sympathetic</if>
+          <if test="{{character.emotional_state.compassion >= 0.6 and character.emotional_state.compassion < 0.8}}">🌡️ Caring</if>
+          <if test="{{character.emotional_state.compassion >= 0.8}}">🔥 Deeply Moved</if>
+        </indicator>
+      </emotion>
+
+      <emotion name="confidence">
+        <value>{{character.emotional_state.confidence | multiply: 10 | round: 1}}/10</value>
+        <indicator>
+          <if test="{{character.emotional_state.confidence < 0.2}}">🧊 Broken</if>
+          <if test="{{character.emotional_state.confidence >= 0.2 and character.emotional_state.confidence < 0.4}}">❄️ Shaken</if>
+          <if test="{{character.emotional_state.confidence >= 0.4 and character.emotional_state.confidence < 0.6}}">💧 Uncertain</if>
+          <if test="{{character.emotional_state.confidence >= 0.6 and character.emotional_state.confidence < 0.8}}">🌡️ Assured</if>
+          <if test="{{character.emotional_state.confidence >= 0.8}}">🔥 Commanding</if>
+        </indicator>
+      </emotion>
+    </emotional-state>
+
+    <!-- Memory System -->
+    <memory>
+      <if test="{{character.memory.recent_events.length > 0}}">
+        <recent-events limit="{{config.max_memory_events | default: 5}}">
+          <for each="event" in="{{character.memory.recent_events | slice: -5}}">
+            <event timestamp="{{event.timestamp | default: 'recent'}}">
+              {{event.description | default: event}}
+            </event>
+          </for>
+        </recent-events>
+      <else />
+        <recent-events>No significant recent events</recent-events>
+      </if>
+
+      <if test="{{character.memory.key_relationships}}">
+        <key-relationships>
+          <for each="rel" in="{{character.memory.key_relationships}}">
+            <relationship with="{{rel.person}}">
+              <status>{{rel.status}}</status>
+              <trust>{{rel.trust_level | default: 'neutral'}}</trust>
+            </relationship>
+          </for>
+        </key-relationships>
+      </if>
+    </memory>
+
+    <!-- Current Context -->
+    <current-context>
+      <goal>{{character.current_goal | default: "No specific goal"}}</goal>
+      
+      <if test="{{character.immediate_concern}}">
+        <immediate-concern priority="high">
+          {{character.immediate_concern}}
+        </immediate-concern>
+      </if>
+
+      <if test="{{character.location}}">
+        <location>{{character.location}}</location>
+      </if>
+
+      <if test="{{character.time_pressure}}">
+        <time-pressure level="{{character.time_pressure}}">
+          Time is a critical factor in current decisions
+        </time-pressure>
+      </if>
+    </current-context>
+
+    <!-- Relationship Dynamics -->
+    <if test="{{character.relationship_map}}">
+      <relationships>
+        <for each="rel_entry" in="{{character.relationship_map | entries}}">
+          <relationship-to person="{{rel_entry.key}}">
+            <if test="{{rel_entry.value.trust}}">
+              <trust>{{rel_entry.value.trust}}</trust>
+            </if>
+            <if test="{{rel_entry.value.affection}}">
+              <affection>{{rel_entry.value.affection}}</affection>
+            </if>
+            <if test="{{rel_entry.value.respect}}">
+              <respect>{{rel_entry.value.respect}}</respect>
+            </if>
+            <if test="{{rel_entry.value.history}}">
+              <shared-history>{{rel_entry.value.history}}</shared-history>
+            </if>
+          </relationship-to>
+        </for>
+      </relationships>
+    </if>
+  </character>
+</document>

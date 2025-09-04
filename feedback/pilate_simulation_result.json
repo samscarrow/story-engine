@@ -1,0 +1,111 @@
+{
+  "plot": {
+    "structure": "three_act",
+    "plot_points": "Establish the world, main character(s), and the current normal.\n\nGovernor Valerius, a pragmatic Roman administrator in Jerusalem, maintains a fragile peace through calculated concessions and suppression of dissent. The city is simmering with unrest fueled by religious fervor and resentment towards Roman rule; this is the established order he meticulously manages. A minor incident – a public disturbance sparked by a charismatic, unorthodox prophet named Elijah – serves as an early warning sign that the underlying tensions are escalating beyond his usual control.\n\n\n\nEscalate stakes through complications and reversals. Show meaningful choices.\n\nElijah's prophecies, openly challenging Roman authority and predicting impending doom, rapidly gain a large following, threatening to destabilize the region. Valerius is pressured by both the Roman Senate, demanding swift suppression of sedition, and the local Jewish leaders, who see Elijah as a potential catalyst for rebellion.  Valerius must decide whether to arrest Elijah and risk sparking a full-scale uprising or allow him to continue preaching, potentially jeopardizing his own position and the stability he has worked so hard to achieve. He chooses to bring Elijah to trial, hoping to find a legal solution that appeases both sides.\n\n\n\nPresent the decisive confrontation where core values and goals collide.\n\nThe trial becomes a battle of ideologies: Valerius seeks to maintain order through Roman law, while Elijah argues for divine justice and the inherent rights of his people. During the trial, Elijah’s prophetic pronouncements intensify, predicting Valerius's downfall if he condemns him.  Valerius is forced to confront his own moral compass – does his duty lie with Rome’s political interests or with a deeper sense of fairness and truth? He witnesses firsthand the power of faith and the desperation of a people yearning for liberation.\n\n\n\nShow consequences, fallout, and transformations. Tie threads, keep momentum.\n\nValerius ultimately acquits Elijah, defying the Senate's orders and risking his career.  This decision ignites widespread celebration among",
+    "raw_text": "Establish the world, main character(s), and the current normal.\n\nGovernor Valerius, a pragmatic Roman administrator in Jerusalem, maintains a fragile peace through calculated concessions and suppression of dissent. The city is simmering with unrest fueled by religious fervor and resentment towards Roman rule; this is the established order he meticulously manages. A minor incident – a public disturbance sparked by a charismatic, unorthodox prophet named Elijah – serves as an early warning sign that the underlying tensions are escalating beyond his usual control.\n\n\n\nEscalate stakes through complications and reversals. Show meaningful choices.\n\nElijah's prophecies, openly challenging Roman authority and predicting impending doom, rapidly gain a large following, threatening to destabilize the region. Valerius is pressured by both the Roman Senate, demanding swift suppression of sedition, and the local Jewish leaders, who see Elijah as a potential catalyst for rebellion.  Valerius must decide whether to arrest Elijah and risk sparking a full-scale uprising or allow him to continue preaching, potentially jeopardizing his own position and the stability he has worked so hard to achieve. He chooses to bring Elijah to trial, hoping to find a legal solution that appeases both sides.\n\n\n\nPresent the decisive confrontation where core values and goals collide.\n\nThe trial becomes a battle of ideologies: Valerius seeks to maintain order through Roman law, while Elijah argues for divine justice and the inherent rights of his people. During the trial, Elijah’s prophetic pronouncements intensify, predicting Valerius's downfall if he condemns him.  Valerius is forced to confront his own moral compass – does his duty lie with Rome’s political interests or with a deeper sense of fairness and truth? He witnesses firsthand the power of faith and the desperation of a people yearning for liberation.\n\n\n\nShow consequences, fallout, and transformations. Tie threads, keep momentum.\n\nValerius ultimately acquits Elijah, defying the Senate's orders and risking his career.  This decision ignites widespread celebration among",
+    "beats": [
+      {
+        "index": 0,
+        "name": "Setup",
+        "description": "Establish the world, main character(s), and the current normal.",
+        "tension": 2,
+        "purpose": "Establish normal"
+      },
+      {
+        "index": 1,
+        "name": "Rising Action",
+        "description": "Governor Valerius, a pragmatic Roman administrator in Jerusalem, maintains a fragile peace through calculated concessions and suppression of dissent. The city is simmering with unrest fueled by religious fervor and resentment towards Roman rule; this is the established order he meticulously manages. A minor incident – a public disturbance sparked by a charismatic, unorthodox prophet named Elijah – serves as an early warning sign that the underlying tensions are escalating beyond his usual control.",
+        "tension": 5,
+        "purpose": "Escalate stakes"
+      },
+      {
+        "index": 2,
+        "name": "Climax",
+        "description": "Escalate stakes through complications and reversals. Show meaningful choices.",
+        "tension": 9,
+        "purpose": "Decisive confrontation"
+      },
+      {
+        "index": 3,
+        "name": "Falling Action",
+        "description": "Elijah's prophecies, openly challenging Roman authority and predicting impending doom, rapidly gain a large following, threatening to destabilize the region. Valerius is pressured by both the Roman Senate, demanding swift suppression of sedition, and the local Jewish leaders, who see Elijah as a potential catalyst for rebellion.  Valerius must decide whether to arrest Elijah and risk sparking a full-scale uprising or allow him to continue preaching, potentially jeopardizing his own position and the stability he has worked so hard to achieve. He chooses to bring Elijah to trial, hoping to find a legal solution that appeases both sides.",
+        "tension": 4,
+        "purpose": "Process consequences"
+      },
+      {
+        "index": 4,
+        "name": "Resolution",
+        "description": "Present the decisive confrontation where core values and goals collide.",
+        "tension": 3,
+        "purpose": "New equilibrium"
+      }
+    ],
+    "meta": {
+      "provider": "lmstudio",
+      "model": "google/gemma-3n-e4b",
+      "usage": {
+        "prompt_tokens": 245,
+        "completion_tokens": 400,
+        "total_tokens": 645
+      },
+      "timestamp": "2025-09-04T11:50:18.373136",
+      "generation_time_ms": 5122.784300001513,
+      "failures_before_success": []
+    }
+  },
+  "scene": {
+    "plot_point": {
+      "index": 0,
+      "name": "Setup",
+      "description": "Establish the world, main character(s), and the current normal.",
+      "tension": 2,
+      "purpose": "Establish normal"
+    },
+    "scene_description": "Okay, here's a scene designed to fulfill your requirements. It sets the stage for a tense confrontation between Pontius Pilate and Caiaphas, escalating the stakes subtly while maintaining an initial tension level of 2/10 – poised for a critical moment.\n\n**SCENE SITUATION (2-3 sentences):**\nThe late afternoon sun casts long shadows across Pontius Pilate's private chamber in the Praetorium. Caiaphas, the High Priest, stands before Pilate, his face etched with barely concealed fury as he demands answers regarding the Galilean preacher, Jesus. Pilate, weary and attempting to maintain a semblance of calm authority, attempts to deflect Caiaphas’ accusations while privately wrestling with the political ramifications of escalating religious unrest.\n\n**SENSORY DETAILS:**\n\n*   **Sight:** The flickering oil lamps on Pilate's desk cast dancing shadows that writhe across the ornate mosaic floor, making the room feel smaller and more claustrophobic.\n*   **Sound:**  The rhythmic dripping of water from a leaky pipe in the corner echoes unnervingly in the otherwise silent chamber, each drop seeming to amplify Caiaphas’ words.\n*   **Atmosphere:** A heavy scent of incense clings to the air, thick and cloying, attempting to mask something else – perhaps the underlying tension and impending conflict.\n\n\n\n",
+    "characters_present": [
+      "Pontius Pilate",
+      "Caiaphas"
+    ],
+    "name": "Setup",
+    "meta": {
+      "provider": "lmstudio",
+      "model": "google/gemma-3n-e4b",
+      "usage": {
+        "prompt_tokens": 734,
+        "completion_tokens": 280,
+        "total_tokens": 1014
+      },
+      "timestamp": "2025-09-04T11:50:22.127237",
+      "generation_time_ms": 3751.776400000381,
+      "failures_before_success": []
+    }
+  },
+  "dialogue": "```json\n{\n  \"dialogue\": {\n    \"text\": \"So, the crowd desires a spectacle. A release. And you believe… *he* offers that?\",\n    \"interrupted\": false,\n    \"trails_off\": false,\n    \"emphasis\": [\"spectacle\", \"he\"]\n  },\n  \"delivery\": {\n    \"tone\": \"cold\",\n    \"volume\": \"normal\",\n    \"pace\": \"slow\",\n    \"action\": \"Pilate slowly circles the group, his gaze lingering on various faces before settling back on the speaker.\",\n    \"focus\": \"The speaker, but with a detached, assessing look.\",\n    \"emotion\": \"Weariness masking a deep unease.\"\n  },\n  \"subtext\": {\n    \"real_meaning\": \"I am reluctant to condemn him, but I understand their need for distraction. And I doubt he truly *provides* that release.\",\n    \"hidden_message\": \"A veiled criticism of the mob's bloodlust and a subtle warning about the true cost of their entertainment.\",\n    \"avoiding\": \"Acknowledging his own moral responsibility in the matter.\",\n    \"revealing\": \"His cynicism and growing dread of the situation.\"\n  },\n  \"alternatives\": [\n    {\n      \"text\": \"They want blood. They always do. Is that what you offer them?\",",
+  "evaluation": {
+    "evaluation_text": "Narrative Coherence: 8/10 - The scene establishes a clear conflict and sets up future tension effectively.\nPacing: 5/10 - The pacing is slow, prioritizing atmosphere over immediate action.\nCharacter Development: 6/10 - Pilate and Caiaphas are presented with basic traits, but depth is limited in this excerpt.\nSetting/Atmosphere: 9/10 - Sensory details effectively create a claustrophobic and tense environment.\nDialogue: 4/10 - The dialogue is functional but lacks distinct voice or subtext.\nConflict: 7/10 - A clear conflict exists between Pilate and Caiaphas, driven by religious and political tensions.\nShow, Don't Tell: 7/10 - The scene relies more on showing through sensory details than explicitly stating emotions.\nOriginality: 6/10 - The setup is familiar within the biblical narrative but executed with competent detail.\n\n\n\n",
+    "scores": {
+      "Narrative Coherence": 8.0,
+      "Pacing": 5.0,
+      "Character Development": 6.0,
+      "Setting/Atmosphere": 9.0,
+      "Dialogue": 4.0,
+      "Conflict": 7.0,
+      "Show, Don't Tell": 7.0,
+      "Originality": 6.0
+    },
+    "timestamp": 41635.5334557,
+    "meta": {
+      "provider": "lmstudio",
+      "model": "google/gemma-3n-e4b",
+      "usage": {
+        "prompt_tokens": 468,
+        "completion_tokens": 202,
+        "total_tokens": 670
+      },
+      "timestamp": "2025-09-04T11:50:28.789900",
+      "generation_time_ms": 2657.5388999990537,
+      "failures_before_success": []
+    }
+  },
+  "enhanced": "**SCENE SITUATION (2-3 sentences):**\nThe late afternoon sun bleeds across Pontius Pilate's private chamber in the Praetorium, lengthening shadows that seem to press in on Caiaphas. The High Priest stands before Pilate, his face a carefully constructed mask of controlled fury as he presses for answers regarding the Galilean preacher, Jesus. Pilate, weary from the day’s demands and acutely aware of the simmering religious unrest, attempts to deflect Caiaphas’ accusations with practiced patience.\n\n**SENSORY DETAILS:**\n\n*   **Sight:** Flickering oil lamps on Pilate's desk cast dancing shadows that writhe across the ornate mosaic floor, making the room feel smaller, more confining. Dust motes swim in the lamplight, a silent, unsettling ballet.\n*   **Sound:** The rhythmic *drip… drip… drip…* of water from a leaky pipe in the corner echoes unnervingly, each drop a tiny hammer blow against the strained silence, amplifying Caiaphas’ pronouncements. \n*   **Atmosphere:** A heavy scent of incense – myrrh and something sharper, almost metallic – clings to the air, thick and cloying, attempting to mask the underlying tension, the palpable weight of unspoken threats.\n\nPilate steepled his fingers, his gaze fixed on a point just over Caiaphas' shoulder. \"High Priest,\" he began, his voice carefully measured, \""
+}

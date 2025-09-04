@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-09-04T10:28:54.911936",
+  "prompt_preview": "You are an expert narrative architect. Create a concise, clear plot structure\n    that can be used to craft scenes. Prefer specificity over vagueness.\n\n    Story Overview\n    Title: The Trial Before D",
+  "providers_tried": [
+    "lmstudio"
+  ],
+  "all_failures": [
+    {
+      "provider": "lmstudio",
+      "error_type": "ValueError",
+      "error": "Generation failed on lmstudio: Empty response text",
+      "timestamp": "2025-09-04T10:28:54.911223",
+      "prompt_preview": "You are an expert narrative architect. Create a concise, clear plot structure\n    that can be used to craft scenes. Prefer specificity over vagueness.\n\n    Story Overview\n    Title: The Trial Before D...",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\orchestration\\llm_orchestrator.py\", line 210, in generate\n    return LLMResponse(\n        text=text,\n    ...<5 lines>...\n        generation_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000\n    )\n  File \"<string>\", line 12, in __init__\n  File \"C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\orchestration\\llm_orchestrator.py\", line 111, in __post_init__\n    raise ValueError(\"Empty response text\")\nValueError: Empty response text\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\orchestration\\llm_orchestrator.py\", line 456, in generate\n    response = await provider.generate(prompt, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\orchestration\\llm_orchestrator.py\", line 225, in generate\n    raise GenerationError(\"lmstudio\", e, {\"failure\": failure.to_dict()})\ncore.orchestration.llm_orchestrator.GenerationError: Generation failed on lmstudio: Empty response text\n"
+    }
+  ]
+}

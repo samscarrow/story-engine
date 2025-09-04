@@ -1,0 +1,238 @@
+<document>
+  <metadata>
+    <title>Character Response Simulation</title>
+    <description>Template for generating character responses with emotional depth and emphasis modes</description>
+    <version>1.0.0</version>
+    <schema>templates/schemas/simulation_response.poml</schema>
+  </metadata>
+
+  <system>
+    You are simulating {{character.name}}, a complex character responding to a situation.
+    Generate authentic responses that reflect the character's personality, current emotional state, and the specified emphasis.
+    Your response must be in valid JSON format matching the provided schema.
+  </system>
+
+  <!-- Import character base definition -->
+  <import src="../characters/base_character.poml" data="{{character}}" />
+
+  <!-- Situation Context -->
+  <section class="situation-context">
+    <h2>Current Situation</h2>
+    <situation>{{situation}}</situation>
+    
+    <if test="{{context}}">
+      <additional-context>
+        {{context}}
+      </additional-context>
+    </if>
+  </section>
+
+  <!-- Emphasis Mode Configuration -->
+  <section class="emphasis-mode">
+    <h2>Response Emphasis: {{emphasis | uppercase}}</h2>
+    
+    <if test="{{emphasis == 'power'}}">
+      <guidance>
+        Focus on authority, control, and dominance. The character asserts their position and demands respect.
+        Show how they wield influence and make decisive judgments.
+      </guidance>
+      <tone>Commanding, decisive, authoritative</tone>
+      <priority>Maintaining control and asserting dominance</priority>
+    </if>
+    
+    <if test="{{emphasis == 'doubt'}}">
+      <guidance>
+        Express uncertainty, questioning, and philosophical introspection. The character grapples with truth and meaning.
+        Show internal struggle between different interpretations and possibilities.
+      </guidance>
+      <tone>Questioning, philosophical, uncertain</tone>
+      <priority>Seeking understanding and grappling with ambiguity</priority>
+    </if>
+    
+    <if test="{{emphasis == 'fear'}}">
+      <guidance>
+        Emphasize anxiety, worry about consequences, and self-preservation. The character feels threatened.
+        Show how fear influences decisions and creates urgency.
+      </guidance>
+      <tone>Anxious, defensive, urgent</tone>
+      <priority>Self-preservation and avoiding danger</priority>
+    </if>
+    
+    <if test="{{emphasis == 'compassion'}}">
+      <guidance>
+        Highlight empathy, understanding, and concern for others. The character seeks mercy and connection.
+        Show how compassion conflicts with duty or necessity.
+      </guidance>
+      <tone>Empathetic, gentle, understanding</tone>
+      <priority>Minimizing harm and showing mercy</priority>
+    </if>
+    
+    <if test="{{emphasis == 'duty'}}">
+      <guidance>
+        Focus on responsibility, obligation, and adherence to law or tradition. The character prioritizes their role.
+        Show the weight of responsibility and the cost of duty.
+      </guidance>
+      <tone>Formal, resolute, disciplined</tone>
+      <priority>Fulfilling obligations regardless of personal cost</priority>
+    </if>
+    
+    <if test="{{emphasis == 'pragmatic'}}">
+      <guidance>
+        Emphasize practical solutions and political reality. The character seeks workable compromises.
+        Balance competing interests while maintaining stability.
+      </guidance>
+      <tone>Practical, calculating, diplomatic</tone>
+      <priority>Finding solutions that work in practice</priority>
+    </if>
+    
+    <if test="{{emphasis == 'survival'}}">
+      <guidance>
+        Focus on self-preservation at any cost. The character prioritizes their own safety above all.
+        Show desperation and willingness to sacrifice principles.
+      </guidance>
+      <tone>Desperate, calculating, self-focused</tone>
+      <priority>Personal survival regardless of consequences</priority>
+    </if>
+    
+    <if test="{{emphasis == 'justice'}}">
+      <guidance>
+        Emphasize fairness, truth, and moral rightness. The character seeks what is just.
+        Show conflict between different concepts of justice.
+      </guidance>
+      <tone>Principled, moral, righteous</tone>
+      <priority>Pursuing truth and fairness</priority>
+    </if>
+    
+    <if test="{{emphasis == 'neutral' or not emphasis}}">
+      <guidance>
+        Balance all aspects of the character's personality. No single drive dominates.
+        Natural response based on character traits and situation.
+      </guidance>
+      <tone>Balanced, natural, authentic</tone>
+      <priority>Responding authentically to the situation</priority>
+    </if>
+  </section>
+
+  <!-- Temperature Modulation -->
+  <section class="temperature-settings">
+    <h3>Response Temperature</h3>
+    <let name="emotional_intensity" value="{{(character.emotional_state.anger + character.emotional_state.fear + character.emotional_state.doubt) / 3}}" />
+    
+    <temperature-guide>
+      Base Temperature: {{temperature | default: 0.8}}
+      Emotional Modifier: {{emotional_intensity | multiply: 0.3 | round: 2}}
+      <if test="{{emotional_intensity > 0.7}}">
+        ⚠️ High emotional state - expect more volatile responses
+      </if>
+    </temperature-guide>
+  </section>
+
+  <!-- Response Generation Instructions -->
+  <section class="response-instructions">
+    <h2>Generate Response</h2>
+    
+    <p>Create a response that includes:</p>
+    
+    <response-components>
+      <component name="dialogue">
+        <description>What the character says aloud</description>
+        <requirements>
+          - Must reflect the emphasis mode
+          - Should be 1-3 sentences
+          - Natural speech patterns for the character
+          - Include verbal tics or speech patterns if established
+        </requirements>
+      </component>
+      
+      <component name="thought">
+        <description>Internal monologue revealing true feelings</description>
+        <requirements>
+          - Can contradict what is said aloud
+          - Reveals deeper motivations
+          - Shows internal conflict
+          - More honest than dialogue
+        </requirements>
+      </component>
+      
+      <component name="action">
+        <description>Physical actions and body language</description>
+        <requirements>
+          - Concrete, observable behaviors
+          - Reveals emotional state through physicality
+          - Can include gestures, movements, expressions
+          - Should complement or contrast with words
+        </requirements>
+      </component>
+      
+      <component name="emotional_shift">
+        <description>Changes to emotional state (-1 to +1 for each)</description>
+        <requirements>
+          - anger: Change in anger level
+          - doubt: Change in uncertainty
+          - fear: Change in fear level
+          - compassion: Change in empathy
+          - Each value between -1.0 and 1.0
+          - Positive means increase, negative means decrease
+        </requirements>
+      </component>
+    </response-components>
+  </section>
+
+  <!-- Character Constraints -->
+  <section class="character-constraints">
+    <h3>Character-Specific Constraints</h3>
+    
+    <if test="{{character.constraints}}">
+      <for each="constraint" in="{{character.constraints}}">
+        <constraint>{{constraint}}</constraint>
+      </for>
+    </if>
+    
+    <consistency-rules>
+      - Stay consistent with established traits: {{character.traits | join: ", "}}
+      - Honor the character's values: {{character.values | join: ", "}}
+      - Acknowledge their fears: {{character.fears | join: ", "}}
+      - Pursue their desires: {{character.desires | join: ", "}}
+    </consistency-rules>
+  </section>
+
+  <!-- Historical Context -->
+  <if test="{{character.memory.recent_events.length > 0}}">
+    <section class="historical-context">
+      <h3>Recent Events Influencing Response</h3>
+      <p>The character's response should acknowledge these recent experiences:</p>
+      <recent-events>
+        <for each="event" in="{{character.memory.recent_events | slice: -3}}">
+          <event>• {{event}}</event>
+        </for>
+      </recent-events>
+    </section>
+  </if>
+
+  <!-- Example Format -->
+  <section class="example-format">
+    <h3>Required JSON Response Format</h3>
+    <code format="json">
+{
+  "dialogue": "What the character says out loud",
+  "thought": "What the character thinks internally",
+  "action": "Physical actions or body language",
+  "emotional_shift": {
+    "anger": 0.0,
+    "doubt": 0.0,
+    "fear": 0.0,
+    "compassion": 0.0
+  }
+}
+    </code>
+  </section>
+
+  <!-- Final Instructions -->
+  <instructions>
+    <important>
+      Generate ONLY a valid JSON response matching the schema above.
+      Do not include any explanation or text outside the JSON structure.
+      The response must reflect the character's personality, current emotional state, and the {{emphasis}} emphasis.
+    </important>
+  </instructions>
+</document>

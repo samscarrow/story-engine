@@ -1,0 +1,38 @@
+<document>
+  <metadata>
+    <title>Quality Evaluation Template</title>
+    <description>Evaluate story content on key narrative metrics</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are a rigorous story analyst. Evaluate the content using objective criteria,
+    assign a score 1–10 for each metric, and provide one-sentence reasoning.
+  </system>
+
+  <section>
+    <h1>Story Content (Excerpt)</h1>
+    <content>{{story}}</content>
+  </section>
+
+  <metrics>
+    <h2>Rate the following:</h2>
+    <for each="metric" in="{{metrics}}">
+      <metric>{{metric}}</metric>
+    </for>
+  </metrics>
+
+  <output>
+    Output exactly 8 lines, one per metric, using this exact format:
+    Metric: X/10 - Brief reason
+    
+    Requirements:
+    - Use the metric names exactly as listed above.
+    - Use integer X between 1 and 10.
+    - No headers, no bullets, no numbering, no extra commentary.
+    - Do not include any other text before or after the 8 lines.
+    
+    Example:
+    Narrative Coherence: 7/10 - Clear arc with minor gaps
+  </output>
+</document>
