@@ -835,6 +835,62 @@ class SimulationEngine:
             "reviews": reviews,
         }
 
+    async def extract_beats(self, simulations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract beat atoms from simulation results using POML reviewer."""
+        if not self.poml_adapter or not self.use_poml:
+            raise SimulationError("POML adapter not available for beat extraction")
+
+        beats: List[Dict[str, Any]] = []
+
+        async def _call_backend(prompt: str) -> Dict[str, Any]:
+            if self.orchestrator is not None:
+                resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.2, max_tokens=500)
+                text = getattr(resp, 'text', '') or getattr(resp, 'content', '') or ''
+            else:
+                resp = await self.llm.generate_response(prompt, temperature=0.2, max_tokens=500)
+                text = getattr(resp, 'content', '')
+            # Best-effort JSON parse
+            try:
+                return json.loads(text)
+            except Exception:
+                import re
+                m = re.search(r"\{[\s\S]*\}", text)
+                return json.loads(m.group(0)) if m else {}
+
+        for sim in simulations:
+            try:
+                prompt = self.poml_adapter.get_beat_extraction_prompt(sim)
+                data = await _call_backend(prompt)
+                beats.append(data)
+            except Exception as e:
+                logger.error(f"Beat extraction failed: {e}")
+                beats.append({})
+
+        return beats
+
+    async def plan_scene(self, beats: List[Dict[str, Any]], objective: str = '', style: str = '') -> Dict[str, Any]:
+        """Create a compact scene plan from a list of beat atoms."""
+        if not self.poml_adapter or not self.use_poml:
+            raise SimulationError("POML adapter not available for scene planning")
+
+        prompt = self.poml_adapter.get_scene_plan_prompt(beats, objective=objective, style=style)
+
+        if self.orchestrator is not None:
+            resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.4, max_tokens=700)
+            text = getattr(resp, 'text', '') or getattr(resp, 'content', '') or ''
+        else:
+            resp = await self.llm.generate_response(prompt, temperature=0.4, max_tokens=700)
+            text = getattr(resp, 'content', '')
+
+        try:
+            plan = json.loads(text)
+        except Exception:
+            import re
+            m = re.search(r"\{[\s\S]*\}", text)
+            plan = json.loads(m.group(0)) if m else {}
+
+        return plan
+
     def _validate_character_response_shape(self, payload: Dict[str, Any]) -> None:
         """Minimal schema check for character response shape."""
         if not isinstance(payload, dict):

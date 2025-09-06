@@ -1,0 +1,52 @@
+<document>
+  <metadata>
+    <title>Scene Plan</title>
+    <description>Create a compact plan for a scene from beat atoms.</description>
+    <version>1.0.0</version>
+    <tags>scene, plan, beats, turns, blocking</tags>
+  </metadata>
+
+  <system>
+    You are a narrative planner.
+    Given beat atoms, produce a concise scene plan: purpose, setting, beats ordering with turns, blocking notes, and exit state.
+    Return ONLY the JSON object per the schema.
+  </system>
+
+  <section class="inputs">
+    <h2>Beat Atoms (input)</h2>
+    <code format="json">{{beats_json}}</code>
+    <if test="{{objective}}">
+      <objective>Objective: {{objective}}</objective>
+    </if>
+    <if test="{{style}}">
+      <style>Style: {{style}}</style>
+    </if>
+  </section>
+
+  <section class="output">
+    <h2>Output JSON Schema</h2>
+    <code format="json">
+{
+  "purpose": "what this scene accomplishes",
+  "setting": {"location": "", "time": "", "atmosphere": ""},
+  "beats": [
+    {"ref": 0, "goal": "", "conflict": "", "turn": "", "tension_target": 1..10}
+  ],
+  "turns": ["key turn moments in order"],
+  "entrances": ["character names"],
+  "exits": ["character names"],
+  "props": ["key props"],
+  "blocking_notes": ["short bullet notes on positions/motion/proxemics"],
+  "exit_state": {"promise": "", "new_question": "", "stakes_delta": -2..2, "value_shift": {"<value>": -1..1}}
+}
+    </code>
+  </section>
+
+  <instructions>
+    <important>
+      Use only details supported by beats; do not invent new facts unless necessary for cohesion.
+      Keep it tight and actionable. Prefer 3–5 beats.
+    </important>
+  </instructions>
+</document>
+
