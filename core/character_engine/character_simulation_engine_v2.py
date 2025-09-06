@@ -449,6 +449,9 @@ class SimulationEngine:
             self.poml_adapter = None
         self.use_poml = bool(use_poml if use_poml is not None else self.config.get('simulation', {}).get('use_poml', False))
         self.validate_schema = bool(self.config.get('simulation', {}).get('validate_schema', True))
+        # Persona strict mode settings
+        self.strict_persona = bool(self.config.get('features', {}).get('strict_persona_mode', False))
+        self.persona_threshold = int(self.config.get('features', {}).get('persona_adherence_threshold', 80))
         
         # Initialize cache if not provided but enabled in config
         if self.cache is None and create_cache and config:
@@ -563,6 +566,28 @@ class SimulationEngine:
                         response_data["dialogue"] = (raw_text or "").strip()[:800]
                     # No schema raise at this point; we proceed best-effort
                 
+                # Optionally enforce persona adherence with a single strict retry
+                if self.strict_persona:
+                    try:
+                        meta = response_data.get('metadata') if isinstance(response_data, dict) else None
+                        adherence = int(meta.get('persona_adherence')) if isinstance(meta, dict) and meta.get('persona_adherence') is not None else None
+                        violations = meta.get('violations') if isinstance(meta, dict) else []
+                        needs_retry = (adherence is not None and adherence < self.persona_threshold) or (isinstance(violations, list) and len(violations) > 0)
+                    except Exception:
+                        needs_retry = False
+                    if needs_retry:
+                        logger.warning(f"Persona adherence low (score={adherence}, violations={violations}). Retrying with strict persona instructions.")
+                        strict_suffix = "\n\nSTRICT PERSONA MODE:\n- Obey guardrails precisely.\n- Do NOT use any forbidden lexicon; replace with period-appropriate alternatives.\n- Include a metadata.persona_adherence (0-100) and metadata.violations[].\n"
+                        strict_prompt = f"{prompt}{strict_suffix}"
+                        try:
+                            strict_resp = await _call(strict_prompt, temperature, max_tokens)
+                            strict_text = getattr(strict_resp, 'content', None) or getattr(strict_resp, 'text', '') or ''
+                            parsed = json.loads(strict_text)
+                            if isinstance(parsed, dict):
+                                response_data = parsed
+                        except Exception:
+                            pass
+
                 result = {
                     "character_id": character.id,
                     "situation": situation,
@@ -621,6 +646,16 @@ class SimulationEngine:
                         new_value = max(0, min(1, delta))
                     else:
                         new_value = max(0, min(1, current + delta))
+
+                    # Apply trait-based modifiers from config (gentle nudge)
+                    try:
+                        mods_cfg = (self.config.get('character') or {}).get('trait_modifiers') or {}
+                        for trait in character.traits:
+                            trait_mods = mods_cfg.get(trait)
+                            if isinstance(trait_mods, dict) and emotion in trait_mods:
+                                new_value = max(0, min(1, new_value + float(trait_mods[emotion])))
+                    except Exception:
+                        pass
                     
                     setattr(character.emotional_state, emotion, new_value)
                     logger.debug(f"Updated {emotion}: {current:.2f} -> {new_value:.2f}")

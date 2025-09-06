@@ -605,6 +605,19 @@ class StoryEnginePOMLAdapter:
             }
         )
 
+    def get_persona_check_prompt(self, character: Dict[str, Any], response_json: Dict[str, Any]) -> str:
+        """Generate a persona adherence check prompt.
+        Accepts a character dict and the response payload (dict)."""
+        import json as _json
+        character = self._load_persona(character)
+        return self.engine.render(
+            'meta/persona_check.poml',
+            {
+                'character': character,
+                'response_json': _json.dumps(response_json, ensure_ascii=False)
+            }
+        )
+
 # Example usage
 if __name__ == "__main__":
     # Set up logging

@@ -113,6 +113,49 @@
     </if>
   </section>
 
+  <!-- Persona Guardrails -->
+  <section class="persona-guardrails">
+    <h2>Persona Guardrails</h2>
+
+    <if test="{{character.constraints}}">
+      <h3>Hard Constraints</h3>
+      <for each="constraint" in="{{character.constraints}}">
+        <constraint>• {{constraint}}</constraint>
+      </for>
+    </if>
+
+    <if test="{{character.forbidden_lexicon}}">
+      <forbidden-lexicon>
+        Do NOT use these words/phrases: {{character.forbidden_lexicon | join: ", "}}
+      </forbidden-lexicon>
+    </if>
+
+    <if test="{{character.required_lexicon}}">
+      <required-lexicon>
+        Prefer period-appropriate terms such as: {{character.required_lexicon | join: ", "}}
+      </required-lexicon>
+    </if>
+
+    <if test="{{character.register}}">
+      <register>Speech Register: {{character.register}} (maintain this register)</register>
+    </if>
+
+    <if test="{{character.sentence_length}}">
+      <sentence-guidance>
+        Aim for average sentence length ≈ {{character.sentence_length.avg | default: 16}} words; max {{character.sentence_length.max | default: 28}} words.
+      </sentence-guidance>
+    </if>
+
+    <if test="{{character.voice_examples}}">
+      <voice-examples>
+        <h3>Voice Anchors</h3>
+        <for each="ex" in="{{character.voice_examples}}">
+          <example>“{{ex}}”</example>
+        </for>
+      </voice-examples>
+    </if>
+  </section>
+
   <!-- Temperature Modulation -->
   <section class="temperature-settings">
     <h3>Response Temperature</h3>
@@ -233,6 +276,10 @@
       Generate ONLY a valid JSON response matching the schema above.
       Do not include any explanation or text outside the JSON structure.
       The response must reflect the character's personality, current emotional state, and the {{emphasis}} emphasis.
+      If possible, include a "metadata" object with:
+      - "persona_adherence" (0-100)
+      - "violations" (array of any broken guardrails)
+      Under STRICT PERSONA MODE, never use any forbidden lexicon; replace with period-appropriate alternatives.
     </important>
   </instructions>
 </document>

@@ -186,3 +186,6 @@ features:
   enable_multi_character_interaction: false
   enable_narrative_branching: false
   enable_audience_simulation: false
+  # Strict persona adherence controls
+  strict_persona_mode: true
+  persona_adherence_threshold: 80
