@@ -39,7 +39,7 @@ class _ProfilesConfig:
 class OrchestratedStoryEngine:
     """Story engine using LLM orchestrator for all generation tasks"""
     
-    def __init__(self, config_path: str = "llm_config.json", orchestrator: Optional[Any] = None, use_poml: Optional[bool] = None):
+    def __init__(self, config_path: str = "llm_config.json", orchestrator: Optional[Any] = None, use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any]]] = None):
         """Initialize with orchestrator from YAML or legacy JSON config.
 
         Args:
@@ -73,7 +73,7 @@ class OrchestratedStoryEngine:
         # Optional POML adapter
         try:
             from poml.lib.poml_integration import StoryEnginePOMLAdapter
-            self.poml_adapter = StoryEnginePOMLAdapter()
+            self.poml_adapter = StoryEnginePOMLAdapter(runtime_flags=runtime_flags)
         except Exception:
             self.poml_adapter = None
         

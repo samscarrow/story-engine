@@ -11,8 +11,8 @@ def store_workflow_output(workflow_name: str, output: Dict[str, Any]) -> None:
     If credentials are missing or connection fails, this function is a no-op.
     """
     try:
-from core.storage import get_database_connection
-from .dotenv_loader import load_dotenv_keys
+        from core.storage import get_database_connection
+        from .dotenv_loader import load_dotenv_keys
     except Exception:
         return
 

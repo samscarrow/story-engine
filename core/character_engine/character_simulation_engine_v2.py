@@ -22,7 +22,8 @@ try:
 except ImportError:
     SimulationCache = None
     create_cache = None
-    logging.warning("Cache manager not available")
+    # Cache manager is optional; proceed without warning to avoid noise in normal runs.
+    # A cache will not be used unless provided.
 
 # Configure logging
 logging.basicConfig(
@@ -506,6 +507,7 @@ class SimulationEngine:
                         kwargs = {"allow_fallback": True, "temperature": t}
                         if mt is not None:
                             kwargs["max_tokens"] = mt
+                        # Avoid provider-specific response_format toggles; rely on strict prompting + parser
                         return await self.orchestrator.generate(p, **kwargs)
                 else:
                     async def _call(p: str, t: float, mt: Optional[int]):
@@ -514,21 +516,52 @@ class SimulationEngine:
                 # Call backend with retry logic
                 response = await self.retry_handler.execute_with_retry(_call, prompt, temperature, max_tokens)
                 
-                # Parse and validate structured response
+                # Parse and validate structured response with robust fallbacks
+                raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
+                def _default_payload():
+                    return {
+                        "dialogue": "",
+                        "thought": "",
+                        "action": "",
+                        "emotional_shift": {"anger": 0, "doubt": 0, "fear": 0, "compassion": 0}
+                    }
+                def _coerce_payload(d: Dict[str, Any]) -> Dict[str, Any]:
+                    out = _default_payload()
+                    if isinstance(d, dict):
+                        out.update({k: v for k, v in d.items() if k in out})
+                        # If emotional_shift missing or not a dict, normalize
+                        es = d.get("emotional_shift")
+                        if not isinstance(es, dict):
+                            es = {}
+                        out["emotional_shift"].update({k: es.get(k, 0) for k in ["anger", "doubt", "fear", "compassion"]})
+                    return out
                 try:
-                    raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
                     response_data = json.loads(raw_text)
+                    if not isinstance(response_data, dict):
+                        raise ValueError("Top-level JSON is not an object")
                     if self.validate_schema:
                         self._validate_character_response_shape(response_data)
                     logger.info("Parsed structured response successfully")
                 except Exception as e:
                     logger.error(f"Failed to parse/validate structured response: {e}")
-                    response_data = {
-                        "dialogue": "I cannot respond properly at this time.",
-                        "thought": "System error in processing.",
-                        "action": "Pauses uncertainly",
-                        "emotional_shift": {"anger": 0, "doubt": 0, "fear": 0, "compassion": 0}
-                    }
+                    # Try to extract JSON object from within the text
+                    import re
+                    text = raw_text.strip()
+                    # Strip common code fences
+                    if text.startswith("```"):
+                        text = re.sub(r"^```[a-zA-Z0-9_-]*\n|\n```$", "", text)
+                    m = re.search(r"\{[\s\S]*\}", text)
+                    response_data = _default_payload()
+                    if m:
+                        try:
+                            parsed = json.loads(m.group(0))
+                            response_data = _coerce_payload(parsed)
+                        except Exception:
+                            pass
+                    # As a last resort, embed the raw text into dialogue to avoid empty output
+                    if not response_data.get("dialogue"):
+                        response_data["dialogue"] = (raw_text or "").strip()[:800]
+                    # No schema raise at this point; we proceed best-effort
                 
                 result = {
                     "character_id": character.id,
