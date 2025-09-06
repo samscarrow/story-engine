@@ -484,6 +484,24 @@ class StoryEnginePOMLAdapter:
             }
         )
 
+    def get_character_prompt_roles(self, character, situation: str, emphasis: str = "neutral") -> Dict[str, str]:
+        if isinstance(character, dict):
+            character = self._load_persona(character)
+        # Apply runtime flags overlay
+        character = self._apply_runtime_flags(character)
+        context_text = self._load_context(character)
+        return self.engine.render_roles(
+            'simulations/character_response.poml',
+            {
+                'character': character,
+                'situation': situation,
+                'context': context_text,
+                'emphasis': emphasis,
+                'temperature': 0.8,
+                'flags': self._current_flags(character),
+            }
+        )
+
     def _current_flags(self, character: Dict[str, Any]) -> Dict[str, Any]:
         try:
             cid = (character.get('id') or character.get('name') or '').lower().replace(' ', '_')
@@ -613,6 +631,38 @@ class StoryEnginePOMLAdapter:
                 'world': world_state
             }
         )
+
+    def get_world_state_brief_for(self, world_state: Dict[str, Any], characters: Optional[List[str]] = None, location: Optional[str] = None, last_n_events: int = 5) -> str:
+        """Render a targeted world brief focusing on characters and/or a location."""
+        # Lightweight filter mirroring WorldStateManager.targeted_subset behavior
+        chars = set([c.lower() for c in (characters or [])])
+        ws = {
+            'facts': dict((world_state.get('facts') or {})),
+            'relationships': {},
+            'timeline': list((world_state.get('timeline') or []))[-last_n_events:],
+            'availability': {},
+            'locations': {},
+            'props': dict((world_state.get('props') or {})),
+        }
+        rels = world_state.get('relationships') or {}
+        if chars:
+            for k, v in rels.items():
+                try:
+                    src, dst = k.split('->', 1)
+                except ValueError:
+                    continue
+                if src.lower() in chars or dst.lower() in chars:
+                    ws['relationships'][k] = v
+        else:
+            ws['relationships'] = rels
+        av = world_state.get('availability') or {}
+        ws['availability'] = {k: v for k, v in av.items() if not chars or k.lower() in chars}
+        locs = world_state.get('locations') or {}
+        if location and location in locs:
+            ws['locations'][location] = locs[location]
+        else:
+            ws['locations'] = locs
+        return self.get_world_state_brief(ws)
 
     # --- Meta narrative helpers ---
     def get_review_throughlines_prompt(
@@ -745,6 +795,31 @@ class StoryEnginePOMLAdapter:
             {
                 'character': character,
                 'situation': situation,
+                'emphasis': emphasis,
+                'temperature': 0.8,
+                'previous_responses_json': _json.dumps((previous_responses or [])[-3:], ensure_ascii=False),
+            }
+        )
+
+    def get_character_prompt_iterative_roles(
+        self,
+        character,
+        situation: str,
+        emphasis: str = "neutral",
+        previous_responses: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, str]:
+        import json as _json
+        if isinstance(character, dict):
+            character = self._load_persona(character)
+        # Apply runtime flags overlay
+        character = self._apply_runtime_flags(character)
+        context_text = self._load_context(character)
+        return self.engine.render_roles(
+            'simulations/character_response_iterative.poml',
+            {
+                'character': character,
+                'situation': situation,
+                'context': context_text,
                 'emphasis': emphasis,
                 'temperature': 0.8,
                 'previous_responses_json': _json.dumps((previous_responses or [])[-3:], ensure_ascii=False),
