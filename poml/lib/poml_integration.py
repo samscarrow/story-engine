@@ -209,6 +209,51 @@ class POMLEngine:
             self.cache.set(template_name, data, rendered)
         
         return rendered
+
+    def render_roles(self, template_name: str, data: Dict[str, Any]) -> Dict[str, str]:
+        """Render template and split into chat roles: system and user.
+        - Extracts <system>...</system> content as system message (after substitution)
+        - Renders the rest as user message
+        """
+        # Find template file
+        template_path = self._find_template(template_name)
+        if not template_path:
+            raise FileNotFoundError(f"Template not found: {template_name}")
+        processed_data = self._preprocess_data(data)
+        with open(template_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        import re
+        # Extract system block
+        m = re.search(r'<system>(.*?)</system>', content, flags=re.DOTALL)
+        sys_block = m.group(1) if m else ''
+        # Remove system block from user content
+        user_content = re.sub(r'<system>.*?</system>', '', content, flags=re.DOTALL)
+
+        # Simple variable replacement for both
+        def _subst(text: str) -> str:
+            def replace_var(match):
+                var_path = match.group(1).strip()
+                parts = var_path.split('.')
+                value = processed_data
+                for part in parts:
+                    if '|' in part:
+                        part = part.split('|')[0].strip()
+                    if isinstance(value, dict) and part in value:
+                        value = value[part]
+                    else:
+                        return match.group(0)
+                return str(value)
+            text = re.sub(r'\{\{([^}]+)\}\}', replace_var, text)
+            # Strip tags
+            text = re.sub(r'<metadata>.*?</metadata>', '', text, flags=re.DOTALL)
+            text = re.sub(r'<style>.*?</style>', '', text, flags=re.DOTALL)
+            text = re.sub(r'<import[^>]*>', '', text)
+            text = re.sub(r'<[^>]+>', '', text)
+            text = re.sub(r'\n\s*\n', '\n\n', text)
+            return text.strip()
+
+        return {"system": _subst(sys_block), "user": _subst(user_content)}
     
     def _render_native(self, template_path: Path, data: Dict[str, Any]) -> str:
         """
@@ -558,6 +603,14 @@ class StoryEnginePOMLAdapter:
                 'evaluation': evaluation_text or 'No evaluation',
                 'focus': focus or 'general',
                 'metrics_json': _json.dumps(metrics) if metrics else '',
+            }
+        )
+
+    def get_world_state_brief(self, world_state: Dict[str, Any]) -> str:
+        return self.engine.render(
+            'meta/world_state_brief.poml',
+            {
+                'world': world_state
             }
         )
 

@@ -1,0 +1,83 @@
+<document>
+  <metadata>
+    <title>World State Brief</title>
+    <description>Compact, readable summary of world facts and relationships for prompting.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    This brief summarizes current world facts, relationships, and relevant availability.
+    Use it as authoritative continuity context.
+  </system>
+
+  <section class="facts">
+    <h2>Facts</h2>
+    <if test="{{world.facts}}">
+      <for each="f" in="{{world.facts | entries}}">
+        <fact>{{f.key}}: {{f.value}}</fact>
+      </for>
+    <else />
+      <fact>None</fact>
+    </if>
+  </section>
+
+  <section class="relationships">
+    <h2>Relationships</h2>
+    <if test="{{world.relationships}}">
+      <for each="r" in="{{world.relationships | entries}}">
+        <rel>{{r.key}} — {{r.value | json}}</rel>
+      </for>
+    <else />
+      <rel>None recorded</rel>
+    </if>
+  </section>
+
+  <section class="availability">
+    <h2>Availability</h2>
+    <if test="{{world.availability}}">
+      <for each="a" in="{{world.availability | entries}}">
+        <avail>{{a.key}} — {{a.value | json}}</avail>
+      </for>
+    <else />
+      <avail>Not specified</avail>
+    </if>
+  </section>
+
+  <section class="locations">
+    <h2>Locations</h2>
+    <if test="{{world.locations}}">
+      <for each="l" in="{{world.locations | entries}}">
+        <loc>{{l.key}} — {{l.value | json}}</loc>
+      </for>
+    <else />
+      <loc>None</loc>
+    </if>
+  </section>
+
+  <section class="timeline">
+    <h2>Timeline</h2>
+    <if test="{{world.timeline}}">
+      <for each="e" in="{{world.timeline}}">
+        <event>{{e.time | default: "t"}} — {{e.desc | default: e}}</event>
+      </for>
+    <else />
+      <event>No events recorded</event>
+    </if>
+  </section>
+
+  <section class="props">
+    <h2>Props</h2>
+    <if test="{{world.props}}">
+      <for each="p" in="{{world.props | entries}}">
+        <prop>{{p.key}} — {{p.value | json}}</prop>
+      </for>
+    <else />
+      <prop>None</prop>
+    </if>
+  </section>
+
+  <instructions>
+    <important>Use this brief to avoid continuity errors.</important>
+  </instructions>
+</document>
+
