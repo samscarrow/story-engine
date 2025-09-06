@@ -15,6 +15,7 @@ import random
 from enum import Enum
 import traceback
 import yaml
+from core.story_engine.narrative_graph import NarrativeGraph
 
 # Import cache manager
 try:
@@ -890,6 +891,81 @@ class SimulationEngine:
             plan = json.loads(m.group(0)) if m else {}
 
         return plan
+
+    async def continuity_check_scene(self, plan: Dict[str, Any], world_state: Dict[str, Any]) -> Dict[str, Any]:
+        """Run continuity check on a scene plan vs. world state."""
+        if not self.poml_adapter or not self.use_poml:
+            raise SimulationError("POML adapter not available for continuity check")
+
+        prompt = self.poml_adapter.get_continuity_check_prompt(plan, world_state)
+        if self.orchestrator is not None:
+            resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.2, max_tokens=600)
+            text = getattr(resp, 'text', '') or getattr(resp, 'content', '') or ''
+        else:
+            resp = await self.llm.generate_response(prompt, temperature=0.2, max_tokens=600)
+            text = getattr(resp, 'content', '')
+        try:
+            return json.loads(text)
+        except Exception:
+            import re
+            m = re.search(r"\{[\s\S]*\}", text)
+            return json.loads(m.group(0)) if m else {"ok": False, "violations": [], "summary": "unparsed"}
+
+    async def plan_scene_with_continuity(
+        self,
+        beats: List[Dict[str, Any]],
+        world_state: Dict[str, Any],
+        objective: str = '',
+        style: str = '',
+        tolerance: int = 0,
+        max_attempts: int = 2,
+    ) -> Dict[str, Any]:
+        """Plan a scene and enforce continuity with up to one guided retry."""
+        attempt = 0
+        continuity_fix = ''
+        last_report: Dict[str, Any] = {}
+        while attempt < max_attempts:
+            plan = await self.plan_scene(beats, objective=objective, style=style if not continuity_fix else f"{style} (respect continuity)")
+            report = await self.continuity_check_scene(plan, world_state)
+            last_report = report
+            vcount = len(report.get('violations') or [])
+            if report.get('ok') or vcount <= tolerance:
+                plan.setdefault('continuity_report', report)
+                return plan
+            # Prepare fix guidance for retry
+            guidance_list = report.get('fix_guidance') or []
+            # Fall back to concatenated suggested_fix strings
+            if not guidance_list and report.get('violations'):
+                guidance_list = [v.get('suggested_fix') for v in report['violations'] if v.get('suggested_fix')]
+            continuity_fix = '\n'.join([g for g in guidance_list if g])[:800]
+            attempt += 1
+            # Re-plan with continuity_fix injected
+            plan = await self.plan_scene(beats, objective=objective, style=style,)
+        # Return last plan attempt plus report if could not fix
+        plan.setdefault('continuity_report', last_report)
+        return plan
+
+    def graph_from(self, beats: List[Dict[str, Any]], plan: Dict[str, Any]) -> NarrativeGraph:
+        """Build a small NarrativeGraph from beats and a plan."""
+        g = NarrativeGraph()
+        beat_nodes: List[str] = []
+        for b in beats:
+            nid = g.add_beat(b)
+            beat_nodes.append(nid)
+        scene_id = g.add_scene(plan)
+        # Chronological edges between beats, and to scene
+        for i in range(len(beat_nodes) - 1):
+            g.link(beat_nodes[i], beat_nodes[i+1], edge_type='chronology', weight=1.0)
+        for bn in beat_nodes:
+            g.link(bn, scene_id, edge_type='cause', weight=1.0)
+        # Value shift edge if present in plan.exit_state
+        try:
+            vs = (plan.get('exit_state') or {}).get('value_shift') or {}
+            if isinstance(vs, dict) and vs:
+                g.link(scene_id, scene_id, edge_type='value_shift', weight=1.0, data={'value_shift': vs})
+        except Exception:
+            pass
+        return g
 
     def _validate_character_response_shape(self, payload: Dict[str, Any]) -> None:
         """Minimal schema check for character response shape."""

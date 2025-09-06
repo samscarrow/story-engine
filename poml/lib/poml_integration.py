@@ -635,7 +635,7 @@ class StoryEnginePOMLAdapter:
         }
         return self.engine.render('meta/beat_extraction.poml', payload)
 
-    def get_scene_plan_prompt(self, beats: list[dict], objective: str = '', style: str = '') -> str:
+    def get_scene_plan_prompt(self, beats: list[dict], objective: str = '', style: str = '', continuity_fix: str = '') -> str:
         import json as _json
         return self.engine.render(
             'narrative/scene_plan.poml',
@@ -643,6 +643,17 @@ class StoryEnginePOMLAdapter:
                 'beats_json': _json.dumps(beats, ensure_ascii=False),
                 'objective': objective,
                 'style': style,
+                'continuity_fix': continuity_fix,
+            }
+        )
+
+    def get_continuity_check_prompt(self, plan: Dict[str, Any], world_state: Dict[str, Any]) -> str:
+        import json as _json
+        return self.engine.render(
+            'meta/continuity_check.poml',
+            {
+                'plan_json': _json.dumps(plan, ensure_ascii=False),
+                'world_json': _json.dumps(world_state, ensure_ascii=False),
             }
         )
 

@@ -21,6 +21,11 @@
     <if test="{{style}}">
       <style>Style: {{style}}</style>
     </if>
+    <if test="{{continuity_fix}}">
+      <continuity-fix>Apply these continuity constraints:
+        {{continuity_fix}}
+      </continuity-fix>
+    </if>
   </section>
 
   <section class="output">
@@ -49,4 +54,3 @@
     </important>
   </instructions>
 </document>
-
