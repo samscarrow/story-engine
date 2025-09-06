@@ -119,6 +119,17 @@
                 "minimum": -1,
                 "maximum": 1
               }
+            },
+            "persona_adherence": {
+              "type": "number",
+              "description": "Post-hoc estimate of adherence to persona guardrails (0-100)",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "violations": {
+              "type": "array",
+              "description": "Detected persona/voice guardrail violations (best-effort)",
+              "items": { "type": "string" }
             }
           }
         }
