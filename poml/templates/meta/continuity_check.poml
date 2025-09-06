@@ -1,0 +1,49 @@
+<document>
+  <metadata>
+    <title>Continuity Check</title>
+    <description>Validate scene plan against world facts, relationships, and timeline.</description>
+    <version>1.0.0</version>
+    <tags>continuity, facts, relationships, timeline</tags>
+  </metadata>
+
+  <system>
+    You are a strict continuity supervisor.
+    Compare the SCENE PLAN with the WORLD STATE registry and report any violations.
+    Return ONLY the JSON object specified below.
+  </system>
+
+  <section class="inputs">
+    <h2>World State</h2>
+    <code format="json">{{world_json}}</code>
+    <h2>Scene Plan</h2>
+    <code format="json">{{plan_json}}</code>
+  </section>
+
+  <section class="output">
+    <h2>Output JSON</h2>
+    <code format="json">
+{
+  "ok": true|false,
+  "violations": [
+    {
+      "type": "fact|relationship|timeline|availability|register|location|prop|other",
+      "entity": "character|location|prop|fact_key",
+      "description": "what is wrong and why",
+      "evidence": "brief quote or key",
+      "suggested_fix": "concise instruction to fix plan"
+    }
+  ],
+  "summary": "1-2 sentence summary of issues",
+  "fix_guidance": ["imperative bullets that can be fed to a planner to correct the plan"]
+}
+    </code>
+  </section>
+
+  <instructions>
+    <important>
+      Be precise and minimal. If no violations, set ok=true and list empty violations.
+      Keep suggested_fix actionable and specific.
+    </important>
+  </instructions>
+</document>
+
