@@ -1,0 +1,62 @@
+<document>
+  <metadata>
+    <title>World State POV Brief</title>
+    <description>Character-limited perspective on world state: knowns, unknowns, assumptions, and biases.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    This brief is written from the character's point of view. Include only what they plausibly know or infer.
+    Separate KNOWN facts from UNCERTAIN information and ASSUMPTIONS.
+  </system>
+
+  <section class="identity">
+    <character>{{character.name}}</character>
+  </section>
+
+  <section class="knowns">
+    <h2>Known Now</h2>
+    <if test="{{world_subset.facts}}">
+      <for each="f" in="{{world_subset.facts | entries}}">
+        <fact>• {{f.key}}: {{f.value}}</fact>
+      </for>
+    </if>
+    <if test="{{world_subset.relationships}}">
+      <for each="r" in="{{world_subset.relationships | entries}}">
+        <rel>• {{r.key}} — {{r.value | json}}</rel>
+      </for>
+    </if>
+    <if test="{{world_subset.availability}}">
+      <for each="a" in="{{world_subset.availability | entries}}">
+        <avail>• {{a.key}} — {{a.value | json}}</avail>
+      </for>
+    </if>
+  </section>
+
+  <section class="uncertains">
+    <h2>Uncertain / Rumors</h2>
+    <if test="{{world_subset.uncertain}}">
+      <for each="u" in="{{world_subset.uncertain}}">
+        <uncertain>• {{u}}</uncertain>
+      </for>
+    <else />
+      <uncertain>None noted</uncertain>
+    </if>
+  </section>
+
+  <section class="assumptions">
+    <h2>Reasonable Assumptions</h2>
+    <if test="{{world_subset.assumptions}}">
+      <for each="x" in="{{world_subset.assumptions}}">
+        <assume>• {{x}}</assume>
+      </for>
+    <else />
+      <assume>None stated</assume>
+    </if>
+  </section>
+
+  <instructions>
+    <important>Use this POV brief to anchor the character's perception and language.</important>
+  </instructions>
+</document>
+

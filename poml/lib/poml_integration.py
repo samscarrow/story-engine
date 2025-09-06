@@ -484,7 +484,7 @@ class StoryEnginePOMLAdapter:
             }
         )
 
-    def get_character_prompt_roles(self, character, situation: str, emphasis: str = "neutral") -> Dict[str, str]:
+    def get_character_prompt_roles(self, character, situation: str, emphasis: str = "neutral", world_pov: str = "") -> Dict[str, str]:
         if isinstance(character, dict):
             character = self._load_persona(character)
         # Apply runtime flags overlay
@@ -496,6 +496,7 @@ class StoryEnginePOMLAdapter:
                 'character': character,
                 'situation': situation,
                 'context': context_text,
+                'world_pov': world_pov,
                 'emphasis': emphasis,
                 'temperature': 0.8,
                 'flags': self._current_flags(character),
@@ -664,6 +665,15 @@ class StoryEnginePOMLAdapter:
             ws['locations'] = locs
         return self.get_world_state_brief(ws)
 
+    def get_world_state_pov_brief(self, character: Dict[str, Any], world_subset: Dict[str, Any]) -> str:
+        return self.engine.render(
+            'meta/world_state_pov.poml',
+            {
+                'character': character,
+                'world_subset': world_subset,
+            }
+        )
+
     # --- Meta narrative helpers ---
     def get_review_throughlines_prompt(
         self,
@@ -825,6 +835,7 @@ class StoryEnginePOMLAdapter:
         situation: str,
         emphasis: str = "neutral",
         previous_responses: Optional[List[Dict[str, Any]]] = None,
+        world_pov: str = "",
     ) -> Dict[str, str]:
         import json as _json
         if isinstance(character, dict):
@@ -838,6 +849,7 @@ class StoryEnginePOMLAdapter:
                 'character': character,
                 'situation': situation,
                 'context': context_text,
+                'world_pov': world_pov,
                 'emphasis': emphasis,
                 'temperature': 0.8,
                 'previous_responses_json': _json.dumps((previous_responses or [])[-3:], ensure_ascii=False),

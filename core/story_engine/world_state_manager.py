@@ -99,3 +99,69 @@ class WorldStateManager:
             out['locations'] = locs
         return out
 
+    def pov_subset(
+        self,
+        world_state: WorldState,
+        character_id: str,
+        location: Optional[str] = None,
+        last_n_events: int = 5,
+    ) -> Dict[str, Any]:
+        """Character-limited subset. Heuristics:
+        - Include facts marked public=True
+        - Include facts with visible_to containing character_id
+        - Include relationships where character participates
+        - Include availability for character_id + directly related entities
+        - Collect uncertain items from facts with rumor=True or confidence<0.6
+        """
+        ws = world_state.to_dict()
+        out = {
+            'facts': {},
+            'relationships': {},
+            'availability': {},
+            'locations': {},
+            'timeline': list(ws.get('timeline') or [])[-last_n_events:],
+            'props': {},
+            'uncertain': [],
+            'assumptions': [],
+        }
+        cid = (character_id or '').lower()
+        # Facts
+        for k, v in (ws.get('facts') or {}).items():
+            try:
+                if isinstance(v, dict):
+                    public = bool(v.get('public', False))
+                    visible = [x.lower() for x in (v.get('visible_to') or [])]
+                    rumor = bool(v.get('rumor', False))
+                    conf = float(v.get('confidence', 1.0))
+                    if public or cid in visible:
+                        out['facts'][k] = v.get('value', v)
+                        if rumor or conf < 0.6:
+                            out['uncertain'].append(f"{k}")
+                else:
+                    # If simple values, treat as public
+                    out['facts'][k] = v
+            except Exception:
+                continue
+        # Relationships touching character
+        for rel_key, rel_val in (ws.get('relationships') or {}).items():
+            try:
+                src, dst = rel_key.split('->', 1)
+                if src.lower() == cid or dst.lower() == cid:
+                    out['relationships'][rel_key] = rel_val
+            except Exception:
+                continue
+        # Availability
+        av = ws.get('availability') or {}
+        if cid in (x.lower() for x in av.keys()):
+            # exact key may differ; include all and let prompt focus
+            out['availability'] = av
+        else:
+            # include only the character if present
+            for k, v in av.items():
+                if k.lower() == cid:
+                    out['availability'][k] = v
+        # Locations
+        locs = ws.get('locations') or {}
+        if location and location in locs:
+            out['locations'][location] = locs[location]
+        return out
