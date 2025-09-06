@@ -18,7 +18,7 @@ from core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
 class MetaNarrativePipeline:
     """Run multi-simulation → review → synthesis → screenplay drafting via POML personas."""
 
-    def __init__(self, use_poml: bool = True, orchestrator: Any = None, target_metrics: Optional[List[str]] = None, weights: Optional[Dict[str, float]] = None, character_flags: Optional[Dict[str, Dict[str, Any]]] = None):
+    def __init__(self, use_poml: bool = True, orchestrator: Any = None, target_metrics: Optional[List[str]] = None, weights: Optional[Dict[str, float]] = None, character_flags: Optional[Dict[str, Dict[str, Any]]] = None, use_iterative_persona: Optional[bool] = None):
         cfg = load_config("config.yaml")
         self.config = cfg
         self.orchestrator = orchestrator or create_orchestrator_from_yaml("config.yaml")
@@ -36,21 +36,42 @@ class MetaNarrativePipeline:
         # Preferences for biasing review/evaluation
         self.target_metrics: List[str] = list(target_metrics or [])
         self.criteria_weights: Dict[str, float] = dict(weights or {})
+        # Iterative persona loop is on by default when strict persona is enabled unless explicitly disabled
+        self.use_iterative_persona: bool = bool(use_iterative_persona if use_iterative_persona is not None else cfg.get('features', {}).get('strict_persona_mode', False))
 
     async def simulate(self, character: CharacterState, situations: List[str], runs_per: int = 3) -> List[Dict[str, Any]]:
         results: List[Dict[str, Any]] = []
         for s in situations:
             # Apply reviewer parameters if available
             rp = getattr(self, '_reviewer_params', {}) or {}
-            sims = await self.engine.run_multiple_simulations(
-                character,
-                s,
-                num_runs=runs_per,
-                emphases=rp.get('emphases'),
-                fixed_temperature=rp.get('temperature'),
-                max_tokens=rp.get('max_tokens')
-            )
-            results.extend(sims)
+            if self.use_iterative_persona:
+                # Use runs_per as iteration count for iterative persona refinement
+                iters = int(runs_per or 3)
+                window = int(rp.get('window', 3))
+                final = await self.engine.run_iterative_simulation(
+                    character,
+                    s,
+                    emphasis=(rp.get('emphases') or ["neutral"])[:1][0],
+                    iterations=iters,
+                    window=window,
+                    max_tokens=rp.get('max_tokens'),
+                )
+                # Append only the final attempt to keep the shape compatible for throughline review
+                if isinstance(final, dict) and final.get('final'):
+                    results.append(final['final'])
+                else:
+                    # fallback in case of unexpected format
+                    results.append(final)
+            else:
+                sims = await self.engine.run_multiple_simulations(
+                    character,
+                    s,
+                    num_runs=runs_per,
+                    emphases=rp.get('emphases'),
+                    fixed_temperature=rp.get('temperature'),
+                    max_tokens=rp.get('max_tokens')
+                )
+                results.extend(sims)
         return results
 
     async def review_throughlines(self, character: Dict[str, Any], situations: List[str], simulations: List[Dict[str, Any]]) -> Dict[str, Any]:

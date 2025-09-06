@@ -760,7 +760,8 @@ class SimulationEngine:
                 async def _call(p: str, t: float, mt: Optional[int]):
                     return await self.llm.generate_response(p, temperature=t, max_tokens=mt or 500)
 
-            response = await self.retry_handler.execute_with_retry(_call, prompt, character.emotional_state.modulate_temperature(), max_tokens)
+            temp = character.emotional_state.modulate_temperature()
+            response = await self.retry_handler.execute_with_retry(_call, prompt, temp, max_tokens)
             raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
 
             # Parse best-effort
@@ -784,6 +785,11 @@ class SimulationEngine:
                 "emphasis": emphasis,
                 "response": payload,
                 "iteration": i + 1,
+                "temperature": temp,
+                "metadata": {
+                    "used_poml": self.use_poml,
+                    "template": "character_response_iterative.poml",
+                },
                 "timestamp": getattr(response, 'timestamp', datetime.now().isoformat())
             }
             previous.append(result)
