@@ -1,0 +1,43 @@
+<document>
+  <metadata>
+    <title>Scenario Crafting</title>
+    <description>Create a specific scenario from world state for the next simulation run.</description>
+    <version>1.0.0</version>
+    <tags>scenario, world, planning</tags>
+  </metadata>
+
+  <system>
+    You are a meta-narrative planner.
+    Using the WORLD BRIEF, propose a concrete, immediate scenario fit for a single simulation run.
+    Keep it actionable and specific, and align with current facts/relationships.
+    Return ONLY the JSON described below.
+  </system>
+
+  <section class="world-brief">
+    <h2>World Brief</h2>
+    <code format="markdown">{{world_brief}}</code>
+  </section>
+
+  <section class="output">
+    <h2>Output JSON</h2>
+    <code format="json">
+{
+  "situation": "one-paragraph concrete situation to feed simulation",
+  "location": "where it happens",
+  "time": "when (if relevant)",
+  "involved_characters": ["ids or names"],
+  "purpose": "scene/beat purpose",
+  "constraints": ["hard constraints to respect"],
+  "notes": "optional brief notes"
+}
+    </code>
+  </section>
+
+  <instructions>
+    <important>
+      Prefer scenarios that pressure current conflicts and can resolve or escalate existing tensions.
+      Avoid contradictions with facts; suggest constraints that preserve continuity.
+    </important>
+  </instructions>
+</document>
+

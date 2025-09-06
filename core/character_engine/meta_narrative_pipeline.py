@@ -13,6 +13,8 @@ from core.character_engine.character_simulation_engine_v2 import (
 )
 from core.common.config import load_config
 from core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
+from core.story_engine.world_state_manager import WorldStateManager
+from core.story_engine.world_state import WorldState
 
 
 class MetaNarrativePipeline:
@@ -33,11 +35,26 @@ class MetaNarrativePipeline:
         # POML adapter
         from poml.lib.poml_integration import StoryEnginePOMLAdapter
         self.poml = StoryEnginePOMLAdapter(runtime_flags=character_flags)
+        self.world_manager = WorldStateManager()
         # Preferences for biasing review/evaluation
         self.target_metrics: List[str] = list(target_metrics or [])
         self.criteria_weights: Dict[str, float] = dict(weights or {})
         # Iterative persona loop is on by default when strict persona is enabled unless explicitly disabled
         self.use_iterative_persona: bool = bool(use_iterative_persona if use_iterative_persona is not None else cfg.get('features', {}).get('strict_persona_mode', False))
+
+    async def craft_scenario_from_world(self, characters: Optional[List[str]] = None, location: Optional[str] = None, last_n_events: int = 5) -> Dict[str, Any]:
+        """Craft a single scenario using only the world state (meta-narrative responsibility)."""
+        ws: WorldState = self.world_manager.load_latest()
+        brief_md = self.poml.get_world_state_brief_for(ws.to_dict(), characters=characters, location=location, last_n_events=last_n_events)
+        prompt = self.poml.get_scenario_prompt(brief_md)
+        resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.5, max_tokens=600)
+        text = getattr(resp, 'text', '') or ''
+        import json as _json, re as _re
+        try:
+            return _json.loads(text)
+        except Exception:
+            m = _re.search(r"\{[\s\S]*\}", text)
+            return _json.loads(m.group(0)) if m else {"situation": brief_md[:400]}
 
     async def simulate(self, character: CharacterState, situations: List[str], runs_per: int = 3) -> List[Dict[str, Any]]:
         results: List[Dict[str, Any]] = []
@@ -73,6 +90,32 @@ class MetaNarrativePipeline:
                 )
                 results.extend(sims)
         return results
+
+    async def simulate_from_world(self, character: CharacterState, runs_per: int = 3, focus_chars: Optional[List[str]] = None, location: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Craft a scenario from world state, run simulations, then evaluate plausibility against the same world state."""
+        scenario = await self.craft_scenario_from_world(characters=focus_chars, location=location)
+        situation = scenario.get('situation', '')
+        sims = await self.simulate(character, [situation], runs_per=runs_per)
+        # Post-simulation plausibility check using world state
+        ws = self.world_manager.load_latest().to_dict()
+        checked: List[Dict[str, Any]] = []
+        for sim in sims:
+            try:
+                sim_payload = sim.get('response') if isinstance(sim, dict) else sim
+                prompt = self.poml.get_plausibility_check_prompt(sim_payload, ws)
+                resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.2, max_tokens=500)
+                report_text = getattr(resp, 'text', '') or ''
+                import json as _json, re as _re
+                try:
+                    report = _json.loads(report_text)
+                except Exception:
+                    m = _re.search(r"\{[\s\S]*\}", report_text)
+                    report = _json.loads(m.group(0)) if m else {"adherence": 0}
+                sim['plausibility_report'] = report
+                checked.append(sim)
+            except Exception:
+                checked.append(sim)
+        return checked
 
     async def review_throughlines(self, character: Dict[str, Any], situations: List[str], simulations: List[Dict[str, Any]]) -> Dict[str, Any]:
         prompt = self.poml.get_review_throughlines_prompt(

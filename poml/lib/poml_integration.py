@@ -760,6 +760,24 @@ class StoryEnginePOMLAdapter:
             }
         )
 
+    def get_scenario_prompt(self, world_brief_markdown: str) -> str:
+        return self.engine.render(
+            'meta/scenario_crafting.poml',
+            {
+                'world_brief': world_brief_markdown,
+            }
+        )
+
+    def get_plausibility_check_prompt(self, simulation: Dict[str, Any], world_state: Dict[str, Any]) -> str:
+        import json as _json
+        return self.engine.render(
+            'meta/plausibility_check.poml',
+            {
+                'simulation_json': _json.dumps(simulation, ensure_ascii=False),
+                'world_json': _json.dumps(world_state, ensure_ascii=False),
+            }
+        )
+
     def get_persona_iterative_review_prompt(
         self,
         character: Dict[str, Any],

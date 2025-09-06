@@ -1,0 +1,43 @@
+<document>
+  <metadata>
+    <title>Plausibility Check</title>
+    <description>Evaluate a single simulation response against world state for adherence and plausibility.</description>
+    <version>1.0.0</version>
+    <tags>plausibility, adherence, continuity</tags>
+  </metadata>
+
+  <system>
+    You are a rigorous plausibility and continuity evaluator.
+    Compare the SIMULATION with WORLD STATE and report adherence, violations, and a concise rationale.
+    Return ONLY the JSON object described below.
+  </system>
+
+  <section class="inputs">
+    <h2>World</h2>
+    <code format="json">{{world_json}}</code>
+    <h2>Simulation</h2>
+    <code format="json">{{simulation_json}}</code>
+  </section>
+
+  <section class="output">
+    <h2>Output JSON</h2>
+    <code format="json">
+{
+  "adherence": 0..100,
+  "violations": [
+    {"type": "fact|relationship|timeline|register|other", "description": "what contradicted and why"}
+  ],
+  "rationale": "1-2 concise sentences",
+  "suggested_adjustments": ["imperative bullets to make it plausible in next pass"]
+}
+    </code>
+  </section>
+
+  <instructions>
+    <important>
+      Focus on mismatches that matter: facts, availability, established relationships, and register.
+      Keep guidance specific and short.
+    </important>
+  </instructions>
+</document>
+
