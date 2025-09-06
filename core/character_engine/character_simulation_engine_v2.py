@@ -709,6 +709,126 @@ class SimulationEngine:
         logger.info(f"Completed {len(results)}/{num_runs} simulations successfully")
         return results
 
+    async def run_iterative_simulation(
+        self,
+        character: CharacterState,
+        situation: str,
+        emphasis: str = "neutral",
+        iterations: int = 3,
+        window: int = 3,
+        max_tokens: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Run iterative simulation with reviewer feedback and regression checks.
+
+        Returns a dict containing final result and history of attempts and reviews.
+        """
+        previous: List[Dict[str, Any]] = []
+        reviews: List[Dict[str, Any]] = []
+
+        def _as_dict(obj: Any) -> Dict[str, Any]:
+            try:
+                return obj if isinstance(obj, dict) else json.loads(obj)
+            except Exception:
+                return {}
+
+        for i in range(iterations):
+            # Render prompt (iterative if history exists)
+            if self.use_poml and self.poml_adapter and previous:
+                prompt = self.poml_adapter.get_character_prompt_iterative(
+                    character=character,
+                    situation=situation,
+                    emphasis=emphasis,
+                    previous_responses=[p.get('response', {}) for p in previous][-window:],
+                )
+            elif self.use_poml and self.poml_adapter:
+                prompt = self.poml_adapter.get_character_prompt(
+                    character=character,
+                    situation=situation,
+                    emphasis=emphasis,
+                )
+            else:
+                prompt = character.get_simulation_prompt(situation, emphasis)
+
+            # Call backend
+            if self.orchestrator is not None:
+                async def _call(p: str, t: float, mt: Optional[int]):
+                    kwargs = {"allow_fallback": True, "temperature": character.emotional_state.modulate_temperature()}
+                    if mt is not None:
+                        kwargs["max_tokens"] = mt
+                    return await self.orchestrator.generate(p, **kwargs)
+            else:
+                async def _call(p: str, t: float, mt: Optional[int]):
+                    return await self.llm.generate_response(p, temperature=t, max_tokens=mt or 500)
+
+            response = await self.retry_handler.execute_with_retry(_call, prompt, character.emotional_state.modulate_temperature(), max_tokens)
+            raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
+
+            # Parse best-effort
+            try:
+                payload = json.loads(raw_text)
+                if self.validate_schema:
+                    self._validate_character_response_shape(payload)
+            except Exception:
+                # Fallback: try to find first JSON object
+                import re
+                m = re.search(r"\{[\s\S]*\}", raw_text)
+                payload = _as_dict(m.group(0)) if m else {"dialogue": raw_text[:800]}
+
+            # Apply emotional shifts
+            if isinstance(payload, dict) and payload.get("emotional_shift"):
+                await self._apply_emotional_shift(character, payload.get("emotional_shift", {}))
+
+            result = {
+                "character_id": character.id,
+                "situation": situation,
+                "emphasis": emphasis,
+                "response": payload,
+                "iteration": i + 1,
+                "timestamp": getattr(response, 'timestamp', datetime.now().isoformat())
+            }
+            previous.append(result)
+
+            # Persona check review
+            try:
+                if self.use_poml and self.poml_adapter:
+                    persona_check_prompt = self.poml_adapter.get_persona_check_prompt(asdict(character), payload)
+                    review_resp = await self.retry_handler.execute_with_retry(_call, persona_check_prompt, 0.2, 300)
+                    review_text = getattr(review_resp, 'content', None) or getattr(review_resp, 'text', '') or ''
+                    review_json = _as_dict(review_text)
+                    reviews.append({"iteration": i + 1, "persona_check": review_json})
+            except Exception:
+                reviews.append({"iteration": i + 1, "persona_check": {}})
+
+            # Iterative comparative review (previous up to window)
+            try:
+                if self.use_poml and self.poml_adapter and len(previous) > 1:
+                    iter_rev_prompt = self.poml_adapter.get_persona_iterative_review_prompt(
+                        asdict(character), payload, [p.get('response', {}) for p in previous[:-1]][-window:], self.persona_threshold
+                    )
+                    iter_rev_resp = await self.retry_handler.execute_with_retry(_call, iter_rev_prompt, 0.2, 400)
+                    iter_rev_text = getattr(iter_rev_resp, 'content', None) or getattr(iter_rev_resp, 'text', '') or ''
+                    iter_rev_json = _as_dict(iter_rev_text)
+                    # Decide early stop if no regression and adherence >= threshold
+                    adherence = (
+                        (payload.get('metadata') or {}).get('persona_adherence')
+                        if isinstance(payload.get('metadata'), dict) else None
+                    )
+                    if adherence is None:
+                        # Try reviewer’s measure
+                        adherence = iter_rev_json.get('current_persona_adherence')
+                    if iter_rev_json.get('regression_detected') is False and isinstance(adherence, (int, float)) and adherence >= self.persona_threshold:
+                        reviews.append({"iteration": i + 1, "iterative_review": iter_rev_json, "early_stop": True})
+                        break
+                    reviews.append({"iteration": i + 1, "iterative_review": iter_rev_json})
+            except Exception:
+                pass
+
+        return {
+            "final": previous[-1] if previous else {},
+            "history": previous,
+            "reviews": reviews,
+        }
+
     def _validate_character_response_shape(self, payload: Dict[str, Any]) -> None:
         """Minimal schema check for character response shape."""
         if not isinstance(payload, dict):

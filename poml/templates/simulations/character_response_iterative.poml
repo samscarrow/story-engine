@@ -1,0 +1,37 @@
+<document>
+  <metadata>
+    <title>Character Response – Iterative</title>
+    <description>Generate a refined character response using previous attempts to avoid regression and improve persona adherence.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are simulating {{character.name}}. Improve upon prior attempts.
+    Preserve what worked, fix guardrail violations, and avoid regression.
+    Output only valid JSON per the schema.
+  </system>
+
+  <import src="../characters/base_character.poml" data="{{character}}" />
+
+  <section class="situation-context">
+    <h2>Current Situation</h2>
+    <situation>{{situation}}</situation>
+  </section>
+
+  <import src="character_response.poml" />
+
+  <section class="recent-attempts">
+    <h2>Recent Attempts (for improvement)</h2>
+    <p>Use these to avoid repeating mistakes and to keep any improvement.</p>
+    <code format="json">{{previous_responses_json}}</code>
+  </section>
+
+  <instructions>
+    <important>
+      Improve persona adherence relative to previous attempts. Do not reintroduce past violations.
+      If previous attempts include good phrasing aligned with persona, keep that tone while generating new content.
+      Include metadata.persona_adherence (0–100) and metadata.violations[].
+    </important>
+  </instructions>
+</document>
+
