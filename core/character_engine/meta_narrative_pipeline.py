@@ -95,9 +95,18 @@ class MetaNarrativePipeline:
         """Craft a scenario from world state, run simulations, then evaluate plausibility against the same world state."""
         scenario = await self.craft_scenario_from_world(characters=focus_chars, location=location)
         situation = scenario.get('situation', '')
-        sims = await self.simulate(character, [situation], runs_per=runs_per)
+        # Build character POV brief and feed into simulation
+        ws_full = self.world_manager.load_latest()
+        pov = self.world_manager.pov_subset(ws_full, character_id=character.id, location=location)
+        pov_brief = self.poml.get_world_state_pov_brief(asdict(character), pov)
+        # Run simulations with world POV injected
+        results: List[Dict[str, Any]] = []
+        for _ in range(runs_per):
+            res = await self.engine.run_simulation(character, situation, emphasis='neutral', world_pov=pov_brief)
+            results.append(res)
+        sims = results
         # Post-simulation plausibility check using world state
-        ws = self.world_manager.load_latest().to_dict()
+        ws = ws_full.to_dict()
         checked: List[Dict[str, Any]] = []
         for sim in sims:
             try:

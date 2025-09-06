@@ -470,7 +470,8 @@ class SimulationEngine:
                             situation: str,
                             emphasis: str = "neutral",
                             temperature: Optional[float] = None,
-                            max_tokens: Optional[int] = None) -> Dict:
+                            max_tokens: Optional[int] = None,
+                            world_pov: Optional[str] = None) -> Dict:
         """Run single simulation with error handling, caching, and concurrency control"""
         
         async with self.semaphore:  # Limit concurrent simulations
@@ -500,7 +501,8 @@ class SimulationEngine:
                     roles = self.poml_adapter.get_character_prompt_roles(
                         character=asdict(character),
                         situation=situation,
-                        emphasis=emphasis
+                        emphasis=emphasis,
+                        world_pov=world_pov or ""
                     )
                 else:
                     roles = {"system": "", "user": character.get_simulation_prompt(situation, emphasis)}
@@ -719,6 +721,7 @@ class SimulationEngine:
         iterations: int = 3,
         window: int = 3,
         max_tokens: Optional[int] = None,
+        world_pov: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Run iterative simulation with reviewer feedback and regression checks.
 
@@ -741,12 +744,14 @@ class SimulationEngine:
                     situation=situation,
                     emphasis=emphasis,
                     previous_responses=[p.get('response', {}) for p in previous][-window:],
+                    world_pov=world_pov or "",
                 )
             elif self.use_poml and self.poml_adapter:
                 roles = self.poml_adapter.get_character_prompt_roles(
                     character=asdict(character),
                     situation=situation,
                     emphasis=emphasis,
+                    world_pov=world_pov or "",
                 )
             else:
                 roles = {"system": "", "user": character.get_simulation_prompt(situation, emphasis)}

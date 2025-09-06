@@ -25,6 +25,12 @@
         {{context}}
       </additional-context>
     </if>
+
+    <if test="{{world_pov}}">
+      <world-pov>
+        {{world_pov}}
+      </world-pov>
+    </if>
   </section>
 
   <!-- Emphasis Mode Configuration -->
