@@ -369,10 +369,14 @@ def render_template(template: str, data: Dict[str, Any]) -> str:
 class StoryEnginePOMLAdapter:
     """Adapter for integrating POML with existing Story Engine code"""
     
-    def __init__(self, engine: Optional[POMLEngine] = None):
+    def __init__(self, engine: Optional[POMLEngine] = None, runtime_flags: Optional[Dict[str, Dict[str, Any]]] = None):
         self.engine = engine or create_engine()
         # Character persona cache
         self._persona_cache: Dict[str, Dict[str, Any]] = {}
+        # Context cache
+        self._context_cache: Dict[str, str] = {}
+        # Per-character runtime flags (e.g., {"pontius_pilate": {"era_mode": "mark_i"}})
+        self._runtime_flags: Dict[str, Dict[str, Any]] = dict(runtime_flags or {})
 
     def _load_persona(self, character: Dict[str, Any]) -> Dict[str, Any]:
         """Load optional character persona YAML and merge onto character data."""
@@ -419,15 +423,67 @@ class StoryEnginePOMLAdapter:
         # Merge persona overlay if present
         if isinstance(character, dict):
             character = self._load_persona(character)
+        # Apply runtime flags overlay
+        character = self._apply_runtime_flags(character)
+        # Load optional world/character context briefs
+        context_text = self._load_context(character)
         return self.engine.render(
             'simulations/character_response.poml',
             {
                 'character': character,
                 'situation': situation,
+                'context': context_text,
                 'emphasis': emphasis,
-                'temperature': 0.8
+                'temperature': 0.8,
+                'flags': self._current_flags(character),
             }
         )
+
+    def _current_flags(self, character: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            cid = (character.get('id') or character.get('name') or '').lower().replace(' ', '_')
+            return dict(self._runtime_flags.get(cid, {}))
+        except Exception:
+            return {}
+
+    def _apply_runtime_flags(self, character: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            cid = (character.get('id') or character.get('name') or '').lower().replace(' ', '_')
+            flags = self._runtime_flags.get(cid) or {}
+            if not isinstance(flags, dict) or not flags:
+                return character
+            merged = dict(character)
+            for k, v in flags.items():
+                merged[k] = v
+            return merged
+        except Exception:
+            return character
+
+    def _load_context(self, character: Dict[str, Any]) -> str:
+        """Load global + character-specific context briefs (markdown)."""
+        try:
+            name = (character.get('id') or character.get('name') or '').lower().replace(' ', '_')
+            cache_key = name or 'global'
+            if cache_key in self._context_cache:
+                return self._context_cache[cache_key]
+
+            base_dir = Path(__file__).parent.parent / 'config' / 'context'
+            parts: list[str] = []
+            # Global/world context
+            g = base_dir / 'global.md'
+            if g.exists():
+                parts.append(g.read_text(encoding='utf-8'))
+            # Character-specific context
+            if name:
+                c = base_dir / f'{name}.md'
+                if c.exists():
+                    parts.append(c.read_text(encoding='utf-8'))
+
+            text = '\n\n'.join(p.strip() for p in parts if p.strip())
+            self._context_cache[cache_key] = text
+            return text
+        except Exception:
+            return ''
     
     def get_scene_prompt(self, beat: Dict, characters: List[Dict], 
                         previous_context: str = "") -> str:
@@ -506,7 +562,14 @@ class StoryEnginePOMLAdapter:
         )
 
     # --- Meta narrative helpers ---
-    def get_review_throughlines_prompt(self, character: Dict[str, Any], situations: List[str], simulations: List[Dict[str, Any]]) -> str:
+    def get_review_throughlines_prompt(
+        self,
+        character: Dict[str, Any],
+        situations: List[str],
+        simulations: List[Dict[str, Any]],
+        target_criteria: Optional[List[str]] = None,
+        weights: Optional[Dict[str, float]] = None,
+    ) -> str:
         import json as _json
         character = self._load_persona(character)
         return self.engine.render(
@@ -514,7 +577,9 @@ class StoryEnginePOMLAdapter:
             {
                 'character': character,
                 'situations': situations,
-                'simulations_json': _json.dumps(simulations, ensure_ascii=False)
+                'simulations_json': _json.dumps(simulations, ensure_ascii=False),
+                'target_criteria': target_criteria or [],
+                'weights_json': _json.dumps(weights or {}, ensure_ascii=False),
             }
         )
 

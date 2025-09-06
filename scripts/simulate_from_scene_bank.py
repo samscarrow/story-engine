@@ -28,8 +28,8 @@ from core.common.result_store import store_workflow_output  # noqa: E402
 from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
 
 
-async def simulate_from_scene(scene: Dict[str, Any]) -> Dict[str, Any]:
-    engine = OrchestratedStoryEngine(use_poml=True)
+async def simulate_from_scene(scene: Dict[str, Any], character_flags: dict | None = None) -> Dict[str, Any]:
+    engine = OrchestratedStoryEngine(use_poml=True, runtime_flags=character_flags)
 
     # Slightly larger budgets for drama
     profiles = engine.component_profiles
@@ -76,6 +76,7 @@ def main() -> None:
     p.add_argument("--list", action="store_true", help="List available scenes")
     p.add_argument("--id", help="Scene id or title slug to simulate from", default=None)
     p.add_argument("--out", help="Write JSON result to this file", default=None)
+    p.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags id:key=value; repeatable")
     args = p.parse_args()
 
     # Load DB_* env vars from .env for auto-store
@@ -92,7 +93,20 @@ def main() -> None:
     if not entry:
         raise SystemExit(f"Scene not found: {args.id}")
 
-    res = asyncio.get_event_loop().run_until_complete(simulate_from_scene(entry.__dict__))
+    # Parse character flags
+    cflags: dict[str, dict] = {}
+    for spec in args.char_flag or []:
+        try:
+            if ":" not in spec or "=" not in spec:
+                continue
+            ident, kv = spec.split(":", 1)
+            key, val = kv.split("=", 1)
+            ident = ident.strip().lower().replace(" ", "_")
+            cflags.setdefault(ident, {})[key.strip()] = val.strip()
+        except Exception:
+            continue
+
+    res = asyncio.run(simulate_from_scene(entry.__dict__, cflags or None))
 
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
