@@ -18,7 +18,7 @@ from core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
 class MetaNarrativePipeline:
     """Run multi-simulation → review → synthesis → screenplay drafting via POML personas."""
 
-    def __init__(self, use_poml: bool = True, orchestrator: Any = None):
+    def __init__(self, use_poml: bool = True, orchestrator: Any = None, target_metrics: Optional[List[str]] = None, weights: Optional[Dict[str, float]] = None, character_flags: Optional[Dict[str, Dict[str, Any]]] = None):
         cfg = load_config("config.yaml")
         self.config = cfg
         self.orchestrator = orchestrator or create_orchestrator_from_yaml("config.yaml")
@@ -32,7 +32,10 @@ class MetaNarrativePipeline:
 
         # POML adapter
         from poml.lib.poml_integration import StoryEnginePOMLAdapter
-        self.poml = StoryEnginePOMLAdapter()
+        self.poml = StoryEnginePOMLAdapter(runtime_flags=character_flags)
+        # Preferences for biasing review/evaluation
+        self.target_metrics: List[str] = list(target_metrics or [])
+        self.criteria_weights: Dict[str, float] = dict(weights or {})
 
     async def simulate(self, character: CharacterState, situations: List[str], runs_per: int = 3) -> List[Dict[str, Any]]:
         results: List[Dict[str, Any]] = []
@@ -51,9 +54,20 @@ class MetaNarrativePipeline:
         return results
 
     async def review_throughlines(self, character: Dict[str, Any], situations: List[str], simulations: List[Dict[str, Any]]) -> Dict[str, Any]:
-        prompt = self.poml.get_review_throughlines_prompt(character, situations, simulations)
-        # Large budget for reviewer to consider many simulations
-        resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.3, max_tokens=1800)
+        prompt = self.poml.get_review_throughlines_prompt(
+            character,
+            situations,
+            simulations,
+            target_criteria=self.target_metrics or None,
+            weights=self.criteria_weights or None,
+        )
+        # Larger budget for reviewer to consider many simulations and include scoring fields
+        resp = await self.orchestrator.generate(
+            prompt,
+            allow_fallback=True,
+            temperature=0.3,
+            max_tokens=2200,
+        )
         text = getattr(resp, 'text', '') or ''
         try:
             data = json.loads(text)
@@ -62,6 +76,30 @@ class MetaNarrativePipeline:
             import re
             m = re.search(r"\{[\s\S]*\}", text)
             data = json.loads(m.group(0)) if m else {"throughlines": []}
+        # Ensure criteria_scores/weighted_score are present if preferences were provided
+        return self._backfill_weighted_scores(data)
+
+    def _backfill_weighted_scores(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            ths = data.get('throughlines') or []
+            for t in ths:
+                cs = t.get('criteria_scores') or {}
+                # Ensure all target metrics exist
+                for m in self.target_metrics or []:
+                    cs.setdefault(m, 0)
+                t['criteria_scores'] = cs
+                # Compute weighted score if missing or zero
+                ws = t.get('weighted_score')
+                if ws in (None, 0, 0.0, '') and (self.criteria_weights or {}):
+                    total = 0.0
+                    for k, w in (self.criteria_weights or {}).items():
+                        try:
+                            total += float(cs.get(k, 0) or 0) * float(w)
+                        except Exception:
+                            continue
+                    t['weighted_score'] = round(total, 2)
+        except Exception:
+            pass
         return data
 
     def apply_reviewer_params(self, params: Dict[str, Any]) -> None:
@@ -82,7 +120,7 @@ class MetaNarrativePipeline:
         # Reuse story evaluation to assess outline potential
         from poml.lib.poml_integration import StoryEnginePOMLAdapter
         adapter = self.poml
-        prompt = adapter.get_quality_evaluation_prompt(meta_outline[:2000], [
+        metrics = self.target_metrics or [
             "Narrative Coherence",
             "Character Motivation",
             "Conflict Density",
@@ -91,7 +129,8 @@ class MetaNarrativePipeline:
             "Originality",
             "Dramatic Momentum",
             "Overall Potential",
-        ])
+        ]
+        prompt = adapter.get_quality_evaluation_prompt(meta_outline[:2000], metrics)
         resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.3, max_tokens=500)
         text = getattr(resp, 'text', '') or ''
         # Parse into scores
@@ -120,16 +159,30 @@ class MetaNarrativePipeline:
         )
         return getattr(enhanced, 'text', '') or ''
 
-    @staticmethod
-    def select_best_throughline(throughlines: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    def select_best_throughline(self, throughlines: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         """Pick best throughline using arc strength + evidence richness + conflict coverage."""
         if not throughlines:
             return None
+        # Prefer weighted score if reviewer provided it
         def score(t: Dict[str, Any]) -> float:
-            strength = float(t.get('arc_strength', 0) or 0)
-            ev = t.get('evidence', []) or []
-            conflicts = set((t.get('conflicts') or []))
-            return strength + 2.0 * len(ev) + 1.0 * len(conflicts)
+            if 'weighted_score' in t:
+                try:
+                    return float(t.get('weighted_score') or 0.0)
+                except Exception:
+                    pass
+            # Otherwise compute ad-hoc, optionally factoring criteria_scores with weights
+            base = float(t.get('arc_strength', 0) or 0)
+            ev_count = len(t.get('evidence', []) or [])
+            conflicts = len(set((t.get('conflicts') or [])))
+            s = base + 2.0 * ev_count + 1.0 * conflicts
+            cs = t.get('criteria_scores') or {}
+            if cs and getattr(self, 'criteria_weights', None):
+                try:
+                    for k, w in self.criteria_weights.items():
+                        s += float(w) * float(cs.get(k, 0) or 0)
+                except Exception:
+                    pass
+            return s
         return max(throughlines, key=score)
 
     @staticmethod

@@ -62,10 +62,10 @@ def _read_inputs(args: argparse.Namespace) -> List[Dict[str, Any]]:
     return items
 
 
-async def _evaluate_items(items: List[Dict[str, Any]], use_poml: bool) -> List[Dict[str, Any]]:
+async def _evaluate_items(items: List[Dict[str, Any]], use_poml: bool, character_flags: Dict[str, Dict[str, Any]] | None = None) -> List[Dict[str, Any]]:
     # Load DB_* from .env for auto-store
     load_dotenv_keys()
-    engine = OrchestratedStoryEngine(use_poml=use_poml)
+    engine = OrchestratedStoryEngine(use_poml=use_poml, runtime_flags=character_flags)
     out: List[Dict[str, Any]] = []
 
     for it in items:
@@ -100,7 +100,23 @@ def main() -> None:
     g_cfg = p.add_argument_group("config")
     g_cfg.add_argument("--live", action="store_true", help="Use live provider (LM Studio) via env vars")
 
+    # Character/runtime flags
+    g_cfg.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags id:key=value; repeatable")
+
     args = p.parse_args()
+
+    # Parse character flags
+    cflags: Dict[str, Dict[str, Any]] = {}
+    for spec in args.char_flag or []:
+        try:
+            if ":" not in spec or "=" not in spec:
+                continue
+            ident, kv = spec.split(":", 1)
+            key, val = kv.split("=", 1)
+            ident = ident.strip().lower().replace(" ", "_")
+            cflags.setdefault(ident, {})[key.strip()] = val.strip()
+        except Exception:
+            continue
 
     use_poml = True  # Always use POML evaluation template here
 
@@ -109,7 +125,8 @@ def main() -> None:
         print("! --live is set but LM_ENDPOINT/LMSTUDIO_MODEL not found in env; using defaults.", file=sys.stderr)
 
     items = _read_inputs(args)
-    results = asyncio.get_event_loop().run_until_complete(_evaluate_items(items, use_poml))
+    # Use asyncio.run for modern event loop management (Py3.7+)
+    results = asyncio.run(_evaluate_items(items, use_poml, character_flags=cflags or None))
 
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:

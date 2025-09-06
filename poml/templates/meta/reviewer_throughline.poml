@@ -21,10 +21,19 @@
     <simulations>
       {{simulations_json}}
     </simulations>
+    <preferences>
+      <!-- Optional: target criteria and weights to bias selection -->
+      <target_criteria>
+        <for each="c" in="{{target_criteria}}">
+          <c>{{c}}</c>
+        </for>
+      </target_criteria>
+      <weights_json>{{weights_json}}</weights_json>
+    </preferences>
   </section>
 
   <output>
-    Return strict JSON with this exact schema:
+    Return strict JSON with this exact schema (fields marked optional may be omitted if no preferences are provided). If this is a subsequent review (e.g., after parameter adjustments), you MUST continue to include the scoring fields when preferences exist:
     {
       "throughlines": [
         {
@@ -33,7 +42,9 @@
           "evidence": [ {"index": <int>, "quote": "short quote from dialogue or thought"} ],
           "conflicts": ["short"],
           "motivations": ["short"],
-          "arc_strength": 0..100
+          "arc_strength": 0..100,
+          "criteria_scores": { "<metric>": 0..10 },   // optional
+          "weighted_score": <float>                    // optional
         }
       ],
       "recommended_params": {
@@ -52,6 +63,8 @@
       }
     }
     - Provide 3–5 throughlines; arc_strength is a comparative score.
+    - If target_criteria are provided, score each throughline on those metrics (0–10) as criteria_scores (always include for subsequent reviews as well).
+    - If weights_json is provided, compute weighted_score = sum(criteria_scores[m] * weights[m]) and include it (always include for subsequent reviews as well).
     - Assess if prior parameters were adequate and propose concrete adjustments for the next simulation batch.
     - Your output must be valid JSON with no commentary outside the JSON.
   </output>
