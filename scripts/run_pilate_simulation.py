@@ -14,6 +14,7 @@ Usage:
 """
 
 import asyncio
+import argparse
 import json
 import os
 import sys
@@ -27,10 +28,10 @@ from core.common.result_store import store_workflow_output  # noqa: E402
 from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
 
 
-async def run_sim():
+async def run_sim(character_flags: dict | None = None):
     # Load DB_* so that auto-store can work without manual export
     load_dotenv_keys()
-    engine = OrchestratedStoryEngine(use_poml=True)
+    engine = OrchestratedStoryEngine(use_poml=True, runtime_flags=character_flags)
 
     # Trim defaults to keep the run snappy
     profiles = engine.component_profiles
@@ -109,4 +110,19 @@ async def run_sim():
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(run_sim())
+    p = argparse.ArgumentParser(description="Run a Pilate demo simulation")
+    p.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags id:key=value; repeatable")
+    args = p.parse_args()
+    # Parse flags
+    cflags: dict[str, dict] = {}
+    for spec in args.char_flag or []:
+        try:
+            if ":" not in spec or "=" not in spec:
+                continue
+            ident, kv = spec.split(":", 1)
+            key, val = kv.split("=", 1)
+            ident = ident.strip().lower().replace(" ", "_")
+            cflags.setdefault(ident, {})[key.strip()] = val.strip()
+        except Exception:
+            continue
+    asyncio.run(run_sim(cflags or None))

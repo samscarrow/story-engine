@@ -8,6 +8,7 @@ __pycache__/
 client-cert.pem
 client-key.pem
 gcloud-sql-mc3.pem
+server-ca.pem
 
 # Generated artifacts
 feedback/
@@ -16,4 +17,3 @@ scene_bank/*.json
 
 # OS
 .DS_Store
-

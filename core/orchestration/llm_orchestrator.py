@@ -183,55 +183,78 @@ class LMStudioProvider(LLMProvider):
             "max_tokens": kwargs.get('max_tokens', self.config.max_tokens),
             "stream": False
         }
+        # Note: LM Studio JSON schema support varies by version; avoid response_format to prevent 400s.
         
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    url, 
-                    json=payload,
-                    timeout=aiohttp.ClientTimeout(total=self.config.timeout)
-                ) as response:
-                    if response.status != 200:
-                        error_text = await response.text()
-                        raise GenerationError(
-                            "lmstudio",
-                            Exception(f"HTTP {response.status}: {error_text}"),
-                            {"status": response.status, "response": error_text}
+                attempts = 2 if "response_format" in payload else 1
+                for i in range(attempts):
+                    current_payload = payload
+                    if i == 1:
+                        # Retry without response_format if the first attempt failed due to format type
+                        current_payload = {k: v for k, v in payload.items() if k != "response_format"}
+                        logger.warning("Retrying LMStudio generation without response_format (text mode)")
+
+                    async with session.post(
+                        url, 
+                        json=current_payload,
+                        timeout=aiohttp.ClientTimeout(total=self.config.timeout)
+                    ) as response:
+                        if response.status != 200:
+                            error_text = await response.text()
+                            # On first attempt, if LM Studio rejects response_format, try text mode
+                            if (
+                                i == 0
+                                and response.status == 400
+                                and "response_format.type" in error_text
+                                and "response_format" in payload
+                            ):
+                                continue
+                            raise GenerationError(
+                                "lmstudio",
+                                Exception(f"HTTP {response.status}: {error_text}"),
+                                {"status": response.status, "response": error_text}
+                            )
+                        
+                        data = await response.json()
+                        
+                        # Validate response structure
+                        if 'choices' not in data or len(data['choices']) == 0:
+                            raise GenerationError(
+                                "lmstudio",
+                                ValueError("Invalid response structure: no choices"),
+                                {"response": data}
+                            )
+                        # LM Studio may return either OpenAI-style message.content or text
+                        choice = data['choices'][0]
+                        text = ''
+                        if isinstance(choice, dict):
+                            # Prefer chat message content
+                            text = (
+                                (choice.get('message') or {}).get('content')
+                                if isinstance(choice.get('message'), dict)
+                                else ''
+                            )
+                            if not text:
+                                text = choice.get('text', '') or ''
+                        
+                        # Create response with validation
+                        return LLMResponse(
+                            text=text,
+                            provider=ModelProvider.LMSTUDIO,
+                            provider_name="lmstudio",
+                            model=data.get('model'),
+                            usage=data.get('usage'),
+                            raw_response=data,
+                            generation_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000
                         )
-                    
-                    data = await response.json()
-                    
-                    # Validate response structure
-                    if 'choices' not in data or len(data['choices']) == 0:
-                        raise GenerationError(
-                            "lmstudio",
-                            ValueError("Invalid response structure: no choices"),
-                            {"response": data}
-                        )
-                    # LM Studio may return either OpenAI-style message.content or text
-                    choice = data['choices'][0]
-                    text = ''
-                    if isinstance(choice, dict):
-                        # Prefer chat message content
-                        text = (
-                            (choice.get('message') or {}).get('content')
-                            if isinstance(choice.get('message'), dict)
-                            else ''
-                        )
-                        if not text:
-                            text = choice.get('text', '') or ''
-                    
-                    # Create response with validation
-                    return LLMResponse(
-                        text=text,
-                        provider=ModelProvider.LMSTUDIO,
-                        provider_name="lmstudio",
-                        model=data.get('model'),
-                        usage=data.get('usage'),
-                        raw_response=data,
-                        generation_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000
-                    )
-                    
+                # If loop completes without returning, raise last error
+                raise GenerationError(
+                    "lmstudio",
+                    Exception("All attempts failed for LMStudio generation"),
+                    {"status": 400}
+                )
+                
         except GenerationError:
             raise
         except Exception as e:

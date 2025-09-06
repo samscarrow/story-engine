@@ -45,10 +45,21 @@ def load_character(name: str) -> dict:
     raise SystemExit(f"Unknown character preset: {name}")
 
 
-async def run(character_name: str, situations: List[str], runs: int, out: str, store_db: bool = False, workflow_name: str = "meta_pipeline") -> None:
+async def run(
+    character_name: str,
+    situations: List[str],
+    runs: int,
+    out: str,
+    store_db: bool = False,
+    workflow_name: str = "meta_pipeline",
+    *,
+    target_metrics: list[str] | None = None,
+    weights: dict[str, float] | None = None,
+    character_flags: dict[str, dict] | None = None,
+) -> None:
     # Load DB_* from .env so auto-store works without manual export
     load_dotenv_keys()
-    pipeline = MetaNarrativePipeline(use_poml=True)
+    pipeline = MetaNarrativePipeline(use_poml=True, target_metrics=target_metrics, weights=weights, character_flags=character_flags)
     char_dict = load_character(character_name)
     char_state = pipeline.character_from_dict(char_dict)
 
@@ -132,9 +143,43 @@ def main() -> None:
     p.add_argument("--out", default="feedback/meta_pipeline_result.json")
     p.add_argument("--store-db", action="store_true", help="Store the final result JSON into PostgreSQL using DB_* env vars")
     p.add_argument("--workflow-name", default="meta_pipeline", help="Workflow name key under which to store the output")
+
+    # Preferences for reviewer/evaluator bias
+    p.add_argument("--target-metrics", nargs="*", default=[], help="Bias toward these metrics (e.g., Pacing Dialogue Structure)")
+    p.add_argument("--weights", default="", help="Comma-separated weights, e.g., 'Pacing=2,Dialogue=1.5,Structure=1'")
+    # Character flags (apply per character id): --char-flag pilate:era_mode=mark_i (repeatable)
+    p.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags, format id:key=value; can be repeated")
+
     args = p.parse_args()
 
-    asyncio.get_event_loop().run_until_complete(
+    # Parse weights string
+    weights: dict[str, float] = {}
+    if args.weights:
+        for item in args.weights.split(","):
+            if not item.strip() or "=" not in item:
+                continue
+            k, v = item.split("=", 1)
+            try:
+                weights[k.strip()] = float(v.strip())
+            except Exception:
+                continue
+
+    # Parse character flags
+    cflags: dict[str, dict] = {}
+    for spec in args.char_flag or []:
+        try:
+            if ":" not in spec or "=" not in spec:
+                continue
+            ident, kv = spec.split(":", 1)
+            key, val = kv.split("=", 1)
+            ident = ident.strip().lower().replace(" ", "_")
+            key = key.strip()
+            val = val.strip()
+            cflags.setdefault(ident, {})[key] = val
+        except Exception:
+            continue
+
+    asyncio.run(
         run(
             args.character,
             args.situations,
@@ -142,6 +187,9 @@ def main() -> None:
             args.out,
             store_db=args.store_db,
             workflow_name=args.workflow_name,
+            target_metrics=args.target_metrics or None,
+            weights=weights or None,
+            character_flags=cflags or None,
         )
     )
 
