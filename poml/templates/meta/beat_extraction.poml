@@ -1,0 +1,58 @@
+<document>
+  <metadata>
+    <title>Beat Extraction</title>
+    <description>Extract a beat atom from a single simulation result.</description>
+    <version>1.0.0</version>
+    <tags>beat, intent, obstacle, tactic, turn, outcome, value</tags>
+  </metadata>
+
+  <system>
+    You are a surgical narrative analyst.
+    Read the simulation JSON (dialogue, thought, action, emotional_shift) and produce a compact beat atom.
+    Return ONLY the JSON object per the schema.
+  </system>
+
+  <section class="inputs">
+    <h2>Simulation Under Review</h2>
+    <character>{{character.name | default: character_id}}</character>
+    <situation>{{situation}}</situation>
+    <emphasis>{{emphasis | default: "neutral"}}</emphasis>
+    <code format="json">{{response_json}}</code>
+  </section>
+
+  <section class="output">
+    <h2>Output JSON Schema</h2>
+    <code format="json">
+{
+  "character": "name",
+  "situation": "short restatement",
+  "intent": "speaker's immediate objective",
+  "obstacle": {
+    "type": "person|system|self|unknown",
+    "name": "who/what blocks",
+    "force": "how it resists"
+  },
+  "tactic": "threaten|plead|deflect|question|deceive|appeal_to_authority|bargain|withdraw|attack|expose|state|other",
+  "turn": "the moment of change in the beat",
+  "outcome": "win|lose|stalemate|unclear",
+  "tension_change": -2..2,
+  "value_shift": {"<value>": -1..1},
+  "relationship_delta": {"<target>": -1..1},
+  "world_delta": {"<fact>": "set|clear|change:<value>"},
+  "evidence": {
+    "dialogue": "key quote",
+    "thought": "key internal line",
+    "action": "key physical indicator"
+  }
+}
+    </code>
+  </section>
+
+  <instructions>
+    <important>
+      Be specific and short. Infer values from context (e.g., order, justice, duty, mercy) if relevant.
+      If unknown, set concise defaults rather than omitting fields.
+    </important>
+  </instructions>
+</document>
+

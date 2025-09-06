@@ -618,6 +618,34 @@ class StoryEnginePOMLAdapter:
             }
         )
 
+    def get_beat_extraction_prompt(self, sim: Dict[str, Any]) -> str:
+        """Prompt to extract a beat atom from a single simulation result dict."""
+        import json as _json
+        character = sim.get('character') or {}
+        # handle CharacterState dataclass or dict
+        if hasattr(character, '__dataclass_fields__'):
+            from dataclasses import asdict as _asdict
+            character = _asdict(character)
+        payload = {
+            'character': character or {'name': sim.get('character_id', 'Character'), 'id': sim.get('character_id', 'char')},
+            'character_id': sim.get('character_id', ''),
+            'situation': sim.get('situation', ''),
+            'emphasis': sim.get('emphasis', ''),
+            'response_json': _json.dumps(sim.get('response') or {}, ensure_ascii=False),
+        }
+        return self.engine.render('meta/beat_extraction.poml', payload)
+
+    def get_scene_plan_prompt(self, beats: list[dict], objective: str = '', style: str = '') -> str:
+        import json as _json
+        return self.engine.render(
+            'narrative/scene_plan.poml',
+            {
+                'beats_json': _json.dumps(beats, ensure_ascii=False),
+                'objective': objective,
+                'style': style,
+            }
+        )
+
     def get_persona_iterative_review_prompt(
         self,
         character: Dict[str, Any],
