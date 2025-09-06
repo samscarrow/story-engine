@@ -618,6 +618,47 @@ class StoryEnginePOMLAdapter:
             }
         )
 
+    def get_persona_iterative_review_prompt(
+        self,
+        character: Dict[str, Any],
+        current_response: Dict[str, Any],
+        previous_responses: List[Dict[str, Any]],
+        threshold: int = 80,
+    ) -> str:
+        import json as _json
+        character = self._load_persona(character)
+        return self.engine.render(
+            'meta/persona_iterative_review.poml',
+            {
+                'character': character,
+                'current_response_json': _json.dumps(current_response, ensure_ascii=False),
+                'previous_responses_json': _json.dumps(previous_responses[-3:], ensure_ascii=False),
+                'threshold': threshold,
+            }
+        )
+
+    def get_character_prompt_iterative(
+        self,
+        character,
+        situation: str,
+        emphasis: str = "neutral",
+        previous_responses: Optional[List[Dict[str, Any]]] = None,
+    ) -> str:
+        """Generate character prompt that includes up to the last 3 responses to steer improvements."""
+        import json as _json
+        if isinstance(character, dict):
+            character = self._load_persona(character)
+        return self.engine.render(
+            'simulations/character_response_iterative.poml',
+            {
+                'character': character,
+                'situation': situation,
+                'emphasis': emphasis,
+                'temperature': 0.8,
+                'previous_responses_json': _json.dumps((previous_responses or [])[-3:], ensure_ascii=False),
+            }
+        )
+
 # Example usage
 if __name__ == "__main__":
     # Set up logging
