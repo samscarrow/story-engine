@@ -495,30 +495,31 @@ class SimulationEngine:
                         logger.info(f"Using cached simulation for {character.name}/{emphasis}")
                         return cached_result
                     
-                # Generate prompt (POML when enabled)
+                # Generate prompt (POML when enabled) using role-aware splits
                 if self.use_poml and self.poml_adapter:
-                    prompt = self.poml_adapter.get_character_prompt(
-                        character=character,
+                    roles = self.poml_adapter.get_character_prompt_roles(
+                        character=asdict(character),
                         situation=situation,
                         emphasis=emphasis
                     )
                 else:
-                    prompt = character.get_simulation_prompt(situation, emphasis)
+                    roles = {"system": "", "user": character.get_simulation_prompt(situation, emphasis)}
 
                 # Prepare backend call
                 if self.orchestrator is not None:
-                    async def _call(p: str, t: float, mt: Optional[int]):
+                    async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
                         kwargs = {"allow_fallback": True, "temperature": t}
                         if mt is not None:
                             kwargs["max_tokens"] = mt
                         # Avoid provider-specific response_format toggles; rely on strict prompting + parser
-                        return await self.orchestrator.generate(p, **kwargs)
+                        return await self.orchestrator.generate(p.get('user',''), system=p.get('system',''), **kwargs)
                 else:
-                    async def _call(p: str, t: float, mt: Optional[int]):
-                        return await self.llm.generate_response(p, temperature=t, max_tokens=mt or 500)
+                    async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
+                        text = f"{p.get('system','')}\n\n{p.get('user','')}".strip()
+                        return await self.llm.generate_response(text, temperature=t, max_tokens=mt or 500)
 
                 # Call backend with retry logic
-                response = await self.retry_handler.execute_with_retry(_call, prompt, temperature, max_tokens)
+                response = await self.retry_handler.execute_with_retry(_call, roles, temperature, max_tokens)
                 
                 # Parse and validate structured response with robust fallbacks
                 raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
@@ -733,36 +734,37 @@ class SimulationEngine:
                 return {}
 
         for i in range(iterations):
-            # Render prompt (iterative if history exists)
+            # Render prompt (iterative if history exists) with role-aware splits
             if self.use_poml and self.poml_adapter and previous:
-                prompt = self.poml_adapter.get_character_prompt_iterative(
-                    character=character,
+                roles = self.poml_adapter.get_character_prompt_iterative_roles(
+                    character=asdict(character),
                     situation=situation,
                     emphasis=emphasis,
                     previous_responses=[p.get('response', {}) for p in previous][-window:],
                 )
             elif self.use_poml and self.poml_adapter:
-                prompt = self.poml_adapter.get_character_prompt(
-                    character=character,
+                roles = self.poml_adapter.get_character_prompt_roles(
+                    character=asdict(character),
                     situation=situation,
                     emphasis=emphasis,
                 )
             else:
-                prompt = character.get_simulation_prompt(situation, emphasis)
+                roles = {"system": "", "user": character.get_simulation_prompt(situation, emphasis)}
 
             # Call backend
             if self.orchestrator is not None:
-                async def _call(p: str, t: float, mt: Optional[int]):
+                async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
                     kwargs = {"allow_fallback": True, "temperature": character.emotional_state.modulate_temperature()}
                     if mt is not None:
                         kwargs["max_tokens"] = mt
-                    return await self.orchestrator.generate(p, **kwargs)
+                    return await self.orchestrator.generate(p.get('user',''), system=p.get('system',''), **kwargs)
             else:
-                async def _call(p: str, t: float, mt: Optional[int]):
-                    return await self.llm.generate_response(p, temperature=t, max_tokens=mt or 500)
+                async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
+                    text = f"{p.get('system','')}\n\n{p.get('user','')}".strip()
+                    return await self.llm.generate_response(text, temperature=t, max_tokens=mt or 500)
 
             temp = character.emotional_state.modulate_temperature()
-            response = await self.retry_handler.execute_with_retry(_call, prompt, temp, max_tokens)
+            response = await self.retry_handler.execute_with_retry(_call, roles, temp, max_tokens)
             raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
 
             # Parse best-effort
