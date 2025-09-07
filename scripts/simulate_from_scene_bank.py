@@ -26,6 +26,7 @@ from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine,
 from core.domain.models import StoryRequest  # noqa: E402
 from core.common.result_store import store_workflow_output  # noqa: E402
 from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
 async def simulate_from_scene(scene: Dict[str, Any], character_flags: dict | None = None) -> Dict[str, Any]:
@@ -72,12 +73,26 @@ async def simulate_from_scene(scene: Dict[str, Any], character_flags: dict | Non
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Simulate from a scene bank entry")
+    
+    # Add standardized model/client arguments
+    add_model_client_args(p)
+    
     p.add_argument("--bank", default="scene_bank/pilate_md_scenes.json")
     p.add_argument("--list", action="store_true", help="List available scenes")
     p.add_argument("--id", help="Scene id or title slug to simulate from", default=None)
     p.add_argument("--out", help="Write JSON result to this file", default=None)
     p.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags id:key=value; repeatable")
     args = p.parse_args()
+
+    # Get model/client configuration
+    model_config = get_model_and_client_config(args)
+    print_connection_status(model_config)
+    
+    # Configure environment for model/client
+    if model_config.get("endpoint"):
+        os.environ["LM_ENDPOINT"] = model_config["endpoint"]
+    if model_config.get("model"):
+        os.environ["LMSTUDIO_MODEL"] = model_config["model"]
 
     # Load DB_* env vars from .env for auto-store
     load_dotenv_keys()
