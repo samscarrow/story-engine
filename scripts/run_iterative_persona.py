@@ -17,6 +17,7 @@ import yaml
 
 from core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline
 from core.storage import get_database_connection
+from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status
 
 
 def load_persona_yaml(char_id: str) -> Dict[str, Any]:
@@ -59,6 +60,10 @@ def build_db():
 
 async def main():
     parser = argparse.ArgumentParser(description='Run iterative persona simulation and store results')
+    
+    # Add standardized model/client arguments
+    add_model_client_args(parser)
+    
     parser.add_argument('--character-id', default='pontius_pilate', help='Character ID matching a persona YAML filename')
     parser.add_argument('--situation', required=False, default='The crowd demands a decision; tensions are high in the Praetorium.', help='Situation prompt')
     parser.add_argument('--emphasis', default='duty', help='Emphasis mode')
@@ -66,6 +71,16 @@ async def main():
     parser.add_argument('--window', type=int, default=3, help='Number of previous attempts to include')
     parser.add_argument('--workflow-name', default='iterative_persona_sim', help='Storage workflow name')
     args = parser.parse_args()
+    
+    # Get model/client configuration
+    model_config = get_model_and_client_config(args)
+    print_connection_status(model_config)
+    
+    # Configure environment for model/client
+    if model_config.get("endpoint"):
+        os.environ["LM_ENDPOINT"] = model_config["endpoint"]
+    if model_config.get("model"):
+        os.environ["LMSTUDIO_MODEL"] = model_config["model"]
 
     # Load persona
     persona = load_persona_yaml(args.character_id)

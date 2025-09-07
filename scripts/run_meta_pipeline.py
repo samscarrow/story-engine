@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pa
 
 from core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline  # noqa: E402
 from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
 def load_character(name: str) -> dict:
@@ -137,6 +138,10 @@ async def run(
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Run meta-narrative pipeline over character simulations")
+    
+    # Add standardized model/client arguments
+    add_model_client_args(p)
+    
     p.add_argument("--character", default="pilate")
     p.add_argument("--runs", type=int, default=2)
     p.add_argument("--situations", nargs="+", required=True)
@@ -151,6 +156,16 @@ def main() -> None:
     p.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags, format id:key=value; can be repeated")
 
     args = p.parse_args()
+    
+    # Get model/client configuration
+    model_config = get_model_and_client_config(args)
+    print_connection_status(model_config)
+    
+    # Configure environment for model/client
+    if model_config.get("endpoint"):
+        os.environ["LM_ENDPOINT"] = model_config["endpoint"]
+    if model_config.get("model"):
+        os.environ["LMSTUDIO_MODEL"] = model_config["model"]
 
     # Parse weights string
     weights: dict[str, float] = {}

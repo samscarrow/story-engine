@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pa
 from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine  # noqa: E402
 from core.common.result_store import store_workflow_output  # noqa: E402
 from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
 def _read_inputs(args: argparse.Namespace) -> List[Dict[str, Any]]:
@@ -89,6 +90,10 @@ async def _evaluate_items(items: List[Dict[str, Any]], use_poml: bool, character
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Evaluate story content quality using POML")
+    
+    # Add standardized model/client arguments
+    add_model_client_args(p)
+    
     g_in = p.add_argument_group("inputs")
     g_in.add_argument("--text", help="Inline text to evaluate", default=None)
     g_in.add_argument("--file", nargs="*", help="One or more file globs to evaluate", default=[])
@@ -104,6 +109,16 @@ def main() -> None:
     g_cfg.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags id:key=value; repeatable")
 
     args = p.parse_args()
+    
+    # Get model/client configuration
+    model_config = get_model_and_client_config(args)
+    print_connection_status(model_config)
+    
+    # Configure environment for model/client
+    if model_config.get("endpoint"):
+        os.environ["LM_ENDPOINT"] = model_config["endpoint"]
+    if model_config.get("model"):
+        os.environ["LMSTUDIO_MODEL"] = model_config["model"]
 
     # Parse character flags
     cflags: Dict[str, Dict[str, Any]] = {}

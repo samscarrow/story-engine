@@ -26,11 +26,20 @@ from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine,
 from core.domain.models import StoryRequest  # noqa: E402
 from core.common.result_store import store_workflow_output  # noqa: E402
 from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
-async def run_sim(character_flags: dict | None = None):
+async def run_sim(character_flags: dict | None = None, model_config: dict | None = None):
     # Load DB_* so that auto-store can work without manual export
     load_dotenv_keys()
+    
+    # Configure environment for model/client if provided
+    if model_config:
+        if model_config.get("endpoint"):
+            os.environ["LM_ENDPOINT"] = model_config["endpoint"]
+        if model_config.get("model"):
+            os.environ["LMSTUDIO_MODEL"] = model_config["model"]
+    
     engine = OrchestratedStoryEngine(use_poml=True, runtime_flags=character_flags)
 
     # Trim defaults to keep the run snappy
@@ -111,9 +120,19 @@ async def run_sim(character_flags: dict | None = None):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Run a Pilate demo simulation")
+    
+    # Add standardized model/client arguments
+    add_model_client_args(p)
+    
     p.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags id:key=value; repeatable")
+    
     args = p.parse_args()
-    # Parse flags
+    
+    # Get model/client configuration
+    model_config = get_model_and_client_config(args)
+    print_connection_status(model_config)
+    
+    # Parse character flags
     cflags: dict[str, dict] = {}
     for spec in args.char_flag or []:
         try:
@@ -125,4 +144,5 @@ if __name__ == "__main__":
             cflags.setdefault(ident, {})[key.strip()] = val.strip()
         except Exception:
             continue
-    asyncio.run(run_sim(cflags or None))
+    
+    asyncio.run(run_sim(cflags or None, model_config))
