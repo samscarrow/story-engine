@@ -7,7 +7,7 @@ Now supports YAML-based orchestrator loader and simple response caching.
 import asyncio
 import json
 from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from enum import Enum
 import logging
 
@@ -38,8 +38,9 @@ class _ProfilesConfig:
 
 class OrchestratedStoryEngine:
     """Story engine using LLM orchestrator for all generation tasks"""
-    
-    def __init__(self, config_path: str = "llm_config.json", orchestrator: Optional[Any] = None, use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any]]] = None):
+
+    def __init__(self, config_path: str = "llm_config.json", orchestrator: Optional[Any] = None,
+use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any]]] = None):
         """Initialize with orchestrator from YAML or legacy JSON config.
 
         Args:
@@ -59,7 +60,7 @@ class OrchestratedStoryEngine:
                 from core.orchestration.llm_orchestrator import LLMOrchestrator
                 self.orchestrator = LLMOrchestrator.from_config_file(config_path)
                 logger.info("Initialized orchestrator from legacy llm_config.json")
-        
+
         # Load unified config for narrative profiles
         try:
             self._config = load_config("config.yaml")
@@ -76,7 +77,7 @@ class OrchestratedStoryEngine:
             self.poml_adapter = StoryEnginePOMLAdapter(runtime_flags=runtime_flags)
         except Exception:
             self.poml_adapter = None
-        
+
         # Map components to preferred providers
         self.component_providers = {
             StoryComponent.PLOT_STRUCTURE: None,  # Use active/fallback
@@ -85,7 +86,7 @@ class OrchestratedStoryEngine:
             StoryComponent.QUALITY_EVALUATION: None,
             StoryComponent.ENHANCEMENT: None
         }
-        
+
         # Map components to generation profiles (merge config.yaml when present)
         defaults = {
             StoryComponent.PLOT_STRUCTURE: {"temperature": 0.7, "max_tokens": 800},
@@ -107,7 +108,8 @@ class OrchestratedStoryEngine:
             profile = defaults[comp].copy()
             if key in conf and isinstance(conf[key], dict):
                 # Allow temperature, max_tokens, and optional system prompt per component
-                profile.update({k: v for k, v in conf[key].items() if k in ("temperature", "max_tokens", "system")})
+                profile.update({k: v for k, v in conf[key].items() if k in ("temperature",
+"max_tokens", "system")})
             merged[comp] = profile
         self.component_profiles = merged
 
@@ -201,23 +203,23 @@ class OrchestratedStoryEngine:
             goals[cid] = f"Navigate {purpose}"
 
         return {"emphasis": emphasis, "goals": goals}
-    
+
     async def generate_component(
-        self, 
+        self,
         component: StoryComponent,
         prompt: str,
         with_meta: bool = False,
         **kwargs
     ) -> str | Tuple[str, Dict[str, Any]]:
         """Generate a story component using appropriate provider and settings"""
-        
+
         # Get provider and profile for this component
         provider = self.component_providers.get(component)
         profile = self.component_profiles.get(component, {})
-        
+
         # Merge kwargs with profile
         generation_params = {**profile, **kwargs}
-        
+
         # Cache key and lookup
         key = self.cache.make_key(
             provider or "active",
@@ -241,7 +243,8 @@ class OrchestratedStoryEngine:
             text = getattr(response, "text", "") or ""
             # Build response meta and expose it for observability
             meta: Dict[str, Any] = {
-                "provider": getattr(response, "provider_name", None) or getattr(response, "provider", None),
+                "provider": getattr(response, "provider_name", None) or getattr(response, "provider",
+None),
                 "model": getattr(response, "model", None),
                 "usage": getattr(response, "usage", None),
                 "timestamp": getattr(response, "timestamp", None),
@@ -261,11 +264,26 @@ class OrchestratedStoryEngine:
         except Exception as e:
             logger.error(f"Error generating {component.value}: {e}")
             raise
-    
+
     async def generate_plot_structure(self, request: StoryRequest) -> Dict:
-        """Generate the plot structure"""
-        
-        prompt = f"""Create a {request.structure} plot structure for:
+        """Generate the plot structure using the two-stage pipeline."""
+
+        if self.use_poml and self.poml_adapter:
+            # Use the new two-stage pipeline
+            plot_data = await self.poml_adapter.get_two_stage_plot_structure(
+                request=request,
+                orchestrator=self.orchestrator
+            )
+            return {
+                "structure": plot_data.get("structure_type", request.structure),
+                "plot_points": plot_data.get("beats", []),
+                "raw_text": json.dumps(plot_data, indent=2),
+                "beats": plot_data.get("beats", []),
+                "meta": {},
+            }
+        else:
+            # Fallback to original single-stage method
+            prompt = f"""Create a {request.structure} plot structure for:
 Title: {request.title}
 Premise: {request.premise}
 Genre: {request.genre}
@@ -281,80 +299,31 @@ Provide the plot points in a clear, structured format with:
 
 Be specific about key events and turning points."""
 
-        # Prefer POML-based prompt if enabled
-        if self.use_poml and self.poml_adapter:
-            prompt = self.poml_adapter.get_plot_structure_prompt(request)
-        
-        structure_text, meta = await self.generate_component(
-            StoryComponent.PLOT_STRUCTURE,
-            prompt,
-            with_meta=True
-        )
-        
-        beats = self._parse_plot_structure(structure_text)
+            structure_text, meta = await self.generate_component(
+                StoryComponent.PLOT_STRUCTURE,
+                prompt,
+                with_meta=True
+            )
 
-        return {
-            "structure": request.structure,
-            "plot_points": structure_text,
-            "raw_text": structure_text,
-            "beats": beats,
-            "meta": meta,
-        }
+            # Legacy path: skip parsing into beats to avoid dependency on removed parser
+            beats = []
 
-    def _parse_plot_structure(self, text: str) -> List[Dict[str, Any]]:
-        """Parse plot structure text into structured beats.
+            return {
+                "structure": request.structure,
+                "plot_points": structure_text,
+                "raw_text": structure_text,
+                "beats": beats,
+                "meta": meta,
+            }
 
-        Heuristic parsing of up to five classic beats: Setup, Rising Action,
-        Climax, Falling Action, Resolution. Each beat contains name, description,
-        tension (1-10), and purpose.
-        """
-        if not text:
-            return []
-        chunks = [c.strip() for c in text.strip().split("\n\n") if c.strip()]
-        names = ["Setup", "Rising Action", "Climax", "Falling Action", "Resolution"]
-        purposes = [
-            "Establish normal",
-            "Escalate stakes",
-            "Decisive confrontation",
-            "Process consequences",
-            "New equilibrium",
-        ]
-        tensions = [2, 5, 9, 4, 3]
-        beats: List[Dict[str, Any]] = []
-        for i, chunk in enumerate(chunks[:5]):
-            lower = chunk.lower()
-            name = names[i]
-            purpose = purposes[i]
-            tension = tensions[i]
-            # Try to detect named headers in text
-            if lower.startswith("setup") or "setup" in lower.split(':')[0]:
-                name, purpose, tension = names[0], purposes[0], tensions[0]
-            elif lower.startswith("rising") or "rising action" in lower.split(':')[0]:
-                name, purpose, tension = names[1], purposes[1], tensions[1]
-            elif lower.startswith("climax"):
-                name, purpose, tension = names[2], purposes[2], tensions[2]
-            elif lower.startswith("falling") or "falling action" in lower.split(':')[0] or "aftermath" in lower:
-                name, purpose, tension = names[3], purposes[3], tensions[3]
-            elif lower.startswith("resolution") or "denouement" in lower:
-                name, purpose, tension = names[4], purposes[4], tensions[4]
-            beats.append({
-                "index": i,
-                "name": name,
-                "description": chunk,
-                "tension": tension,
-                "purpose": purpose,
-            })
-        return beats
-    
     async def generate_scene(
-        self, 
+        self,
         plot_point: Any,
         characters: List[Dict],
         previous_context: str = ""
     ) -> Dict:
-        """Generate detailed scene from plot point"""
-        
-        # Use POML prompt if enabled and available
+        """Generate detailed scene from plot point using the two-stage pipeline."""
+
         if self.use_poml and self.poml_adapter:
             if isinstance(plot_point, dict):
                 beat_info = {
@@ -364,12 +333,23 @@ Be specific about key events and turning points."""
                 }
             else:
                 beat_info = self._derive_beat_info(str(plot_point))
-            prompt = self.poml_adapter.get_scene_prompt(
+
+            scene_data = await self.poml_adapter.get_two_stage_scene(
                 beat=beat_info,
                 characters=characters,
-                previous_context=previous_context or ""
+                previous_context=previous_context or "",
+                orchestrator=self.orchestrator
             )
+            return {
+                "plot_point": plot_point,
+                "scene_description": scene_data.get("scene_description", ""),
+                "characters_present": [c.get("name") for c in scene_data.get("characters_present",
+[])],
+                "name": beat_info.get("name", "Scene"),
+                "meta": scene_data, # Store the full structured data in meta
+            }
         else:
+            # Fallback to original single-stage method
             char_descriptions = "\n".join([
                 f"- {c['name']}: {c.get('description', 'No description')}"
                 for c in characters
@@ -389,21 +369,21 @@ Include:
 - Key dialogue snippets
 - Emotional tone
 - Scene objective/purpose"""
-        
-        scene_text, meta = await self.generate_component(
-            StoryComponent.SCENE_DETAILS,
-            prompt,
-            with_meta=True,
-            temperature=0.8  # More creative for scenes
-        )
-        
-        return {
-            "plot_point": plot_point,
-            "scene_description": scene_text,
-            "characters_present": [c['name'] for c in characters],
-            "name": (plot_point.get("name") if isinstance(plot_point, dict) else None) or "Scene",
-            "meta": meta,
-        }
+
+            scene_text, meta = await self.generate_component(
+                StoryComponent.SCENE_DETAILS,
+                prompt,
+                with_meta=True,
+                temperature=0.8  # More creative for scenes
+            )
+
+            return {
+                "plot_point": plot_point,
+                "scene_description": scene_text,
+                "characters_present": [c['name'] for c in characters],
+                "name": (plot_point.get("name") if isinstance(plot_point, dict) else None) or "Scene",
+                "meta": meta,
+            }
 
     # ---- Scene Bank integration ----
     def list_scene_bank(self, query: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -453,46 +433,28 @@ Include:
             "seed_scene": asdict(entry),
             "expanded_scene": scene,
         }
-    
+
     async def generate_dialogue(
         self,
         scene: Dict,
         character: Dict,
         interaction_context: str
     ) -> str:
-        """Generate character dialogue for a scene"""
-        
-        # Use POML prompt if enabled and available
+        """Generate character dialogue for a scene using the two-stage pipeline."""
+
         if self.use_poml and self.poml_adapter:
-            pp = scene.get("plot_point", "")
-            if isinstance(pp, dict):
-                beat_info = {
-                    "name": pp.get("name", "Beat"),
-                    "purpose": pp.get("purpose", "Advance the plot"),
-                    "tension": pp.get("tension", 5),
-                }
-            else:
-                beat_info = self._derive_beat_info(str(pp))
-            eg = self._emphasis_and_goals([character], beat_info)
-            scene_adapter = {
-                "name": scene.get("name", "Scene"),
-                "situation": scene.get("scene_description", ""),
-                "emphasis": eg["emphasis"],
-                "goals": eg["goals"],
-                "sensory": {},
-            }
-            cid = character.get("id", character.get("name", "char"))
-            dlg_ctx = {
-                "emphasis": eg["emphasis"].get(cid, "neutral"),
-                "goal": eg["goals"].get(cid, "respond"),
-                "note": interaction_context,
-            }
-            prompt = self.poml_adapter.get_dialogue_prompt(
+            dialogue_data = await self.poml_adapter.get_two_stage_dialogue(
+                scene=scene,
                 character=character,
-                scene=scene_adapter,
-                dialogue_context=dlg_ctx
+                interaction_context=interaction_context,
+                orchestrator=self.orchestrator
             )
+            # For now, return the first line of dialogue for compatibility
+            if dialogue_data.get("dialogue"):
+                return dialogue_data["dialogue"][0].get("line", "")
+            return ""
         else:
+            # Fallback to original single-stage method
             prompt = f"""Generate dialogue for {character['name']}:
 
 Scene: {scene.get('scene_description', 'No description')}
@@ -506,35 +468,43 @@ Provide realistic dialogue that:
 - Shows character emotion through speech
 
 Response format: Just the dialogue, no attribution."""
-        
-        dialogue = await self.generate_component(
-            StoryComponent.CHARACTER_DIALOGUE,
-            prompt,
-            temperature=0.9,  # High creativity for dialogue
-            max_tokens=300
-        )
-        
-        return dialogue.strip()
-    
+
+            dialogue = await self.generate_component(
+                StoryComponent.CHARACTER_DIALOGUE,
+                prompt,
+                temperature=0.9,  # High creativity for dialogue
+                max_tokens=1000,
+                timeout=180
+            )
+
+            return dialogue.strip()
+
     async def evaluate_quality(self, story_content: str) -> Dict:
-        """Evaluate story quality"""
-        
-        metrics = [
-            "Narrative Coherence",
-            "Character Development",
-            "Pacing",
-            "Emotional Impact",
-            "Dialogue Quality",
-            "Setting/Atmosphere",
-            "Theme Integration",
-            "Overall Engagement",
-        ]
+        """Evaluate story quality using the two-stage pipeline."""
 
         if self.use_poml and self.poml_adapter:
-            prompt = self.poml_adapter.get_quality_evaluation_prompt(
-                story_content[:2000], metrics
+            quality_data = await self.poml_adapter.get_two_stage_quality_evaluation(
+                story_content=story_content,
+                orchestrator=self.orchestrator
             )
+            return {
+                "evaluation_text": quality_data.get("evaluation_text", ""),
+                "scores": quality_data.get("scores", {}),
+                "timestamp": asyncio.get_event_loop().time(),
+                "meta": quality_data,
+            }
         else:
+            # Fallback to original single-stage method
+            metrics = [
+                "Narrative Coherence",
+                "Character Development",
+                "Pacing",
+                "Emotional Impact",
+                "Dialogue Quality",
+                "Setting/Atmosphere",
+                "Theme Integration",
+                "Overall Engagement",
+            ]
             prompt = f"""Evaluate this story content on these metrics (1-10 scale):
 
 Story Content:
@@ -551,49 +521,52 @@ Rate each metric and provide brief reasoning:
 8. Overall Engagement - compelling narrative
 
 Format: Metric: Score/10 - Brief reason"""
-        
-        evaluation_text, meta = await self.generate_component(
-            StoryComponent.QUALITY_EVALUATION,
-            prompt,
-            with_meta=True,
-            temperature=0.3  # Low temperature for consistent evaluation
-        )
-        
-        # Parse scores from evaluation text for downstream use
-        scores: Dict[str, float] = {}
-        if isinstance(evaluation_text, str):
-            for line in evaluation_text.splitlines():
-                if ":" in line and "/" in line:
-                    try:
-                        metric, rest = line.split(":", 1)
-                        num = rest.strip().split("/")[0]
-                        score = float(num.strip())
-                        scores[metric.strip()] = score
-                    except Exception:
-                        continue
-        
-        return {
-            "evaluation_text": evaluation_text,
-            "scores": scores,
-            "timestamp": asyncio.get_event_loop().time(),
-            "meta": meta,
-        }
-    
+
+            evaluation_text, meta = await self.generate_component(
+                StoryComponent.QUALITY_EVALUATION,
+                prompt,
+                with_meta=True,
+                temperature=0.3  # Low temperature for consistent evaluation
+            )
+
+            # Parse scores from evaluation text for downstream use
+            scores: Dict[str, float] = {}
+            if isinstance(evaluation_text, str):
+                for line in evaluation_text.splitlines():
+                    if ":" in line and "/" in line:
+                        try:
+                            metric, rest = line.split(":", 1)
+                            num = rest.strip().split("/")[0]
+                            score = float(num.strip())
+                            scores[metric.strip()] = score
+                        except Exception:
+                            continue
+
+            return {
+                "evaluation_text": evaluation_text,
+                "scores": scores,
+                "timestamp": asyncio.get_event_loop().time(),
+                "meta": meta,
+            }
+
     async def enhance_content(
         self,
         content: str,
         quality_evaluation: Dict,
         enhancement_focus: str = "general"
     ) -> str:
-        """Enhance story content based on evaluation"""
-        
+        """Enhance story content based on evaluation using the two-stage pipeline."""
+
         if self.use_poml and self.poml_adapter:
-            prompt = self.poml_adapter.get_enhancement_prompt(
-                content[:1500],
-                quality_evaluation.get('evaluation_text', 'No evaluation'),
-                enhancement_focus,
+            enhancement_data = await self.poml_adapter.get_two_stage_enhancement(
+                content=content,
+                evaluation_text=quality_evaluation.get('evaluation_text', 'No evaluation'),
+                focus=enhancement_focus,
+                orchestrator=self.orchestrator
             )
+            return enhancement_data.get("enhanced_content", content)
         else:
+            # Fallback to original single-stage method
             prompt = f"""Enhance this story content:
 
 Original:
@@ -609,53 +582,53 @@ Provide an improved version that:
 - Maintains story continuity
 - Enhances {enhancement_focus} aspects
 - Keeps the core narrative intact"""
-        
-        enhanced = await self.generate_component(
-            StoryComponent.ENHANCEMENT,
-            prompt,
-            temperature=0.6  # Balanced for enhancement
-        )
-        
-        return enhanced
-    
+
+            enhanced = await self.generate_component(
+                StoryComponent.ENHANCEMENT,
+                prompt,
+                temperature=0.6  # Balanced for enhancement
+            )
+
+            return enhanced
+
     async def generate_complete_story(self, request: StoryRequest) -> Dict:
         """Generate a complete story using the orchestrator"""
-        
+
         print(f"\n📖 Generating story: {request.title}")
         print("=" * 60)
-        
+
         # Check provider health
         print("\n🔍 Checking LLM providers...")
         health = await self.orchestrator.health_check_all()
         available = [name for name, status in health.items() if status]
         print(f"Available providers: {', '.join(available)}")
-        
+
         if not available:
             raise RuntimeError("No LLM providers available")
-        
+
         story_data = {
             "title": request.title,
             "premise": request.premise,
             "components": {}
         }
-        
+
         try:
             # Generate plot structure
             print("\n📊 Generating plot structure...")
             plot = await self.generate_plot_structure(request)
             story_data["components"]["plot"] = plot
-            
+
             # Generate key scenes
             print("\n🎬 Generating scenes...")
             scenes = []
             beats = plot.get("beats") or []
             plot_points = beats if beats else plot["raw_text"].split("\n\n")[:3]
-            
+
             for i, point in enumerate(plot_points):
                 print(f"  Scene {i+1}...")
                 previous_context = scenes[-1]["scene_description"] if scenes else ""
                 scene = await self.generate_scene(point, request.characters, previous_context)
-                
+
                 # Add dialogue for main character
                 if request.characters:
                     dialogue = await self.generate_dialogue(
@@ -664,21 +637,21 @@ Provide an improved version that:
                         "Opening dialogue"
                     )
                     scene["sample_dialogue"] = dialogue
-                
+
                 scenes.append(scene)
-            
+
             story_data["components"]["scenes"] = scenes
-            
+
             # Compile story content
             story_content = "\n\n".join([
                 s["scene_description"] for s in scenes
             ])
-            
+
             # Evaluate quality
             print("\n📈 Evaluating quality...")
             evaluation = await self.evaluate_quality(story_content)
             story_data["components"]["evaluation"] = evaluation
-            
+
             # Enhance if needed
             print("\n✨ Enhancing content...")
             enhanced = await self.enhance_content(
@@ -687,25 +660,25 @@ Provide an improved version that:
                 "pacing and emotion"
             )
             story_data["components"]["enhanced_version"] = enhanced[:1000] + "..."
-            
+
             print("\n✅ Story generation complete!")
-            
+
         except Exception as e:
             print(f"\n❌ Error during generation: {e}")
             story_data["error"] = str(e)
-        
+
         return story_data
 
 
 async def test_orchestrated_engine():
     """Test the orchestrated story engine"""
-    
+
     print("🚀 TESTING ORCHESTRATED STORY ENGINE")
     print("=" * 70)
-    
+
     # Create engine
     engine = OrchestratedStoryEngine("llm_config.json")
-    
+
     # Create test request
     request = StoryRequest(
         title="The Last Algorithm",
@@ -727,16 +700,16 @@ async def test_orchestrated_engine():
         setting="Near-future research facility",
         structure="three_act"
     )
-    
+
     # Generate story
     story = await engine.generate_complete_story(request)
-    
+
     # Save result
     with open('orchestrated_story_output.json', 'w') as f:
         json.dump(story, f, indent=2)
-    
+
     print("\n📄 Story saved to 'orchestrated_story_output.json'")
-    
+
     # Display summary
     if "error" not in story:
         print("\n📖 STORY SUMMARY")
@@ -746,7 +719,7 @@ async def test_orchestrated_engine():
         if 'evaluation' in story['components']:
             print("\nQuality evaluation preview:")
             print(story['components']['evaluation']['evaluation_text'][:300] + "...")
-    
+
     print("\n✨ Test complete!")
 
 

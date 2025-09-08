@@ -4,7 +4,15 @@
       "Read(C:\\c\\Users\\sscar\\claude-workspace\\workshop\\aios/**)",
       "Read(C:\\Users\\sscar\\claude-workspace\\workshop\\aios/**)",
       "Read(C:\\c\\Users\\sscar\\claude-workspace/**)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(export:*)",
+      "Bash(source:*)",
+      "Bash(PYTHONPATH=/home/sam/claude-workspace/story-engine:$PYTHONPATH python scripts/refine_world_state.py --mode poml_enhance --system-prompt-file narrative-worldbuilding-agent-prompt.md --output-poml refined_world_state.poml --characters pontius_pilate --location Praetorium --workflow world_state_refined)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(set LMSTUDIO_MODEL=qwen/qwen3-8b)",
+      "mcp__lmstudio-omnibus__discover_models",
+      "Read(//c/Users/sscar/.gemini/**)"
     ],
     "deny": [],
     "ask": []

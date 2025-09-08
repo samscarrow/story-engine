@@ -279,13 +279,10 @@
   <!-- Final Instructions -->
   <instructions>
     <important>
-      Generate ONLY a valid JSON response matching the schema above.
-      Do not include any explanation or text outside the JSON structure.
+      Your response MUST be ONLY a single, valid JSON object matching the schema.
+      Do not include any other text, explanation, or formatting.
       The response must reflect the character's personality, current emotional state, and the {{emphasis}} emphasis.
-      If possible, include a "metadata" object with:
-      - "persona_adherence" (0-100)
-      - "violations" (array of any broken guardrails)
-      Under STRICT PERSONA MODE, never use any forbidden lexicon; replace with period-appropriate alternatives.
+      After the JSON object, and nothing else, append the stop sequence: <|EOR|>
     </important>
   </instructions>
 </document>

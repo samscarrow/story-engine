@@ -460,6 +460,17 @@ class StoryEnginePOMLAdapter:
             return merged
         except Exception:
             return character
+
+    def get_persona_overlay(self, character: Dict[str, Any]) -> Dict[str, Any]:
+        """Return the character dict with any persona YAML overlay merged in.
+
+        Useful outside of prompt rendering (e.g., to tune world-state POV by persona).
+        If no overlay is found or an error occurs, returns the input unchanged.
+        """
+        try:
+            return self._load_persona(character)
+        except Exception:
+            return character
     
     def get_character_prompt(self, character, situation: str, emphasis: str = "neutral") -> str:
         """
@@ -665,6 +676,35 @@ class StoryEnginePOMLAdapter:
             ws['locations'] = locs
         return self.get_world_state_brief(ws)
 
+    def get_world_state_refinement_prompt(
+        self,
+        world_state: Dict[str, Any],
+        focus_characters: Optional[List[str]] = None,
+        location: Optional[str] = None,
+        last_n_events: int = 8,
+    ) -> str:
+        import json as _json
+        # Provide both a targeted slice and full JSON for grounding
+        targeted_md = self.get_world_state_brief_for(world_state, characters=focus_characters, location=location, last_n_events=last_n_events)
+        return self.engine.render(
+            'meta/world_state_refine.poml',
+            {
+                'world_targeted_markdown': targeted_md,
+                'world_json': _json.dumps(world_state, ensure_ascii=False),
+                'focus_characters': focus_characters or [],
+                'location': location or '',
+            }
+        )
+
+    def get_world_state_export_poml(self, world_state: Dict[str, Any]) -> str:
+        import json as _json
+        return self.engine.render(
+            'meta/world_state_export.poml',
+            {
+                'world': world_state,
+            }
+        )
+
     def get_world_state_pov_brief(self, character: Dict[str, Any], world_subset: Dict[str, Any]) -> str:
         return self.engine.render(
             'meta/world_state_pov.poml',
@@ -855,6 +895,330 @@ class StoryEnginePOMLAdapter:
                 'previous_responses_json': _json.dumps((previous_responses or [])[-3:], ensure_ascii=False),
             }
         )
+
+    async def get_two_stage_plot_structure(
+        self,
+        request: Any, # StoryRequest or dict
+        orchestrator: Any, # LLMOrchestrator instance
+        model_identifier: str = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes the two-stage plot structure generation pipeline.
+        """
+        if orchestrator is None:
+            raise ValueError("LLMOrchestrator instance must be provided for two-stage simulation.")
+
+        # --- Stage 1: Generate Freeform Plot ---
+        stage1_engine = create_engine()
+        freeform_system_prompt = stage1_engine.render_roles(
+            'narrative/plot_structure.poml',
+            asdict(request) if hasattr(request, "__dataclass_fields__") else request
+        )
+        freeform_response = await orchestrator.generate(
+            prompt="",
+            system=freeform_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.7,
+            max_tokens=1000
+        )
+        freeform_plot_text = freeform_response.text
+
+        # --- Stage 2: Structure the Plot ---
+        stage2_engine = create_engine()
+        structuring_system_prompt = stage2_engine.render_roles(
+            'narrative/plot_structure_structured.poml',
+            {}
+        )
+        structured_response = await orchestrator.generate(
+            prompt=freeform_plot_text,
+            system=structuring_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.1,
+            max_tokens=4000,
+        )
+
+        try:
+            parsed_response = json.loads(structured_response.text.strip())
+            return parsed_response
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Structuring agent for plot did not return valid JSON: {e}\nRaw output: {structured_response.text}")
+
+    async def get_two_stage_scene(
+        self,
+        beat: Dict,
+        characters: List[Dict],
+        previous_context: str,
+        orchestrator: Any, # LLMOrchestrator instance
+        model_identifier: str = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes the two-stage scene generation pipeline.
+        """
+        if orchestrator is None:
+            raise ValueError("LLMOrchestrator instance must be provided for two-stage simulation.")
+
+        # --- Stage 1: Generate Freeform Scene ---
+        stage1_engine = create_engine()
+        freeform_system_prompt = stage1_engine.render_roles(
+            'narrative/scene_crafting_freeform.poml',
+            {
+                'beat': beat,
+                'characters': characters,
+                'previous_context': previous_context
+            }
+        )
+        freeform_response = await orchestrator.generate(
+            prompt="",
+            system=freeform_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.8,
+            max_tokens=1500
+        )
+        freeform_scene_text = freeform_response.text
+
+        # --- Stage 2: Structure the Scene ---
+        stage2_engine = create_engine()
+        structuring_system_prompt = stage2_engine.render_roles(
+            'narrative/scene_crafting_structured.poml',
+            {}
+        )
+        structured_response = await orchestrator.generate(
+            prompt=freeform_scene_text,
+            system=structuring_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.1,
+            max_tokens=4000,
+        )
+
+        try:
+            parsed_response = json.loads(structured_response.text.strip())
+            return parsed_response
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Structuring agent for scene did not return valid JSON: {e}\nRaw output: {structured_response.text}")
+
+    async def get_two_stage_dialogue(
+        self,
+        scene: Dict,
+        character: Dict,
+        interaction_context: str,
+        orchestrator: Any, # LLMOrchestrator instance
+        model_identifier: str = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes the two-stage dialogue generation pipeline.
+        """
+        if orchestrator is None:
+            raise ValueError("LLMOrchestrator instance must be provided for two-stage simulation.")
+
+        # --- Stage 1: Generate Freeform Dialogue ---
+        stage1_engine = create_engine()
+        freeform_system_prompt = stage1_engine.render_roles(
+            'narrative/dialogue_generation_freeform.poml',
+            {
+                'scene': scene,
+                'character': character,
+                'context': interaction_context
+            }
+        )
+        freeform_response = await orchestrator.generate(
+            prompt="",
+            system=freeform_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.9,
+            max_tokens=1000,
+            timeout=180
+        )
+        freeform_dialogue_text = freeform_response.text
+
+        # --- Stage 2: Structure the Dialogue ---
+        stage2_engine = create_engine()
+        structuring_system_prompt = stage2_engine.render_roles(
+            'narrative/dialogue_generation_structured.poml',
+            {}
+        )
+        structured_response = await orchestrator.generate(
+            prompt=freeform_dialogue_text,
+            system=structuring_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.1,
+            max_tokens=1000,
+            timeout=180
+        )
+
+        try:
+            parsed_response = json.loads(structured_response.text.strip())
+            return parsed_response
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Structuring agent for dialogue did not return valid JSON: {e}\nRaw output: {structured_response.text}")
+
+    async def get_two_stage_quality_evaluation(
+        self,
+        story_content: str,
+        orchestrator: Any, # LLMOrchestrator instance
+        model_identifier: str = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes the two-stage quality evaluation pipeline.
+        """
+        if orchestrator is None:
+            raise ValueError("LLMOrchestrator instance must be provided for two-stage simulation.")
+
+        # --- Stage 1: Generate Freeform Evaluation ---
+        stage1_engine = create_engine()
+        freeform_system_prompt = stage1_engine.render_roles(
+            'narrative/quality_evaluation_freeform.poml',
+            {'story': story_content}
+        )
+        freeform_response = await orchestrator.generate(
+            prompt="",
+            system=freeform_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.5,
+            max_tokens=1000
+        )
+        freeform_evaluation_text = freeform_response.text
+
+        # --- Stage 2: Structure the Evaluation ---
+        stage2_engine = create_engine()
+        structuring_system_prompt = stage2_engine.render_roles(
+            'narrative/quality_evaluation_structured.poml',
+            {}
+        )
+        structured_response = await orchestrator.generate(
+            prompt=freeform_evaluation_text,
+            system=structuring_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.1,
+            max_tokens=1000,
+        )
+
+        try:
+            parsed_response = json.loads(structured_response.text.strip())
+            return parsed_response
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Structuring agent for quality evaluation did not return valid JSON: {e}\nRaw output: {structured_response.text}")
+
+    async def get_two_stage_enhancement(
+        self,
+        content: str,
+        evaluation_text: str,
+        focus: str,
+        orchestrator: Any, # LLMOrchestrator instance
+        model_identifier: str = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes the two-stage enhancement pipeline.
+        """
+        if orchestrator is None:
+            raise ValueError("LLMOrchestrator instance must be provided for two-stage simulation.")
+
+        # --- Stage 1: Generate Freeform Enhancement ---
+        stage1_engine = create_engine()
+        freeform_system_prompt = stage1_engine.render_roles(
+            'narrative/enhancement_freeform.poml',
+            {
+                'content': content,
+                'evaluation': evaluation_text,
+                'focus': focus
+            }
+        )
+        freeform_response = await orchestrator.generate(
+            prompt="",
+            system=freeform_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.6,
+            max_tokens=1500
+        )
+        freeform_enhancement_text = freeform_response.text
+
+        # --- Stage 2: Structure the Enhancement ---
+        stage2_engine = create_engine()
+        structuring_system_prompt = stage2_engine.render_roles(
+            'narrative/enhancement_structured.poml',
+            {}
+        )
+        structured_response = await orchestrator.generate(
+            prompt=freeform_enhancement_text,
+            system=structuring_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.1,
+            max_tokens=4000,
+        )
+
+        try:
+            parsed_response = json.loads(structured_response.text.strip())
+            return parsed_response
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Structuring agent for enhancement did not return valid JSON: {e}\nRaw output: {structured_response.text}")
+
+    async def get_two_stage_character_response(
+        self,
+        character: Dict[str, Any],
+        situation: str,
+        emphasis: str = "neutral",
+        orchestrator: Any = None, # LLMOrchestrator instance
+        model_identifier: str = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes the two-stage character simulation pipeline.
+        Stage 1: Generate stream of consciousness (free-form text).
+        Stage 2: Structure the stream of consciousness into JSON.
+        """
+        if orchestrator is None:
+            raise ValueError("LLMOrchestrator instance must be provided for two-stage simulation.")
+
+        # --- Stage 1: Generate Stream of Consciousness ---
+        # The persona template renders the SYSTEM prompt
+        sim_system_prompt = self.engine.render_roles(
+            'personas/persona_stream_of_consciousness.poml',
+            {'character': character}
+        ) # Use render_roles to get system/user split
+        
+        # The USER prompt is just the situation
+        sim_user_prompt = situation
+
+        sim_response = await orchestrator.generate(
+            prompt=sim_user_prompt,
+            system=sim_system_prompt['system'], # Pass system part of rendered roles
+            model=model_identifier,
+            temperature=0.75, # Slightly higher for more creative prose
+            max_tokens=500,
+            timeout=180 # Increased timeout for potentially slow remote models
+        )
+        stream_of_consciousness_text = sim_response.text
+
+        print("\n" + "-"*25 + " STAGE 1 OUTPUT (Stream of Consciousness) " + "-"*26)
+        print(stream_of_consciousness_text)
+        print("-"*70)
+
+        # --- Stage 2: Structure the Output ---
+        # The structuring template renders the SYSTEM prompt for the next call
+        structuring_system_prompt = self.engine.render_roles(
+            'meta/structure_simulation_output.poml',
+            {}
+        ) # No raw_text here
+
+        structured_response = await orchestrator.generate(
+            prompt=stream_of_consciousness_text, # raw_text is now the user prompt
+            system=structuring_system_prompt['system'],
+            model=model_identifier,
+            temperature=0.1, # Low temperature for precise, deterministic structuring
+            max_tokens=3000, # Increased for complex JSON
+            timeout=300 # Increased timeout for potentially slow remote models
+        )
+
+        # Clean and parse the final JSON
+        response_text = structured_response.text.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:-3].strip()
+        elif response_text.startswith("```"):
+            response_text = response_text[3:-3].strip()
+
+        try:
+            parsed_response = json.loads(response_text)
+            return parsed_response
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Structuring agent did not return valid JSON: {e}\nRaw output: {structured_response.text}")
 
 # Example usage
 if __name__ == "__main__":
