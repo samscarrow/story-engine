@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import asdict
 
 from core.character_engine.character_simulation_engine_v2 import (
     SimulationEngine,
@@ -97,8 +98,10 @@ class MetaNarrativePipeline:
         situation = scenario.get('situation', '')
         # Build character POV brief and feed into simulation
         ws_full = self.world_manager.load_latest()
-        pov = self.world_manager.pov_subset(ws_full, character_id=character.id, location=location)
-        pov_brief = self.poml.get_world_state_pov_brief(asdict(character), pov)
+        # Merge persona overlay for POV tuning (blindspots, assumptions, overrides)
+        persona_overlay = self.poml.get_persona_overlay(asdict(character))
+        pov = self.world_manager.pov_subset(ws_full, character_id=character.id, location=location, persona=persona_overlay)
+        pov_brief = self.poml.get_world_state_pov_brief(persona_overlay, pov)
         # Run simulations with world POV injected
         results: List[Dict[str, Any]] = []
         for _ in range(runs_per):

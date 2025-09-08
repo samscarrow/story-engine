@@ -16,19 +16,31 @@ class WorldStateManager:
 
     def _build_db(self) -> DatabaseConnection:
         db_user = os.getenv('DB_USER')
+        db_type = os.getenv('DB_TYPE', 'postgresql').lower()
+        
         if db_user:
-            return get_database_connection(
-                'postgresql',
-                db_name=os.getenv('DB_NAME', 'story_db'),
-                user=db_user,
-                password=os.getenv('DB_PASSWORD'),
-                host=os.getenv('DB_HOST', '127.0.0.1'),
-                port=int(os.getenv('DB_PORT', '5432')),
-                sslmode=os.getenv('DB_SSLMODE'),
-                sslrootcert=os.getenv('DB_SSLROOTCERT'),
-                sslcert=os.getenv('DB_SSLCERT'),
-                sslkey=os.getenv('DB_SSLKEY'),
-            )
+            if db_type == 'oracle':
+                return get_database_connection(
+                    'oracle',
+                    user=db_user,
+                    password=os.getenv('DB_PASSWORD'),
+                    dsn=os.getenv('DB_DSN'),
+                    wallet_location=os.getenv('DB_WALLET_LOCATION'),
+                    wallet_password=os.getenv('DB_WALLET_PASSWORD'),
+                )
+            else:  # Default to PostgreSQL
+                return get_database_connection(
+                    'postgresql',
+                    db_name=os.getenv('DB_NAME', 'story_db'),
+                    user=db_user,
+                    password=os.getenv('DB_PASSWORD'),
+                    host=os.getenv('DB_HOST', '127.0.0.1'),
+                    port=int(os.getenv('DB_PORT', '5432')),
+                    sslmode=os.getenv('DB_SSLMODE'),
+                    sslrootcert=os.getenv('DB_SSLROOTCERT'),
+                    sslcert=os.getenv('DB_SSLCERT'),
+                    sslkey=os.getenv('DB_SSLKEY'),
+                )
         return get_database_connection('sqlite', db_name='workflow_outputs.db')
 
     def load_latest(self) -> WorldState:
@@ -105,6 +117,7 @@ class WorldStateManager:
         character_id: str,
         location: Optional[str] = None,
         last_n_events: int = 5,
+        persona: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Character-limited subset. Heuristics:
         - Include facts marked public=True
@@ -119,12 +132,18 @@ class WorldStateManager:
             'relationships': {},
             'availability': {},
             'locations': {},
-            'timeline': list(ws.get('timeline') or [])[-last_n_events:],
+            'timeline': [],
             'props': {},
             'uncertain': [],
             'assumptions': [],
         }
         cid = (character_id or '').lower()
+        
+        def _lower_list(x: Any) -> List[str]:
+            try:
+                return [str(i).lower() for i in (x or [])]
+            except Exception:
+                return []
         # Facts
         for k, v in (ws.get('facts') or {}).items():
             try:
@@ -150,18 +169,72 @@ class WorldStateManager:
                     out['relationships'][rel_key] = rel_val
             except Exception:
                 continue
-        # Availability
+        # Availability — only POV character and directly related entities
         av = ws.get('availability') or {}
-        if cid in (x.lower() for x in av.keys()):
-            # exact key may differ; include all and let prompt focus
-            out['availability'] = av
-        else:
-            # include only the character if present
-            for k, v in av.items():
-                if k.lower() == cid:
-                    out['availability'][k] = v
+        related: set = set()
+        for k in out['relationships'].keys():
+            try:
+                src, dst = k.split('->', 1)
+                if src.lower() != cid:
+                    related.add(src)
+                if dst.lower() != cid:
+                    related.add(dst)
+            except Exception:
+                continue
+        for k, v in av.items():
+            kl = k.lower()
+            if kl == cid or kl in (x.lower() for x in related):
+                out['availability'][k] = v
         # Locations
         locs = ws.get('locations') or {}
         if location and location in locs:
             out['locations'][location] = locs[location]
+        
+        # Timeline gating: include only events plausibly visible to the POV
+        # Heuristics:
+        # - Include if event.public is True
+        # - Include if POV cid is in event.visible_to
+        # - Include if cid appears as subject/actor/participants (best-effort)
+        # - If no gating keys, include by default (assume public)
+        tl = list(ws.get('timeline') or [])[-last_n_events:]
+        for ev in tl:
+            try:
+                if not isinstance(ev, dict):
+                    out['timeline'].append(ev)
+                    continue
+                public = bool(ev.get('public', False))
+                visible = _lower_list(ev.get('visible_to'))
+                subject = str(ev.get('subject', '')).lower()
+                actors = _lower_list(ev.get('actors'))
+                participants = _lower_list(ev.get('participants'))
+                if public or cid in visible or cid == subject or cid in actors or cid in participants:
+                    out['timeline'].append(ev)
+                else:
+                    # If no explicit gating keys provided, treat as public
+                    if not any(k in ev for k in ('public', 'visible_to', 'subject', 'actors', 'participants')):
+                        out['timeline'].append(ev)
+            except Exception:
+                continue
+
+        # Persona-aware adjustments (optional)
+        if persona and isinstance(persona, dict):
+            try:
+                blind = set([str(x) for x in (persona.get('blindspots') or [])])
+                for b in blind:
+                    if b in out['facts']:
+                        out['facts'].pop(b, None)
+                overrides = persona.get('belief_overrides') or {}
+                if isinstance(overrides, dict):
+                    for k, v in overrides.items():
+                        # Replace or insert as assumption if not present
+                        if k in out['facts']:
+                            out['facts'][k] = v
+                        else:
+                            out['assumptions'].append(f"Believes {k} = {v}")
+                addl_assumptions = persona.get('assumptions') or []
+                if isinstance(addl_assumptions, list):
+                    out['assumptions'].extend([str(x) for x in addl_assumptions])
+            except Exception:
+                pass
+
         return out
