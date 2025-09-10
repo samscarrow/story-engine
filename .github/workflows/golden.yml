@@ -1,0 +1,29 @@
+name: Golden Suite
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tests-golden:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-xdist pytest-forked aiohttp pyyaml numpy
+
+      - name: Run golden tests in parallel
+        env:
+          STORY_ENGINE_LIVE: '1'
+          LLM_TEST_TIMEOUT: '20'
+        run: pytest -n auto --dist=loadfile -m golden -q
+

@@ -1,0 +1,31 @@
+name: Silver Suite (Small Models)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tests-silver:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-xdist pytest-forked aiohttp pyyaml numpy
+
+      - name: Run silver tests (prefers <=4B models) in parallel
+        env:
+          STORY_ENGINE_LIVE: '1'
+          LLM_TEST_TIMEOUT: '20'
+          # Optionally guide ai-lb routing
+          PREFERRED_MODELS: 'llama-3.2-3b-instruct,qwen2.5-3b-instruct,phi-3.5-mini'
+        run: pytest -n auto --dist=loadfile -m silver -q
+
