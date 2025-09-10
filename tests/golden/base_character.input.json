@@ -1,0 +1,30 @@
+{
+  "character": {
+    "id": "test_char",
+    "name": "Alice",
+    "role": "protagonist",
+    "backstory": {
+      "origin": "Small town",
+      "career": "Scholar"
+    },
+    "traits": ["brave", "curious"],
+    "values": ["honor", "justice"],
+    "fears": ["failure", "loss"],
+    "desires": ["freedom", "truth"],
+    "emotional_state": {
+      "anger": 0.1,
+      "doubt": 0.2,
+      "fear": 0.3,
+      "compassion": 0.6,
+      "confidence": 0.7
+    },
+    "memory": {
+      "recent_events": ["Met a stranger", "Found a clue"]
+    },
+    "current_goal": "Find the truth",
+    "immediate_concern": "Time is short",
+    "location": "Forum"
+  },
+  "config": {"max_memory_events": 5}
+}
+

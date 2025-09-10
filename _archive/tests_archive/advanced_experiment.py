@@ -298,7 +298,7 @@ async def real_llm_experiment():
             )
             
             response = result['response']
-            print(f"🎭 Real LLM Response:")
+            print("🎭 Real LLM Response:")
             print(f"💬 \"{response['dialogue']}\"")
             print(f"🤔 {response['thought']}")
             print(f"🎬 {response['action']}")

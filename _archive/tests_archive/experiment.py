@@ -4,7 +4,6 @@ Interactive exploration of character behavior simulation
 """
 
 import asyncio
-import json
 from character_simulation_engine_v2 import (
     CharacterState, EmotionalState, CharacterMemory, 
     SimulationEngine, MockLLM

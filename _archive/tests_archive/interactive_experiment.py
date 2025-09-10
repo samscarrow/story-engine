@@ -259,7 +259,7 @@ async def character_builder():
         print(f"  😰 Current emotions: Doubt={emotions.doubt:.2f}, Fear={emotions.fear:.2f}, Anger={emotions.anger:.2f}")
     
     # Extreme emotional states test
-    print(f"\n🔥 EXTREME EMOTIONAL STATES TEST")
+    print("\n🔥 EXTREME EMOTIONAL STATES TEST")
     print("-" * 50)
     
     extreme_states = [
@@ -293,7 +293,7 @@ async def character_builder():
         # Restore original state
         character.emotional_state = original_state
     
-    print(f"\n🎉 Playground session complete!")
+    print("\n🎉 Playground session complete!")
     print(f"📊 Total simulations: {llm.call_count}")
     print("\n💡 Try editing the emotional states, scenarios, or character traits to explore different behaviors!")
 

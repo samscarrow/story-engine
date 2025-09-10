@@ -7,7 +7,6 @@ Ensures no silent failures and proper error handling
 import os
 import re
 import shutil
-from pathlib import Path
 
 # Files to fix
 FILES_TO_FIX = [

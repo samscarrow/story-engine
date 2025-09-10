@@ -7,7 +7,7 @@ import asyncio
 import json
 import aiohttp
 import time
-from typing import Dict, List
+from typing import Dict
 
 class Gemma2Simulation:
     """Character simulation using ONLY Gemma-2-27b"""
@@ -79,7 +79,7 @@ Emphasis: {scene.get('emphasis', 'neutral')}
 Respond ONLY with JSON:
 {{"dialogue": "what you say", "thought": "inner thoughts", "action": "physical action", "emotional_shift": {{"doubt": 0.1, "fear": 0.1, "confidence": -0.1}}}}"""
         
-        print(f"⏳ Generating Gemma-2-27b response...")
+        print("⏳ Generating Gemma-2-27b response...")
         start = time.time()
         
         try:
@@ -129,7 +129,7 @@ Respond ONLY with JSON:
                 print(f"\n📊 Current state: Doubt={current_emotions['doubt']:.2f}, Fear={current_emotions['fear']:.2f}, Confidence={current_emotions['confidence']:.2f}")
                 
             else:
-                print(f"⚠️  Could not parse JSON from response")
+                print("⚠️  Could not parse JSON from response")
                 print(f"📝 Raw: {content[:200]}")
                 
         except Exception as e:
@@ -257,7 +257,7 @@ async def main():
     # Display journey
     sim.display_journey()
     
-    print(f"\n✨ Simulation complete with Gemma-2-27b!")
+    print("\n✨ Simulation complete with Gemma-2-27b!")
     print("=" * 70)
 
 

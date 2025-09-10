@@ -5,8 +5,6 @@ Shows dramatic emotional evolution with more intense shifts and better visualiza
 
 import asyncio
 import json
-import yaml
-from pathlib import Path
 from character_simulation_engine_v2 import (
     CharacterState, EmotionalState, CharacterMemory, 
     SimulationEngine, LMStudioLLM, MockLLM, LLMResponse
@@ -207,7 +205,7 @@ def print_dramatic_emotional_visualization(journey_history):
     print("🔥 = Extreme (0.8+)  🌡️ = High (0.6+)  💧 = Medium (0.4+)  ❄️ = Low (0.2+)  🧊 = Minimal (<0.2)")
     
     # Show dramatic changes
-    print(f"\n📈 MOST DRAMATIC CHANGES:")
+    print("\n📈 MOST DRAMATIC CHANGES:")
     if len(journey_history) > 1:
         initial = journey_history[0]
         final = journey_history[-1]
@@ -226,7 +224,7 @@ def print_dramatic_emotional_visualization(journey_history):
             print("   No dramatic changes detected")
     
     # Emotional peaks
-    print(f"\n🏔️ EMOTIONAL PEAKS:")
+    print("\n🏔️ EMOTIONAL PEAKS:")
     peak_emotions = {}
     for emotion in emotions:
         max_val = max(state[emotion] for state in journey_history)
@@ -439,12 +437,12 @@ async def run_dramatic_experiment():
     # Show dramatic visualization
     print_dramatic_emotional_visualization(journey_history)
     
-    print(f"\n🎉 DRAMATIC JOURNEY COMPLETE")
+    print("\n🎉 DRAMATIC JOURNEY COMPLETE")
     print("=" * 60)
-    print(f"🎭 Transformation: From confident Roman administrator to tormented judge")
+    print("🎭 Transformation: From confident Roman administrator to tormented judge")
     print(f"📊 Total simulations: {llm.call_count}")
     print(f"🤖 LLM used: {'Real LMStudio' if using_real_llm else 'Enhanced Dramatic Mock'}")
-    print(f"🎪 Final emotional state: Complex mix of guilt, compassion, and broken confidence")
+    print("🎪 Final emotional state: Complex mix of guilt, compassion, and broken confidence")
 
 if __name__ == "__main__":
     asyncio.run(run_dramatic_experiment())

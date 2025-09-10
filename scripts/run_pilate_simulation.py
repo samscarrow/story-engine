@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Run a live Pontius Pilate simulation via OrchestratedStoryEngine using POML.
 
@@ -22,11 +22,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent  # noqa: E402
-from core.domain.models import StoryRequest  # noqa: E402
-from core.common.result_store import store_workflow_output  # noqa: E402
-from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
-from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
+from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent  # noqa: E402
+from story_engine.core.domain.models import StoryRequest  # noqa: E402
+from story_engine.core.common.result_store import store_workflow_output  # noqa: E402
+from story_engine.core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
 async def run_sim(character_flags: dict | None = None, model_config: dict | None = None):
@@ -146,3 +146,4 @@ if __name__ == "__main__":
             continue
     
     asyncio.run(run_sim(cflags or None, model_config))
+

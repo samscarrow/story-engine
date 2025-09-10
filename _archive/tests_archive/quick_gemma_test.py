@@ -5,7 +5,7 @@ Quick Gemma-3-12b Test - Simplified version for faster testing
 import asyncio
 import json
 import time
-from character_simulation_engine_v2 import LMStudioLLM, LLMResponse
+from character_simulation_engine_v2 import LMStudioLLM
 
 async def quick_gemma_test():
     """Quick test of Gemma model with shorter prompts"""
@@ -120,7 +120,7 @@ JSON only:"""
         print(f"⏱️ Generated in {elapsed:.2f}s")
         
         # Show response
-        print(f"\n📝 Character response:")
+        print("\n📝 Character response:")
         print(response.content[:400] if len(response.content) > 400 else response.content)
         
         # Try to parse

@@ -6,12 +6,9 @@ Testing all components with proper mocking and validation
 import unittest
 import asyncio
 import json
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from dataclasses import dataclass
+from unittest.mock import patch
 import sys
 import os
-from datetime import datetime
-import tempfile
 import yaml
 
 # Add parent directory to path for imports

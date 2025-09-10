@@ -1,0 +1,2372 @@
+E722 Do not use bare `except`
+   --> _archive/core_archive/character_simulation_engine_v2.py:134:9
+    |
+132 |             # Would ping OpenAI API endpoint
+133 |             return True
+134 |         except:
+    |         ^^^^^^
+135 |             return False
+    |
+
+E722 Do not use bare `except`
+   --> _archive/core_archive/character_simulation_engine_v2.py:253:9
+    |
+251 |                 ) as response:
+252 |                     return response.status == 200
+253 |         except:
+    |         ^^^^^^
+254 |             return False
+    |
+
+E722 Do not use bare `except`
+   --> _archive/core_archive/complex_group_dynamics.py:182:17
+    |
+180 |                         if json_start >= 0:
+181 |                             return json.loads(content[json_start:json_end])
+182 |                 except:
+    |                 ^^^^^^
+183 |                     pass
+    |
+
+E722 Do not use bare `except`
+   --> _archive/core_archive/llm_orchestrator_old.py:138:9
+    |
+136 |                 async with session.get(url, timeout=5) as response:
+137 |                     return response.status == 200
+138 |         except:
+    |         ^^^^^^
+139 |             return False
+    |
+
+E722 Do not use bare `except`
+   --> _archive/core_archive/llm_orchestrator_old.py:205:9
+    |
+203 |                 async with session.get(url, timeout=5) as response:
+204 |                     return response.status == 200
+205 |         except:
+    |         ^^^^^^
+206 |             return False
+    |
+
+E722 Do not use bare `except`
+   --> _archive/core_archive/llm_orchestrator_old.py:261:9
+    |
+259 |                 async with session.get(url, timeout=5) as response:
+260 |                     return response.status == 200
+261 |         except:
+    |         ^^^^^^
+262 |             return False
+    |
+
+E722 Do not use bare `except`
+   --> _archive/core_archive/llm_orchestrator_old.py:374:13
+    |
+372 |             try:
+373 |                 results[name] = await provider.health_check()
+374 |             except:
+    |             ^^^^^^
+375 |                 results[name] = False
+376 |         return results
+    |
+
+E722 Do not use bare `except`
+   --> _archive/core_archive/multi_character_simulation.py:139:17
+    |
+137 |                         if json_start >= 0:
+138 |                             return json.loads(content[json_start:json_end])
+139 |                 except:
+    |                 ^^^^^^
+140 |                     return None
+    |
+
+F841 Local variable `results` is assigned to but never used
+   --> _archive/core_archive/multi_character_simulation.py:377:9
+    |
+376 |     for scene in scenes:
+377 |         results = await engine.run_interaction(scene)
+    |         ^^^^^^^
+378 |         await asyncio.sleep(1)  # Pause between scenes
+    |
+help: Remove assignment to unused variable `results`
+
+F841 Local variable `doubt` is assigned to but never used
+  --> _archive/tests_archive/dramatic_emotional_journey.py:69:9
+   |
+67 |         # Get current emotional levels
+68 |         fear = emotions.get('fear', 0.3)
+69 |         doubt = emotions.get('doubt', 0.4)
+   |         ^^^^^
+70 |         anger = emotions.get('anger', 0.2)
+71 |         compassion = emotions.get('compassion', 0.5)
+   |
+help: Remove assignment to unused variable `doubt`
+
+F841 Local variable `anger` is assigned to but never used
+  --> _archive/tests_archive/dramatic_emotional_journey.py:70:9
+   |
+68 |         fear = emotions.get('fear', 0.3)
+69 |         doubt = emotions.get('doubt', 0.4)
+70 |         anger = emotions.get('anger', 0.2)
+   |         ^^^^^
+71 |         compassion = emotions.get('compassion', 0.5)
+72 |         confidence = emotions.get('confidence', 0.7)
+   |
+help: Remove assignment to unused variable `anger`
+
+F841 Local variable `compassion` is assigned to but never used
+  --> _archive/tests_archive/dramatic_emotional_journey.py:71:9
+   |
+69 |         doubt = emotions.get('doubt', 0.4)
+70 |         anger = emotions.get('anger', 0.2)
+71 |         compassion = emotions.get('compassion', 0.5)
+   |         ^^^^^^^^^^
+72 |         confidence = emotions.get('confidence', 0.7)
+   |
+help: Remove assignment to unused variable `compassion`
+
+F841 Local variable `confidence` is assigned to but never used
+  --> _archive/tests_archive/dramatic_emotional_journey.py:72:9
+   |
+70 |         anger = emotions.get('anger', 0.2)
+71 |         compassion = emotions.get('compassion', 0.5)
+72 |         confidence = emotions.get('confidence', 0.7)
+   |         ^^^^^^^^^^
+73 |         
+74 |         # Responses get more intense as scene progresses
+   |
+help: Remove assignment to unused variable `confidence`
+
+F841 Local variable `intensity_multiplier` is assigned to but never used
+  --> _archive/tests_archive/dramatic_emotional_journey.py:75:9
+   |
+74 |         # Responses get more intense as scene progresses
+75 |         intensity_multiplier = min(2.0, 1.0 + (scene_num * 0.2))
+   |         ^^^^^^^^^^^^^^^^^^^^
+76 |         
+77 |         # Scene-specific dramatic responses
+   |
+help: Remove assignment to unused variable `intensity_multiplier`
+
+E722 Do not use bare `except`
+  --> _archive/tests_archive/launch_kobold_and_test.py:23:9
+   |
+21 |                         print("✅ KoboldCpp server is ready!")
+22 |                         return True
+23 |         except:
+   |         ^^^^^^
+24 |             pass
+   |
+
+E722 Do not use bare `except`
+   --> _archive/tests_archive/test_gemma2_explicit.py:170:17
+    |
+168 |                     data = json.loads(content[json_start:json_end])
+169 |                     print(f"💬 \"{data.get('dialogue', 'N/A')[:100]}...\"")
+170 |                 except:
+    |                 ^^^^^^
+171 |                     print(f"📝 {content[:100]}...")
+172 |             else:
+    |
+
+E722 Do not use bare `except`
+   --> _archive/tests_archive/test_gemma_model.py:367:13
+    |
+365 |                 else:
+366 |                     print("  ⚠️  Non-JSON output")
+367 |             except:
+    |             ^^^^^^
+368 |                 print("  ⚠️  JSON parsing issues")
+    |
+
+E402 Module level import not at top of file
+  --> ai-lb/demo_prompt.py:13:1
+   |
+11 | sys.path.insert(0, str(SRC))
+12 |
+13 | from load_balancer.main import app as lb_app
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | from load_balancer import main as lb_main
+   |
+
+E402 Module level import not at top of file
+  --> ai-lb/demo_prompt.py:14:1
+   |
+13 | from load_balancer.main import app as lb_app
+14 | from load_balancer import main as lb_main
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+F841 Local variable `all_capacity` is assigned to but never used
+   --> ai-lb/load_balancer/src/load_balancer/main.py:398:21
+    |
+396 |                 last_error = e
+397 |                 if not isinstance(e, CapacityError):
+398 |                     all_capacity = False
+    |                     ^^^^^^^^^^^^
+399 |                 continue
+400 |         # If all attempts failed, return a final error message chunk
+    |
+help: Remove assignment to unused variable `all_capacity`
+
+F841 Local variable `last_error` is assigned to but never used
+   --> ai-lb/load_balancer/src/load_balancer/main.py:558:13
+    |
+556 | …     logger.warning("[req=%s] Chat (non-stream) upstream error from %s: %s (attempt %d/%d)", request_id, candidate, e, attempts, bud…
+557 | …     await _record_failure(candidate)
+558 | …     last_error = e
+    |       ^^^^^^^^^^
+559 | …     if not isinstance(e, CapacityError):
+560 | …         all_capacity = False
+    |
+help: Remove assignment to unused variable `last_error`
+
+F821 Undefined name `start_time`
+   --> ai-lb/load_balancer/src/load_balancer/main.py:652:46
+    |
+650 |             try:
+651 |                 # For embeddings, we measure end-to-end as well
+652 |                 elapsed = time.monotonic() - start_time
+    |                                              ^^^^^^^^^^
+653 |                 await _record_latency(model_name, candidate, elapsed)
+654 |             except Exception:
+    |
+
+F841 Local variable `last_error` is assigned to but never used
+   --> ai-lb/load_balancer/src/load_balancer/main.py:660:13
+    |
+658 | …     logger.warning("[req=%s] Embeddings upstream error from %s: %s (attempt %d/%d)", request_id, candidate, e, attempts, budget)
+659 | …     await _record_failure(candidate)
+660 | …     last_error = e
+    |       ^^^^^^^^^^
+661 | …     if not isinstance(e, CapacityError):
+662 | …         all_capacity = False
+    |
+help: Remove assignment to unused variable `last_error`
+
+E402 Module level import not at top of file
+  --> ai-lb/load_balancer/tests/test_embeddings_and_forced_node.py:15:1
+   |
+13 |     sys.path.insert(0, str(SRC))
+14 |
+15 | from load_balancer.main import app as lb_app
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+16 | from load_balancer import main as lb_main
+   |
+
+E402 Module level import not at top of file
+  --> ai-lb/load_balancer/tests/test_embeddings_and_forced_node.py:16:1
+   |
+15 | from load_balancer.main import app as lb_app
+16 | from load_balancer import main as lb_main
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+E402 Module level import not at top of file
+  --> ai-lb/load_balancer/tests/test_unified_lb.py:17:1
+   |
+16 | # Import app and globals
+17 | from load_balancer.main import app as lb_app
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+18 | from load_balancer import main as lb_main
+19 | from load_balancer.routing.strategies import get_routing_strategy
+   |
+
+E402 Module level import not at top of file
+  --> ai-lb/load_balancer/tests/test_unified_lb.py:18:1
+   |
+16 | # Import app and globals
+17 | from load_balancer.main import app as lb_app
+18 | from load_balancer import main as lb_main
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+19 | from load_balancer.routing.strategies import get_routing_strategy
+   |
+
+E402 Module level import not at top of file
+  --> ai-lb/load_balancer/tests/test_unified_lb.py:19:1
+   |
+17 | from load_balancer.main import app as lb_app
+18 | from load_balancer import main as lb_main
+19 | from load_balancer.routing.strategies import get_routing_strategy
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+E402 Module level import not at top of file
+  --> ai-lb/monitor/src/monitor/tools/common_models.py:14:1
+   |
+12 | if str(PARENT) not in sys.path:
+13 |     sys.path.insert(0, str(PARENT))
+14 | import config as cfg
+   | ^^^^^^^^^^^^^^^^^^^^
+   |
+
+F841 Local variable `results` is assigned to but never used
+   --> bench/benchmarks/agent_context_benchmark.py:697:9
+    |
+696 |     try:
+697 |         results = await benchmark.run_benchmark(AGENT_A_MODEL, AGENT_X_MODEL, AGENT_B_MODEL)
+    |         ^^^^^^^
+698 |         
+699 |         # Generate analysis and save results
+    |
+help: Remove assignment to unused variable `results`
+
+F841 Local variable `family_bonus` is assigned to but never used
+   --> bench/benchmarks/comprehensive_model_benchmark.py:633:17
+    |
+631 |             for candidate in candidates:
+632 |                 # Prefer diversity in families
+633 |                 family_bonus = 0 if candidate.family in used_families else 0.1
+    |                 ^^^^^^^^^^^^
+634 |                 
+635 |                 if (candidate.memory_usage_gb <= remaining_budget and
+    |
+help: Remove assignment to unused variable `family_bonus`
+
+F841 Local variable `final_content` is assigned to but never used
+   --> bench/benchmarks/comprehensive_synergy_finder.py:119:5
+    |
+117 |     contents = [r.get("content", "") for r in successful_results]
+118 |     all_content = " ".join(contents).lower()
+119 |     final_content = contents[-1] if contents else ""
+    |     ^^^^^^^^^^^^^
+120 |     
+121 |     # Synergy indicators
+    |
+help: Remove assignment to unused variable `final_content`
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/download_essential_models.py:72:5
+   |
+70 |         else:
+71 |             disk_gb = 0
+72 |     except:
+   |     ^^^^^^
+73 |         disk_gb = 0
+   |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/download_essential_models.py:220:5
+    |
+218 |         cache_size = du_output.split()[0]
+219 |         print(f"💾 Cache size: {cache_size}")
+220 |     except:
+    |     ^^^^^^
+221 |         pass
+    |
+
+F841 Local variable `models_output` is assigned to but never used
+  --> bench/benchmarks/dual_lmstudio_benchmark.py:54:13
+   |
+53 |             # Get available models first
+54 |             models_output = check_result.stdout
+   |             ^^^^^^^^^^^^^
+55 |             
+56 |             # Run benchmark using virtual environment with available models
+   |
+help: Remove assignment to unused variable `models_output`
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/dual_macbook_benchmark.py:243:36
+    |
+241 |                 # Parse results
+242 |                 lines = result.stdout.strip().split('\n')
+243 |                 tps = float([l for l in lines if l.startswith("TPS:")][0].split(":")[1].strip())
+    |                                    ^
+244 |                 memory = float([l for l in lines if l.startswith("Memory:")][0].split(":")[1].replace("GB", "").strip())
+245 |                 cpu = float([l for l in lines if l.startswith("CPU:")][0].split(":")[1].replace("%", "").strip())
+    |
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/dual_macbook_benchmark.py:244:39
+    |
+242 |                 lines = result.stdout.strip().split('\n')
+243 |                 tps = float([l for l in lines if l.startswith("TPS:")][0].split(":")[1].strip())
+244 |                 memory = float([l for l in lines if l.startswith("Memory:")][0].split(":")[1].replace("GB", "").strip())
+    |                                       ^
+245 |                 cpu = float([l for l in lines if l.startswith("CPU:")][0].split(":")[1].replace("%", "").strip())
+    |
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/dual_macbook_benchmark.py:245:36
+    |
+243 |                 tps = float([l for l in lines if l.startswith("TPS:")][0].split(":")[1].strip())
+244 |                 memory = float([l for l in lines if l.startswith("Memory:")][0].split(":")[1].replace("GB", "").strip())
+245 |                 cpu = float([l for l in lines if l.startswith("CPU:")][0].split(":")[1].replace("%", "").strip())
+    |                                    ^
+246 |                 
+247 |                 return BenchmarkResult(
+    |
+
+F841 Local variable `scatter` is assigned to but never used
+   --> bench/benchmarks/dual_macbook_benchmark.py:430:9
+    |
+428 |             performance_ratios.append(comp.performance_ratio)
+429 |         
+430 |         scatter = ax.scatter(model_params, performance_ratios, alpha=0.7, s=100)
+    |         ^^^^^^^
+431 |         ax.axhline(y=1.0, color='red', linestyle='--', alpha=0.7)
+432 |         ax.set_xlabel('Model Parameters (B)')
+    |
+help: Remove assignment to unused variable `scatter`
+
+F841 Local variable `bars1` is assigned to but never used
+   --> bench/benchmarks/dual_macbook_benchmark.py:454:9
+    |
+452 |         width = 0.35
+453 |         
+454 |         bars1 = ax.bar(x - width/2, m4_speeds, width, label='M4 Pro', alpha=0.8)
+    |         ^^^^^
+455 |         bars2 = ax.bar(x + width/2, m2_speeds, width, label='M2 Max', alpha=0.8)
+    |
+help: Remove assignment to unused variable `bars1`
+
+F841 Local variable `bars2` is assigned to but never used
+   --> bench/benchmarks/dual_macbook_benchmark.py:455:9
+    |
+454 |         bars1 = ax.bar(x - width/2, m4_speeds, width, label='M4 Pro', alpha=0.8)
+455 |         bars2 = ax.bar(x + width/2, m2_speeds, width, label='M2 Max', alpha=0.8)
+    |         ^^^^^
+456 |         
+457 |         ax.set_xlabel('Models')
+    |
+help: Remove assignment to unused variable `bars2`
+
+F841 Local variable `analysis` is assigned to but never used
+   --> bench/benchmarks/dual_macbook_benchmark.py:634:5
+    |
+633 |     # Analyze results
+634 |     analysis = benchmark.analyze_results()
+    |     ^^^^^^^^
+635 |     
+636 |     # Generate report
+    |
+help: Remove assignment to unused variable `analysis`
+
+F841 Local variable `result` is assigned to but never used
+  --> bench/benchmarks/fair_dual_test.py:33:5
+   |
+31 |     # Try to load the model via LMStudio API
+32 |     load_cmd = f'ssh {hostname} "curl -s -X POST http://localhost:1234/v1/models/load -H \'Content-Type: application/json\' -d \'{{\\\…
+33 |     result = subprocess.run(load_cmd, shell=True, capture_output=True, text=True, timeout=60)
+   |     ^^^^^^
+34 |     
+35 |     # Give model time to load
+   |
+help: Remove assignment to unused variable `result`
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/fair_dual_test.py:47:9
+   |
+45 |             available_models = [m["id"] for m in models_data["data"]]
+46 |             return model in available_models
+47 |         except:
+   |         ^^^^^^
+48 |             return False
+49 |     return False
+   |
+
+F841 Local variable `review_prompt` is assigned to but never used
+   --> bench/benchmarks/fixed_mcp_benchmark.py:125:9
+    |
+124 |         # Step 2: Agent X reviews
+125 |         review_prompt = f"""Review this response for quality:
+    |         ^^^^^^^^^^^^^
+126 |         
+127 | ORIGINAL: {test_case.prompt}
+    |
+help: Remove assignment to unused variable `review_prompt`
+
+F841 Local variable `context_prompt` is assigned to but never used
+   --> bench/benchmarks/fixed_mcp_benchmark.py:156:9
+    |
+155 |         # Step 3: Agent B with context
+156 |         context_prompt = f"""Expert review provided:
+    |         ^^^^^^^^^^^^^^
+157 | {agent_x.response_text}
+    |
+help: Remove assignment to unused variable `context_prompt`
+
+F841 Local variable `result` is assigned to but never used
+   --> bench/benchmarks/fixed_mcp_benchmark.py:304:13
+    |
+302 |     for test_case in test_cases:
+303 |         try:
+304 |             result = await benchmark.run_test(test_case)
+    |             ^^^^^^
+305 |         except Exception as e:
+306 |             logger.error(f"Test {test_case.id} failed: {e}")
+    |
+help: Remove assignment to unused variable `result`
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/fixed_model_benchmark.py:65:17
+   |
+63 |                     print(f"Killed existing KoboldCpp process (PID: {proc.info['pid']})")
+64 |                     time.sleep(2)
+65 |                 except:
+   |                 ^^^^^^
+66 |                     pass
+   |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/fixed_model_benchmark.py:106:17
+    |
+104 |                         print(f"\n✓ Model loaded in {attempt + 1} seconds")
+105 |                         return True
+106 |                 except:
+    |                 ^^^^^^
+107 |                     pass
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/fixed_model_benchmark.py:139:13
+    |
+137 |                 self.current_process.kill()
+138 |                 self.current_process.wait()
+139 |             except:
+    |             ^^^^^^
+140 |                 pass
+    |
+
+F841 Local variable `text` is assigned to but never used
+   --> bench/benchmarks/fixed_model_benchmark.py:162:17
+    |
+160 |             if response.status_code == 200:
+161 |                 result = response.json()
+162 |                 text = result["choices"][0]["text"]
+    |                 ^^^^
+163 |                 tokens = result["usage"]["completion_tokens"]
+164 |                 duration = time.time() - start_time
+    |
+help: Remove assignment to unused variable `text`
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/fixed_model_benchmark.py:305:9
+    |
+303 |             benchmark.stop_koboldcpp()
+304 |             benchmark.kill_existing_koboldcpp()
+305 |         except:
+    |         ^^^^^^
+306 |             pass
+    |
+
+F841 Local variable `small_models_dict` is assigned to but never used
+   --> bench/benchmarks/head_to_head_benchmark.py:187:23
+    |
+185 |         # System2 gets large model, System1 gets small models  
+186 |         large_system, small_system = system2, system1
+187 |         large_models, small_models_dict = system2_models, system1_models
+    |                       ^^^^^^^^^^^^^^^^^
+188 |     
+189 |     # Find largest model that fits in small system's budget
+    |
+help: Remove assignment to unused variable `small_models_dict`
+
+F841 Local variable `result1` is assigned to but never used
+  --> bench/benchmarks/identical_model_shootout.py:62:9
+   |
+60 | …     future2 = executor.submit(subprocess.run, ['ssh', HOST2, f'~/.lmstudio/bin/lms unload {model}'], capture_output=True, text=True)
+61 | …     
+62 | …     result1 = future1.result()
+   |       ^^^^^^^
+63 | …     result2 = future2.result()
+   |
+help: Remove assignment to unused variable `result1`
+
+F841 Local variable `result2` is assigned to but never used
+  --> bench/benchmarks/identical_model_shootout.py:63:9
+   |
+62 |         result1 = future1.result()
+63 |         result2 = future2.result()
+   |         ^^^^^^^
+64 |         
+65 |         print(f"✅ {model} unloaded from both systems")
+   |
+help: Remove assignment to unused variable `result2`
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/kobold_vs_lmstudio_ultimate.py:128:9
+    |
+126 |                             "memory_mb": int(parts[1].strip())
+127 |                         })
+128 |         except:
+    |         ^^^^^^
+129 |             specs["gpus"] = "Not available or no NVIDIA GPU"
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/kobold_vs_lmstudio_ultimate.py:183:17
+    |
+182 |                         return True
+183 |                 except:
+    |                 ^^^^^^
+184 |                     pass
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/kobold_vs_lmstudio_ultimate.py:274:13
+    |
+272 |             try:
+273 |                 await self.unload_model()
+274 |             except:
+    |             ^^^^^^
+275 |                 pass  # May not have a model loaded
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/kobold_vs_lmstudio_ultimate.py:354:9
+    |
+352 |         try:
+353 |             subprocess.run(["lms", "unload"], capture_output=True, timeout=30)
+354 |         except:
+    |         ^^^^^^
+355 |             pass
+    |
+
+F402 Import `platform` from line 24 shadowed by loop variable
+   --> bench/benchmarks/kobold_vs_lmstudio_ultimate.py:599:13
+    |
+598 |         # Group by configuration
+599 |         for platform in ["KoboldCpp", "LMStudio"]:
+    |             ^^^^^^^^
+600 |             results = comparison.koboldcpp_results if platform == "KoboldCpp" else comparison.lmstudio_results
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/koboldcpp_benchmark.py:108:9
+    |
+106 |             response = self.session.get(f"{self.base_url}{KOBOLDCPP_CONFIG['api_endpoints']['model']}")
+107 |             return response.status_code == 200
+108 |         except:
+    |         ^^^^^^
+109 |             return False
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/koboldcpp_benchmark.py:421:9
+    |
+419 |             result = subprocess.run(["nvidia-smi"], capture_output=True, text=True)
+420 |             return result.returncode == 0
+421 |         except:
+    |         ^^^^^^
+422 |             return False
+    |
+
+F841 Local variable `current_prompt` is assigned to but never used
+  --> bench/benchmarks/lmstudio_benchmark.py:81:17
+   |
+79 |             # Would call each model sequentially with enriched prompt
+80 |             if i > 0:
+81 |                 current_prompt = f"{prompt}\n[Previous analysis from {small_models[i-1]}]\nRefine:"
+   |                 ^^^^^^^^^^^^^^
+82 |         elapsed = time.perf_counter() - start
+83 |         results.append(LMStudioBenchmarkResult(
+   |
+help: Remove assignment to unused variable `current_prompt`
+
+F841 Local variable `content` is assigned to but never used
+  --> bench/benchmarks/lmstudio_concurrent_test.py:48:9
+   |
+47 |         # Handle both content and reasoning_content fields
+48 |         content = data["choices"][0]["message"].get("content", "") or data["choices"][0]["message"].get("reasoning_content", "")
+   |         ^^^^^^^
+49 |         tokens = data["usage"].get("completion_tokens", 0)
+50 |         tok_per_sec = tokens / elapsed if elapsed > 0 else 0
+   |
+help: Remove assignment to unused variable `content`
+
+F841 Local variable `content` is assigned to but never used
+  --> bench/benchmarks/m4_parallel_mega_test.py:77:13
+   |
+76 |             # Handle both content fields
+77 |             content = data["choices"][0]["message"].get("content", "") or data["choices"][0]["message"].get("reasoning_content", "")
+   |             ^^^^^^^
+78 |             tokens = data["usage"].get("completion_tokens", 0)
+79 |             tok_per_sec = tokens / elapsed if elapsed > 0 else 0
+   |
+help: Remove assignment to unused variable `content`
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/manual_model_test.py:37:5
+   |
+35 |             print("Could not get model info")
+36 |             return None
+37 |     except:
+   |     ^^^^^^
+38 |         print("Error: Cannot connect to KoboldCpp on port", port)
+39 |         return None
+   |
+
+F841 Local variable `available_models` is assigned to but never used
+   --> bench/benchmarks/mcp_agent_benchmark.py:349:5
+    |
+348 |     # Available models from discovery
+349 |     available_models = [
+    |     ^^^^^^^^^^^^^^^^
+350 |         "qwen/qwen3-8b", "hermes-4-70b@q4_k_m", "qwen/qwen3-4b-2507",
+351 |         "mistralai/devstral-small-2507", "qwen/qwen3-30b-a3b-2507"
+    |
+help: Remove assignment to unused variable `available_models`
+
+F841 Local variable `results` is assigned to but never used
+   --> bench/benchmarks/mcp_agent_benchmark.py:367:9
+    |
+365 |     try:
+366 |         benchmark = MCPAgentContextBenchmark()
+367 |         results = await benchmark.run_benchmark(AGENT_A_MODEL, AGENT_X_MODEL, AGENT_B_MODEL)
+    |         ^^^^^^^
+368 |         
+369 |         # Save results and print summary
+    |
+help: Remove assignment to unused variable `results`
+
+F821 Undefined name `time`
+   --> bench/benchmarks/measure_impact.py:183:17
+    |
+181 |         # Test A: Direct approach
+182 |         proxy.config.force_direct = True
+183 |         start = time.time()
+    |                 ^^^^
+184 |         direct_result = await proxy.query(query)
+185 |         direct_time = time.time() - start
+    |
+
+F841 Local variable `direct_result` is assigned to but never used
+   --> bench/benchmarks/measure_impact.py:184:9
+    |
+182 |         proxy.config.force_direct = True
+183 |         start = time.time()
+184 |         direct_result = await proxy.query(query)
+    |         ^^^^^^^^^^^^^
+185 |         direct_time = time.time() - start
+    |
+help: Remove assignment to unused variable `direct_result`
+
+F821 Undefined name `time`
+   --> bench/benchmarks/measure_impact.py:185:23
+    |
+183 |         start = time.time()
+184 |         direct_result = await proxy.query(query)
+185 |         direct_time = time.time() - start
+    |                       ^^^^
+186 |         
+187 |         # Test B: Scaffolded approach  
+    |
+
+F821 Undefined name `time`
+   --> bench/benchmarks/measure_impact.py:189:17
+    |
+187 |         # Test B: Scaffolded approach  
+188 |         proxy.config.force_direct = False
+189 |         start = time.time()
+    |                 ^^^^
+190 |         scaffold_result = await proxy.query(query)
+191 |         scaffold_time = time.time() - start
+    |
+
+F841 Local variable `scaffold_result` is assigned to but never used
+   --> bench/benchmarks/measure_impact.py:190:9
+    |
+188 |         proxy.config.force_direct = False
+189 |         start = time.time()
+190 |         scaffold_result = await proxy.query(query)
+    |         ^^^^^^^^^^^^^^^
+191 |         scaffold_time = time.time() - start
+    |
+help: Remove assignment to unused variable `scaffold_result`
+
+F821 Undefined name `time`
+   --> bench/benchmarks/measure_impact.py:191:25
+    |
+189 |         start = time.time()
+190 |         scaffold_result = await proxy.query(query)
+191 |         scaffold_time = time.time() - start
+    |                         ^^^^
+192 |         
+193 |         # Compare
+    |
+
+F841 Local variable `result` is assigned to but never used
+   --> bench/benchmarks/minimal_scaffold_proxy.py:207:5
+    |
+206 |     # Complex query - gets optimized automatically
+207 |     result = await proxy.query("""
+    |     ^^^^^^
+208 |         Design a distributed rate limiting system that handles 1M requests/second,
+209 |         supports user and IP limits, works across data centers, handles failures,
+    |
+help: Remove assignment to unused variable `result`
+
+F841 Local variable `content` is assigned to but never used
+  --> bench/benchmarks/mlx_benchmark_m2.py:43:13
+   |
+42 |             # Handle both content and reasoning_content fields
+43 |             content = data["choices"][0]["message"].get("content", "") or data["choices"][0]["message"].get("reasoning_content", "")
+   |             ^^^^^^^
+44 |             tokens = data["usage"].get("completion_tokens", 0)
+45 |             tok_per_sec = tokens / elapsed if elapsed > 0 else 0
+   |
+help: Remove assignment to unused variable `content`
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/mlx_clean_14b_test.py:47:21
+   |
+45 |                     try:
+46 |                         swap_used_mb = float(swap_str)
+47 |                     except:
+   |                     ^^^^^^
+48 |                         pass
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/mlx_clean_14b_test.py:72:5
+   |
+70 |         subprocess.run(f"rm -rf {cache_dir}/models--mlx-community--*", shell=True, check=False)
+71 |         print("✅ Cleared model cache")
+72 |     except:
+   |     ^^^^^^
+73 |         pass
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/mlx_progressive_conservative.py:77:5
+   |
+75 |                 available = int(parts[3])
+76 |                 return available
+77 |     except:
+   |     ^^^^^^
+78 |         pass
+79 |     return 0
+   |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/mlx_progressive_conservative.py:128:5
+    |
+126 |             'available_gb': round(available_gb, 2)
+127 |         }
+128 |     except:
+    |     ^^^^^^
+129 |         return {'total_gb': 0, 'available_gb': 0}
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/mlx_progressive_size_test.py:121:21
+    |
+119 |                     try:
+120 |                         swap_used_mb = float(swap_str)
+121 |                     except:
+    |                     ^^^^^^
+122 |                         swap_used_mb = 0
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/mlx_progressive_size_test.py:250:9
+    |
+248 |         try:
+249 |             mx.clear_cache()
+250 |         except:
+    |         ^^^^^^
+251 |             pass
+    |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/mlx_simple_14b_test.py:38:5
+   |
+36 |             'available_gb': round(available_gb, 2)
+37 |         }
+38 |     except:
+   |     ^^^^^^
+39 |         return {'total_gb': 0, 'available_gb': 0}
+   |
+
+E712 Avoid equality comparisons to `True`; use `caps.get("reasoning"):` for truth checks
+   --> bench/benchmarks/model_capability_detector.py:178:29
+    |
+177 |             # Count confirmed capabilities
+178 |             has_reasoning = caps.get("reasoning") == True
+    |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+179 |             has_tool_use = caps.get("tool_use") == True
+180 |             has_vision = caps.get("vision") == True
+    |
+help: Replace with `caps.get("reasoning")`
+
+E712 Avoid equality comparisons to `True`; use `caps.get("tool_use"):` for truth checks
+   --> bench/benchmarks/model_capability_detector.py:179:28
+    |
+177 |             # Count confirmed capabilities
+178 |             has_reasoning = caps.get("reasoning") == True
+179 |             has_tool_use = caps.get("tool_use") == True
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+180 |             has_vision = caps.get("vision") == True
+181 |             has_coding = caps.get("coding") == True
+    |
+help: Replace with `caps.get("tool_use")`
+
+E712 Avoid equality comparisons to `True`; use `caps.get("vision"):` for truth checks
+   --> bench/benchmarks/model_capability_detector.py:180:26
+    |
+178 |             has_reasoning = caps.get("reasoning") == True
+179 |             has_tool_use = caps.get("tool_use") == True
+180 |             has_vision = caps.get("vision") == True
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+181 |             has_coding = caps.get("coding") == True
+    |
+help: Replace with `caps.get("vision")`
+
+E712 Avoid equality comparisons to `True`; use `caps.get("coding"):` for truth checks
+   --> bench/benchmarks/model_capability_detector.py:181:26
+    |
+179 |             has_tool_use = caps.get("tool_use") == True
+180 |             has_vision = caps.get("vision") == True
+181 |             has_coding = caps.get("coding") == True
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+182 |             
+183 |             confirmed_caps = sum([has_reasoning, has_tool_use, has_vision, has_coding])
+    |
+help: Replace with `caps.get("coding")`
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/model_manager.py:26:17
+   |
+24 |                     du_output = subprocess.check_output(['du', '-sh', model_path]).decode()
+25 |                     size = du_output.split()[0]
+26 |                 except:
+   |                 ^^^^^^
+27 |                     size = "unknown"
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/model_manager.py:57:5
+   |
+55 |         du_output = subprocess.check_output(['du', '-sh', cache_dir]).decode()
+56 |         cache_size = du_output.split()[0]
+57 |     except:
+   |     ^^^^^^
+58 |         cache_size = "0B"
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/multi_model_benchmark.py:91:13
+   |
+89 |                     print(f"✓ KoboldCpp ready after {attempt + 1} seconds")
+90 |                     return True
+91 |             except:
+   |             ^^^^^^
+92 |                 pass
+93 |             time.sleep(1)
+   |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/multi_model_benchmark.py:217:9
+    |
+215 |             # This is a simplified version - in reality you'd use nvidia-ml-py or similar
+216 |             return {"note": "GPU memory monitoring not implemented"}
+217 |         except:
+    |         ^^^^^^
+218 |             return {"error": "Could not get GPU info"}
+    |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/multi_vs_single_quality_test.py:82:5
+   |
+80 |                               capture_output=True, text=True, timeout=10)
+81 |         return result.returncode == 0 and model in result.stdout
+82 |     except:
+   |     ^^^^^^
+83 |         return False
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/multi_vs_single_quality_test.py:91:5
+   |
+89 |                               capture_output=True, text=True, timeout=180)
+90 |         return result.returncode == 0
+91 |     except:
+   |     ^^^^^^
+92 |         return False
+   |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/multi_vs_single_quality_test.py:113:5
+    |
+111 |                                  capture_output=True, text=True, timeout=30)
+112 |         return True
+113 |     except:
+    |     ^^^^^^
+114 |         return False
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/multi_vs_single_quality_test.py:129:5
+    |
+127 |                 'success': True
+128 |             }
+129 |     except:
+    |     ^^^^^^
+130 |         pass
+131 |     return {'success': False}
+    |
+
+E731 Do not assign a `lambda` expression, use a `def`
+  --> bench/benchmarks/one_line_start.py:8:1
+   |
+ 7 | # THE ONE LINE (copy this into any script):
+ 8 | s = lambda q: __import__('subprocess').run(['curl', '-s', 'http://localhost:1234/v1/chat/completions', '-H', 'Content-Type: application/json', '-d', __import__('json').dumps({"model": "qwen/qwen3-8b", "messages": [{"role": "system", "content": "Structure the response with clear sections"}, {"role": "user", "content": q}], "max_tokens": 500})], capture_output=True).stdout.decode()
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 9 |
+10 | # That's it. Now you can use:
+   |
+help: Rewrite `s` as a `def`
+
+E402 Module level import not at top of file
+  --> bench/benchmarks/one_line_start.py:17:1
+   |
+15 | # =============================================================================
+16 |
+17 | import requests
+   | ^^^^^^^^^^^^^^^
+18 |
+19 | class S:
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/quick_capability_scan.py:67:5
+   |
+65 |             return True
+66 |             
+67 |     except:
+   |     ^^^^^^
+68 |         return False
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/quick_comparison.py:59:9
+   |
+57 |             model_info = response.json()
+58 |             logger.info(f"Testing KoboldCpp: {model_info.get('result', 'unknown')}")
+59 |         except:
+   |         ^^^^^^
+60 |             logger.error("Cannot connect to KoboldCpp")
+61 |             return results
+   |
+
+F841 Local variable `payload_str` is assigned to but never used
+  --> bench/benchmarks/quick_dual_test.py:56:9
+   |
+54 |             "temperature": 0.1
+55 |         }
+56 |         payload_str = json.dumps(payload)
+   |         ^^^^^^^^^^^
+57 |         
+58 |         # Use proper escaping for the SSH + curl command
+   |
+help: Remove assignment to unused variable `payload_str`
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/quick_multi_model_test.py:70:13
+   |
+68 |                     print(f"✓ Ready in {attempt + 1}s")
+69 |                     return True
+70 |             except:
+   |             ^^^^^^
+71 |                 pass
+72 |             time.sleep(1)
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/quick_resource_test.py:48:21
+   |
+46 |                     try:
+47 |                         stats['load_average'] = float(line.split(':')[1])
+48 |                     except: pass
+   |                     ^^^^^^
+49 |                 elif line.startswith('MEMORY:'):
+50 |                     try:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> bench/benchmarks/quick_resource_test.py:48:27
+   |
+46 |                     try:
+47 |                         stats['load_average'] = float(line.split(':')[1])
+48 |                     except: pass
+   |                           ^
+49 |                 elif line.startswith('MEMORY:'):
+50 |                     try:
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/quick_resource_test.py:57:21
+   |
+55 |                         stats['free_mb'] = int(free_pages) * 4 // 1024
+56 |                         stats['active_mb'] = int(active_pages) * 4 // 1024
+57 |                     except: pass
+   |                     ^^^^^^
+58 |                 elif line.startswith('CPU_USAGE:'):
+59 |                     try:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> bench/benchmarks/quick_resource_test.py:57:27
+   |
+55 |                         stats['free_mb'] = int(free_pages) * 4 // 1024
+56 |                         stats['active_mb'] = int(active_pages) * 4 // 1024
+57 |                     except: pass
+   |                           ^
+58 |                 elif line.startswith('CPU_USAGE:'):
+59 |                     try:
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/quick_resource_test.py:61:21
+   |
+59 |                     try:
+60 |                         stats['cpu_user_pct'] = float(line.split(':')[1])
+61 |                     except: pass
+   |                     ^^^^^^
+62 |             
+63 |             return stats
+   |
+
+E701 Multiple statements on one line (colon)
+  --> bench/benchmarks/quick_resource_test.py:61:27
+   |
+59 |                     try:
+60 |                         stats['cpu_user_pct'] = float(line.split(':')[1])
+61 |                     except: pass
+   |                           ^
+62 |             
+63 |             return stats
+   |
+
+F841 Local variable `simple_questions` is assigned to but never used
+  --> bench/benchmarks/quick_strategic_test.py:20:5
+   |
+18 |     # Simple test questions
+19 |     complex_question = "Design a REST API for user authentication with JWT tokens"
+20 |     simple_questions = [
+   |     ^^^^^^^^^^^^^^^^
+21 |         "What is JWT?",
+22 |         "How do REST APIs work?",
+   |
+help: Remove assignment to unused variable `simple_questions`
+
+E701 Multiple statements on one line (colon)
+  --> bench/benchmarks/quick_synergy_demo.py:27:30
+   |
+25 |     result1 = await call_model(session, combo[0], prompt1, 200)
+26 |     phases.append(result1)
+27 |     if not result1["success"]: return {"success": False, "phases": phases}
+   |                              ^
+28 |     
+29 |     # Phase 2 
+   |
+
+E701 Multiple statements on one line (colon)
+  --> bench/benchmarks/quick_synergy_demo.py:33:30
+   |
+31 |     result2 = await call_model(session, combo[1], prompt2, 250)
+32 |     phases.append(result2)
+33 |     if not result2["success"]: return {"success": False, "phases": phases}
+   |                              ^
+34 |     
+35 |     # Phase 3
+   |
+
+E701 Multiple statements on one line (colon)
+  --> bench/benchmarks/quick_synergy_demo.py:39:30
+   |
+37 |     result3 = await call_model(session, combo[2], prompt3, 250)
+38 |     phases.append(result3)
+39 |     if not result3["success"]: return {"success": False, "phases": phases}
+   |                              ^
+40 |     
+41 |     # Quick synergy score
+   |
+
+F841 Local variable `current_code` is assigned to but never used
+   --> bench/benchmarks/recursive_self_improvement.py:223:17
+    |
+221 |             # Read current code
+222 |             with open(self.source_file, 'r') as f:
+223 |                 current_code = f.read()
+    |                 ^^^^^^^^^^^^
+224 |             
+225 |             implementation_prompt = f"""You are implementing a code improvement. Generate specific Python code changes.
+    |
+help: Remove assignment to unused variable `current_code`
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/robust_benchmark_suite.py:134:9
+    |
+132 |                     'used_mb': (active_pages + wired_pages) * 4 // 1024
+133 |                 }
+134 |         except:
+    |         ^^^^^^
+135 |             pass
+    |
+
+F841 Local variable `result` is assigned to but never used
+   --> bench/benchmarks/scaffold_cli.py:156:13
+    |
+155 |             # Process the query
+156 |             result = await run_single_query(framework, query, type('Args', (), {'verbose': False})())
+    |             ^^^^^^
+157 |             
+158 |         except KeyboardInterrupt:
+    |
+help: Remove assignment to unused variable `result`
+
+F841 Local variable `total_time` is assigned to but never used
+   --> bench/benchmarks/self_assembling_orchestrator.py:341:9
+    |
+339 |         start_time = time.perf_counter()
+340 |         result = await self._execute_strategy(strategy, optimal_models, prompt, task_type)
+341 |         total_time = time.perf_counter() - start_time
+    |         ^^^^^^^^^^
+342 |         
+343 |         # Learn from results
+    |
+help: Remove assignment to unused variable `total_time`
+
+F841 Local variable `tokens_used` is assigned to but never used
+  --> bench/benchmarks/sequential_quantization_test.py:61:17
+   |
+59 |             if "choices" in response_data and response_data["choices"]:
+60 |                 response_text = response_data["choices"][0]["message"]["content"]
+61 |                 tokens_used = response_data.get("usage", {}).get("total_tokens", 0)
+   |                 ^^^^^^^^^^^
+62 |                 completion_tokens = response_data.get("usage", {}).get("completion_tokens", 0)
+   |
+help: Remove assignment to unused variable `tokens_used`
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/sequential_synergy_benchmark.py:283:9
+    |
+281 |     small = [m for m in MODELS if "4B" in m.size or "8B" in m.size or "Small" in m.size]
+282 |     
+283 |     for l, m, s in itertools.product(large[:2], medium[:2], small[:2]):
+    |         ^
+284 |         if len(set([l.id, m.id, s.id])) == 3:
+285 |             combinations.append((l, m, s))
+    |
+
+F821 Undefined name `duration`
+  --> bench/benchmarks/simple_dual_benchmark.py:61:21
+   |
+59 | result = sum(i*i for i in range(1000000))
+60 | duration = time.time() - start
+61 | print(f\\"CPU_TIME:{duration:.4f}\\")
+   |                     ^^^^^^^^
+62 | print(f\\"RESULT:{result}\\")
+63 | '"'''
+   |
+
+F821 Undefined name `result`
+  --> bench/benchmarks/simple_dual_benchmark.py:62:19
+   |
+60 | duration = time.time() - start
+61 | print(f\\"CPU_TIME:{duration:.4f}\\")
+62 | print(f\\"RESULT:{result}\\")
+   |                   ^^^^^^
+63 | '"'''
+   |
+
+E741 Ambiguous variable name: `l`
+  --> bench/benchmarks/simple_dual_benchmark.py:69:37
+   |
+67 |         if result.returncode == 0:
+68 |             lines = result.stdout.strip().split('\n')
+69 |             cpu_time = float([l for l in lines if l.startswith("CPU_TIME:")][0].split(":")[1])
+   |                                     ^
+70 |             computation_result = int([l for l in lines if l.startswith("RESULT:")][0].split(":")[1])
+   |
+
+E741 Ambiguous variable name: `l`
+  --> bench/benchmarks/simple_dual_benchmark.py:70:45
+   |
+68 |             lines = result.stdout.strip().split('\n')
+69 |             cpu_time = float([l for l in lines if l.startswith("CPU_TIME:")][0].split(":")[1])
+70 |             computation_result = int([l for l in lines if l.startswith("RESULT:")][0].split(":")[1])
+   |                                             ^
+71 |             
+72 |             return {
+   |
+
+F821 Undefined name `duration`
+  --> bench/benchmarks/simple_dual_benchmark.py:97:21
+   |
+95 | del data
+96 | duration = time.time() - start
+97 | print(f\\"MEM_TIME:{duration:.4f}\\")
+   |                     ^^^^^^^^
+98 | print(f\\"RESULT:{result}\\")
+99 | '"'''
+   |
+
+F821 Undefined name `result`
+  --> bench/benchmarks/simple_dual_benchmark.py:98:19
+   |
+96 | duration = time.time() - start
+97 | print(f\\"MEM_TIME:{duration:.4f}\\")
+98 | print(f\\"RESULT:{result}\\")
+   |                   ^^^^^^
+99 | '"'''
+   |
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/simple_dual_benchmark.py:105:37
+    |
+103 |         if result.returncode == 0:
+104 |             lines = result.stdout.strip().split('\n')
+105 |             mem_time = float([l for l in lines if l.startswith("MEM_TIME:")][0].split(":")[1])
+    |                                     ^
+106 |             computation_result = int([l for l in lines if l.startswith("RESULT:")][0].split(":")[1])
+    |
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/simple_dual_benchmark.py:106:45
+    |
+104 |             lines = result.stdout.strip().split('\n')
+105 |             mem_time = float([l for l in lines if l.startswith("MEM_TIME:")][0].split(":")[1])
+106 |             computation_result = int([l for l in lines if l.startswith("RESULT:")][0].split(":")[1])
+    |                                             ^
+107 |             
+108 |             return {
+    |
+
+F821 Undefined name `i`
+   --> bench/benchmarks/simple_dual_benchmark.py:134:27
+    |
+132 |     temp_name = f.name
+133 |     for i in range(10000):
+134 |         f.write(f\\"Line {i}: Testing I/O performance\\n\\")
+    |                           ^
+135 |     f.flush()
+    |
+
+F821 Undefined name `duration`
+   --> bench/benchmarks/simple_dual_benchmark.py:142:20
+    |
+140 | os.unlink(temp_name)
+141 | duration = time.time() - start
+142 | print(f\\"IO_TIME:{duration:.4f}\\")
+    |                    ^^^^^^^^
+143 | print(f\\"LINES:{lines}\\")
+144 | '"'''
+    |
+
+F821 Undefined name `lines`
+   --> bench/benchmarks/simple_dual_benchmark.py:143:18
+    |
+141 | duration = time.time() - start
+142 | print(f\\"IO_TIME:{duration:.4f}\\")
+143 | print(f\\"LINES:{lines}\\")
+    |                  ^^^^^
+144 | '"'''
+    |
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/simple_dual_benchmark.py:150:36
+    |
+148 |         if result.returncode == 0:
+149 |             lines = result.stdout.strip().split('\n')
+150 |             io_time = float([l for l in lines if l.startswith("IO_TIME:")][0].split(":")[1])
+    |                                    ^
+151 |             lines_count = int([l for l in lines if l.startswith("LINES:")][0].split(":")[1])
+    |
+
+E741 Ambiguous variable name: `l`
+   --> bench/benchmarks/simple_dual_benchmark.py:151:38
+    |
+149 |             lines = result.stdout.strip().split('\n')
+150 |             io_time = float([l for l in lines if l.startswith("IO_TIME:")][0].split(":")[1])
+151 |             lines_count = int([l for l in lines if l.startswith("LINES:")][0].split(":")[1])
+    |                                      ^
+152 |             
+153 |             return {
+    |
+
+F821 Undefined name `e`
+   --> bench/benchmarks/smart_cognitive_benchmark.py:262:76
+    |
+260 |                         print(f"      ❌ {model} failed: {e}")
+261 |                     
+262 |                     return {'model': model, 'success': False, 'error': str(e)}
+    |                                                                            ^
+263 |                 
+264 |                 # Run all models concurrently
+    |
+
+F841 Local variable `memory` is assigned to but never used
+   --> bench/benchmarks/smart_cognitive_benchmark.py:355:17
+    |
+353 |             for result in single_models:
+354 |                 model = result['model']
+355 |                 memory = result['memory_usage']['estimated_gb']
+    |                 ^^^^^^
+356 |                 model_size = result['model_size_gb']
+    |
+help: Remove assignment to unused variable `memory`
+
+F841 Local variable `results` is assigned to but never used
+   --> bench/benchmarks/solidified_strategies.py:705:5
+    |
+704 |     # Run all strategies
+705 |     results = benchmark.run_all_strategies(large_model, small_models)
+    |     ^^^^^^^
+706 |     
+707 |     print("\n" + "="*60)
+    |
+help: Remove assignment to unused variable `results`
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/solidified_strategies_lite.py:270:5
+    |
+268 |         else:
+269 |             models = []
+270 |     except:
+    |     ^^^^^^
+271 |         print("Could not fetch models from LMStudio")
+272 |         models = []
+    |
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/strategic_benchmark.py:110:29
+    |
+108 |                                 subprocess.run(['lms', 'unload', model], 
+109 |                                              capture_output=True, timeout=10)
+110 |                             except:
+    |                             ^^^^^^
+111 |                                 pass
+112 |         except Exception as e:
+    |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/system_resource_monitor.py:84:21
+   |
+82 |                         free_pages = int(line.split()[2].rstrip('.'))
+83 |                         memory_info['free_pages'] = free_pages
+84 |                     except:
+   |                     ^^^^^^
+85 |                         pass
+86 |                 elif line.startswith("Pages active"):
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/system_resource_monitor.py:90:21
+   |
+88 |                         active_pages = int(line.split()[2].rstrip('.'))
+89 |                         memory_info['active_pages'] = active_pages
+90 |                     except:
+   |                     ^^^^^^
+91 |                         pass
+92 |                 elif line.startswith("Pages inactive"):
+   |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/system_resource_monitor.py:96:21
+   |
+94 |                         inactive_pages = int(line.split()[2].rstrip('.'))
+95 |                         memory_info['inactive_pages'] = inactive_pages
+96 |                     except:
+   |                     ^^^^^^
+97 |                         pass
+98 |                 elif line.startswith("/"):
+   |
+
+F841 Local variable `load_info` is assigned to but never used
+   --> bench/benchmarks/system_resource_monitor.py:147:13
+    |
+145 |             # Extract key metrics for quick display
+146 |             cpu_info = resource_data.get('cpu_usage', 'N/A')
+147 |             load_info = resource_data.get('load_average', 'N/A')
+    |             ^^^^^^^^^
+148 |             print(f"    Sample {sample_count}: CPU: {cpu_info[:50]}...")
+149 |         else:
+    |
+help: Remove assignment to unused variable `load_info`
+
+F841 Local variable `result` is assigned to but never used
+   --> bench/benchmarks/system_resource_monitor.py:287:5
+    |
+285 |     print(f"🗑️  Unloading {model} from {system_name}...")
+286 |     
+287 |     result = subprocess.run(
+    |     ^^^^^^
+288 |         ['ssh', host, f'~/.lmstudio/bin/lms unload {model}'], 
+289 |         capture_output=True, 
+    |
+help: Remove assignment to unused variable `result`
+
+E722 Do not use bare `except`
+   --> bench/benchmarks/system_resource_monitor.py:316:13
+    |
+314 |                         cpu_samples.append(cpu_pct)
+315 |                         break
+316 |             except:
+    |             ^^^^^^
+317 |                 pass
+    |
+
+E722 Do not use bare `except`
+  --> bench/benchmarks/test_large_models.py:34:5
+   |
+33 |         return {'total_gb': round(total_gb, 2), 'available_gb': round(available_gb, 2)}
+34 |     except:
+   |     ^^^^^^
+35 |         return {'total_gb': 0, 'available_gb': 0}
+   |
+
+F841 Local variable `phase1_start` is assigned to but never used
+   --> bench/results/json/latency_quality_analyzer.py:117:9
+    |
+116 |         # Phase 1: Analysis
+117 |         phase1_start = time.time()
+    |         ^^^^^^^^^^^^
+118 |         result1 = await self._call_model(session, models[0], task["prompt"], 300)
+119 |         contexts.append(result1["content"] if result1["success"] else "")
+    |
+help: Remove assignment to unused variable `phase1_start`
+
+F841 Local variable `domination_count` is assigned to but never used
+   --> bench/results/json/mock_validation_demo.py:665:9
+    |
+663 |         # Generate recommendation
+664 |         positive_utilities = sum(1 for score in utility_scores.values() if score > 0)
+665 |         domination_count = len(dominance_results["orchestrated_dominates"])
+    |         ^^^^^^^^^^^^^^^^
+666 |         
+667 |         if positive_utilities >= 2 and efficiency_ratio > 1.2:
+    |
+help: Remove assignment to unused variable `domination_count`
+
+E722 Do not use bare `except`
+   --> bench/results/json/simplified_live_validation.py:150:9
+    |
+148 |             quality_result = self.quality_analyzer.analyze_quality(content, task_type)
+149 |             return quality_result.overall_score
+150 |         except:
+    |         ^^^^^^
+151 |             # Fallback simple scoring
+152 |             return min(len(content) / 800.0, 1.0) * 0.5
+    |
+
+F841 Local variable `models_data` is assigned to but never used
+   --> bench/results/json/test_api_connectivity.py:105:13
+    |
+103 |             connected = True
+104 |             working_api_url = api_url
+105 |             models_data = data
+    |             ^^^^^^^^^^^
+106 |             break
+    |
+help: Remove assignment to unused variable `models_data`
+
+E741 Ambiguous variable name: `l`
+  --> db/apply_schema.py:31:36
+   |
+29 |     for block in blocks:
+30 |         # Drop pure comment lines
+31 |         lines_no_comments = [l for l in block.splitlines() if not l.strip().startswith("--")]
+   |                                    ^
+32 |         cleaned_block = "\n".join(lines_no_comments)
+33 |         upper = cleaned_block.upper()
+   |
+
+F841 Local variable `models_by_provider` is assigned to but never used
+   --> db/sync_providers_models.py:144:5
+    |
+142 |     import asyncio
+143 |
+144 |     models_by_provider: Dict[str, List[Dict[str, Any]]] = {}
+    |     ^^^^^^^^^^^^^^^^^^
+145 |
+146 |     async def _collect():
+    |
+help: Remove assignment to unused variable `models_by_provider`
+
+E402 Module level import not at top of file
+   --> examples/standardized_llm_migration_example.py:518:1
+    |
+516 |     print("\n🚀 Ready to migrate your Story Engine to standardized LLM interface!")
+517 |
+518 | import time as import_time
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+
+invalid-syntax: missing closing quote in string literal
+  --> scripts/repo_map.py:37:14
+   |
+35 | INTERNAL_ROOTS = {'core','poml','scripts','examples','tests','cache','character_engine','common','domain','orchestration','storage','s…
+36 | ENV_PATTERNS = [
+37 |   re.compile(r"os\.getenv\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]) ),
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+38 |   re.compile(r"os\.environ\[['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]\]") ),
+39 |   re.compile(r"os\.environ\.get\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]) ),
+   |
+
+invalid-syntax: missing closing quote in string literal
+  --> scripts/repo_map.py:39:14
+   |
+37 |   re.compile(r"os\.getenv\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]) ),
+38 |   re.compile(r"os\.environ\[['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]\]") ),
+39 |   re.compile(r"os\.environ\.get\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]) ),
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+40 | ]
+   |
+
+invalid-syntax: Expected ')', found NonLogicalNewline
+  --> scripts/repo_map.py:39:75
+   |
+37 |   re.compile(r"os\.getenv\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]) ),
+38 |   re.compile(r"os\.environ\[['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]\]") ),
+39 |   re.compile(r"os\.environ\.get\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]) ),
+   |                                                                           ^
+40 | ]
+   |
+
+E702 Multiple statements on one line (semicolon)
+   --> scripts/repo_map.py:157:28
+    |
+155 |         tree = None
+156 |       if tree is not None:
+157 |         v = PyFileVisitor(); v.visit(tree)
+    |                            ^
+158 |         # classify imports into internal/external by token
+159 |         for token in v.imports:
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:279:44
+    |
+277 | """.strip()
+278 |   path = f'DOCS/REPO_MAP{("_"+out_suffix) if out_suffix else ""}.md'
+279 |   with open(path,'w',encoding='utf-8') as f: f.write(content)
+    |                                            ^
+280 |
+281 |   # MODULES table
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:292:33
+    |
+290 |     tests = 'yes' if m['name']=='tests' else 'partial'
+291 |     notes = ''
+292 |     if m['name']=='core/storage': notes = 'DB drivers; wallet/SSL may be required'
+    |                                 ^
+293 |     if m['name']=='core/story_engine': notes = (notes+'; ' if notes else '') + 'High centrality; watch for cycles'
+294 |     if m['name']=='core/orchestration': notes = (notes+'; ' if notes else '') + 'External LLM APIs; timeouts'
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:293:38
+    |
+291 |     notes = ''
+292 |     if m['name']=='core/storage': notes = 'DB drivers; wallet/SSL may be required'
+293 |     if m['name']=='core/story_engine': notes = (notes+'; ' if notes else '') + 'High centrality; watch for cycles'
+    |                                      ^
+294 |     if m['name']=='core/orchestration': notes = (notes+'; ' if notes else '') + 'External LLM APIs; timeouts'
+295 |     rows.append('|'.join([m['name'], m['path'], m['language'], m['responsibility'], apis, internals, externals, envs, tests, notes]))
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:294:39
+    |
+292 |     if m['name']=='core/storage': notes = 'DB drivers; wallet/SSL may be required'
+293 |     if m['name']=='core/story_engine': notes = (notes+'; ' if notes else '') + 'High centrality; watch for cycles'
+294 |     if m['name']=='core/orchestration': notes = (notes+'; ' if notes else '') + 'External LLM APIs; timeouts'
+    |                                       ^
+295 |     rows.append('|'.join([m['name'], m['path'], m['language'], m['responsibility'], apis, internals, externals, envs, tests, notes]))
+296 |   path2 = f'DOCS/MODULES{("_"+out_suffix) if out_suffix else ""}.md'
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:297:45
+    |
+295 |     rows.append('|'.join([m['name'], m['path'], m['language'], m['responsibility'], apis, internals, externals, envs, tests, notes]))
+296 |   path2 = f'DOCS/MODULES{("_"+out_suffix) if out_suffix else ""}.md'
+297 |   with open(path2,'w',encoding='utf-8') as f: f.write('\n'.join(rows))
+    |                                             ^
+298 |
+299 |   # JSON index
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:308:45
+    |
+306 |   } for m in modules], 'edges': edges_json, 'meta': meta}
+307 |   path3 = f'DOCS/repo-map{("."+out_suffix) if out_suffix else ""}.json'
+308 |   with open(path3,'w',encoding='utf-8') as f: json.dump(out,f,indent=2)
+    |                                             ^
+309 |
+310 |   # Per-module summaries
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> scripts/repo_map.py:311:38
+    |
+310 |   # Per-module summaries
+311 |   base = pathlib.Path('DOCS/modules'); base.mkdir(parents=True, exist_ok=True)
+    |                                      ^
+312 |   edge_in = defaultdict(set)
+313 |   for a,b in edges: edge_in[b].add(a)
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:313:19
+    |
+311 |   base = pathlib.Path('DOCS/modules'); base.mkdir(parents=True, exist_ok=True)
+312 |   edge_in = defaultdict(set)
+313 |   for a,b in edges: edge_in[b].add(a)
+    |                   ^
+314 |   for m in modules:
+315 |     slug = m['name'].replace('/','-')
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> scripts/repo_map.py:316:20
+    |
+314 |   for m in modules:
+315 |     slug = m['name'].replace('/','-')
+316 |     d = base / slug; d.mkdir(exist_ok=True)
+    |                    ^
+317 |     met = metrics.get(m['name'], {'files':0,'loc':0,'todos':0,'largest':''})
+318 |     content = f"""
+    |
+
+E701 Multiple statements on one line (colon)
+   --> scripts/repo_map.py:353:56
+    |
+351 | - Harden secrets via vault/CI masks; validate DB config on startup
+352 | """.strip()
+353 |     with open(d/'SUMMARY.md','w',encoding='utf-8') as f: f.write(content)
+    |                                                        ^
+    |
+
+F841 Local variable `out_path` is assigned to but never used
+   --> scripts/run_pilate_simulation.py:99:5
+    |
+ 98 |     # Save and pretty print
+ 99 |     out_path = Path("feedback").mkdir(exist_ok=True)
+    |     ^^^^^^^^
+100 |     out_file = Path("feedback").joinpath("pilate_simulation_result.json")
+101 |     with open(out_file, "w", encoding="utf-8") as f:
+    |
+help: Remove assignment to unused variable `out_path`
+
+F821 Undefined name `aiohttp`
+   --> src/story_engine/core/core/character_engine/character_simulation_engine_v2.py:136:17
+    |
+134 |             # Would ping OpenAI API endpoint
+135 |             return True
+136 |         except (aiohttp.ClientError, asyncio.TimeoutError, ConnectionError) as e:
+    |                 ^^^^^^^
+137 |             logger.warning(f'Connection error: {e}')
+138 |             return False
+    |
+
+F821 Undefined name `prompt`
+   --> src/story_engine/core/core/character_engine/character_simulation_engine_v2.py:583:44
+    |
+581 | …     logger.warning(f"Persona adherence low (score={adherence}, violations={violations}). Retrying with strict persona instructions.…
+582 | …     strict_suffix = "\n\nSTRICT PERSONA MODE:\n- Obey guardrails precisely.\n- Do NOT use any forbidden lexicon; replace with perio…
+583 | …     strict_prompt = f"{prompt}{strict_suffix}"
+    |                          ^^^^^^
+584 | …     try:
+585 | …         strict_resp = await _call(strict_prompt, temperature, max_tokens)
+    |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/complex_group_dynamics.py:10:1
+   |
+ 8 | """
+ 9 |
+10 | import asyncio
+   | ^^^^^^^^^^^^^^
+11 | import json
+12 | import aiohttp
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/complex_group_dynamics.py:11:1
+   |
+10 | import asyncio
+11 | import json
+   | ^^^^^^^^^^^
+12 | import aiohttp
+13 | from typing import Dict, List, Set, Tuple
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/complex_group_dynamics.py:12:1
+   |
+10 | import asyncio
+11 | import json
+12 | import aiohttp
+   | ^^^^^^^^^^^^^^
+13 | from typing import Dict, List, Set, Tuple
+14 | from dataclasses import dataclass, field
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/complex_group_dynamics.py:13:1
+   |
+11 | import json
+12 | import aiohttp
+13 | from typing import Dict, List, Set, Tuple
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | from dataclasses import dataclass, field
+15 | from enum import Enum
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/complex_group_dynamics.py:14:1
+   |
+12 | import aiohttp
+13 | from typing import Dict, List, Set, Tuple
+14 | from dataclasses import dataclass, field
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15 | from enum import Enum
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/complex_group_dynamics.py:15:1
+   |
+13 | from typing import Dict, List, Set, Tuple
+14 | from dataclasses import dataclass, field
+15 | from enum import Enum
+   | ^^^^^^^^^^^^^^^^^^^^^
+16 |
+17 | class Faction(Enum):
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/multi_character_simulation.py:10:1
+   |
+ 8 | """
+ 9 |
+10 | import asyncio
+   | ^^^^^^^^^^^^^^
+11 | import json
+12 | import aiohttp
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/multi_character_simulation.py:11:1
+   |
+10 | import asyncio
+11 | import json
+   | ^^^^^^^^^^^
+12 | import aiohttp
+13 | import time
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/multi_character_simulation.py:12:1
+   |
+10 | import asyncio
+11 | import json
+12 | import aiohttp
+   | ^^^^^^^^^^^^^^
+13 | import time
+14 | from typing import Dict, List
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/multi_character_simulation.py:13:1
+   |
+11 | import json
+12 | import aiohttp
+13 | import time
+   | ^^^^^^^^^^^
+14 | from typing import Dict, List
+15 | from dataclasses import dataclass, field
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/multi_character_simulation.py:14:1
+   |
+12 | import aiohttp
+13 | import time
+14 | from typing import Dict, List
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15 | from dataclasses import dataclass, field
+16 | from enum import Enum
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/multi_character_simulation.py:15:1
+   |
+13 | import time
+14 | from typing import Dict, List
+15 | from dataclasses import dataclass, field
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+16 | from enum import Enum
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/character_engine/multi_character_simulation.py:16:1
+   |
+14 | from typing import Dict, List
+15 | from dataclasses import dataclass, field
+16 | from enum import Enum
+   | ^^^^^^^^^^^^^^^^^^^^^
+17 |
+18 | class RelationshipType(Enum):
+   |
+
+F841 Local variable `results` is assigned to but never used
+   --> src/story_engine/core/core/character_engine/multi_character_simulation.py:386:9
+    |
+385 |     for scene in scenes:
+386 |         results = await engine.run_interaction(scene)
+    |         ^^^^^^^
+387 |         await asyncio.sleep(1)  # Pause between scenes
+    |
+help: Remove assignment to unused variable `results`
+
+invalid-syntax: Expected `except` or `finally` after `try` block
+   --> src/story_engine/core/core/messaging/rabbitmq.py:283:21
+    |
+281 |                                     time.sleep(sleep_for)
+282 |
+283 |                     return _on_message
+    |                     ^
+284 |
+285 |                 # Bind consumers
+    |
+
+F841 Local variable `context_hash` is assigned to but never used
+   --> src/story_engine/core/core/orchestration/autonomous_persona_agents.py:141:9
+    |
+139 |     ) -> List[str]:
+140 |         """Find templates similar to the given context"""
+141 |         context_hash = self.generate_template_id(context)
+    |         ^^^^^^^^^^^^
+142 |         similar_templates = []
+    |
+help: Remove assignment to unused variable `context_hash`
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/orchestration/llm_orchestrator.py:28:1
+   |
+26 | logger = logging.getLogger(__name__)
+27 |
+28 | from .response_normalizer import normalize_openai_chat
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+F841 Local variable `status` is assigned to but never used
+   --> src/story_engine/core/core/orchestration/llm_orchestrator.py:482:13
+    |
+480 |         try:
+481 |             response = await provider.generate(prompt, system=system, **kwargs)
+482 |             status = "ok"
+    |             ^^^^^^
+483 |         except Exception as e:
+484 |             # Log failure path to DB if enabled, then re-raise
+    |
+help: Remove assignment to unused variable `status`
+
+E402 Module level import not at top of file
+   --> src/story_engine/core/core/orchestration/standardized_llm_interface.py:434:1
+    |
+433 | # Import fix
+434 | import time as import_time
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+
+F401 `.database.get_database_connection` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> src/story_engine/core/core/storage/__init__.py:2:23
+  |
+1 | # This file makes the 'storage' directory a Python package.
+2 | from .database import get_database_connection, DatabaseConnection, SQLiteConnection, PostgreSQLConnection
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `get_database_connection as get_database_connection`
+
+F401 `.database.DatabaseConnection` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> src/story_engine/core/core/storage/__init__.py:2:48
+  |
+1 | # This file makes the 'storage' directory a Python package.
+2 | from .database import get_database_connection, DatabaseConnection, SQLiteConnection, PostgreSQLConnection
+  |                                                ^^^^^^^^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `DatabaseConnection as DatabaseConnection`
+
+F401 `.database.SQLiteConnection` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> src/story_engine/core/core/storage/__init__.py:2:68
+  |
+1 | # This file makes the 'storage' directory a Python package.
+2 | from .database import get_database_connection, DatabaseConnection, SQLiteConnection, PostgreSQLConnection
+  |                                                                    ^^^^^^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `SQLiteConnection as SQLiteConnection`
+
+F401 `.database.PostgreSQLConnection` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> src/story_engine/core/core/storage/__init__.py:2:86
+  |
+1 | # This file makes the 'storage' directory a Python package.
+2 | from .database import get_database_connection, DatabaseConnection, SQLiteConnection, PostgreSQLConnection
+  |                                                                                      ^^^^^^^^^^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `PostgreSQLConnection as PostgreSQLConnection`
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:10:1
+   |
+ 8 | """
+ 9 |
+10 | import asyncio
+   | ^^^^^^^^^^^^^^
+11 | import json
+12 | import aiohttp
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:11:1
+   |
+10 | import asyncio
+11 | import json
+   | ^^^^^^^^^^^
+12 | import aiohttp
+13 | from typing import Dict, List, Optional, Tuple, Any
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:12:1
+   |
+10 | import asyncio
+11 | import json
+12 | import aiohttp
+   | ^^^^^^^^^^^^^^
+13 | from typing import Dict, List, Optional, Tuple, Any
+14 | from dataclasses import dataclass
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:13:1
+   |
+11 | import json
+12 | import aiohttp
+13 | from typing import Dict, List, Optional, Tuple, Any
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | from dataclasses import dataclass
+15 | from enum import Enum
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:14:1
+   |
+12 | import aiohttp
+13 | from typing import Dict, List, Optional, Tuple, Any
+14 | from dataclasses import dataclass
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15 | from enum import Enum
+16 | from collections import defaultdict
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:15:1
+   |
+13 | from typing import Dict, List, Optional, Tuple, Any
+14 | from dataclasses import dataclass
+15 | from enum import Enum
+   | ^^^^^^^^^^^^^^^^^^^^^
+16 | from collections import defaultdict
+17 | import numpy as np
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:16:1
+   |
+14 | from dataclasses import dataclass
+15 | from enum import Enum
+16 | from collections import defaultdict
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17 | import numpy as np
+18 | from datetime import datetime
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:17:1
+   |
+15 | from enum import Enum
+16 | from collections import defaultdict
+17 | import numpy as np
+   | ^^^^^^^^^^^^^^^^^^
+18 | from datetime import datetime
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/iterative_story_system.py:18:1
+   |
+16 | from collections import defaultdict
+17 | import numpy as np
+18 | from datetime import datetime
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+19 |
+20 | class FeedbackType(Enum):
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/narrative_pipeline.py:16:1
+   |
+14 | logger = logging.getLogger(__name__)
+15 |
+16 | from story_engine.core.domain.models import NarrativeArc, SceneDescriptor
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17 | from story_engine.core.cache.response_cache import ResponseCache
+18 | from story_engine.core.common.config import load_config
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/narrative_pipeline.py:17:1
+   |
+16 | from story_engine.core.domain.models import NarrativeArc, SceneDescriptor
+17 | from story_engine.core.cache.response_cache import ResponseCache
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+18 | from story_engine.core.common.config import load_config
+   |
+
+E402 Module level import not at top of file
+  --> src/story_engine/core/core/story_engine/narrative_pipeline.py:18:1
+   |
+16 | from story_engine.core.domain.models import NarrativeArc, SceneDescriptor
+17 | from story_engine.core.cache.response_cache import ResponseCache
+18 | from story_engine.core.common.config import load_config
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+19 |
+20 | class NarrativePipeline:
+   |
+
+E741 Ambiguous variable name: `l`
+   --> src/story_engine/core/core/story_engine/scene_bank.py:117:31
+    |
+115 |     # Preprocess markdown to make headings consistent
+116 |     raw_lines = text.splitlines()
+117 |     lines = [_strip_md(l) for l in raw_lines]
+    |                               ^
+118 |     scenes: List[SceneEntry] = []
+119 |     current_title: Optional[str] = None
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:163:35
+    |
+161 |                 pos = index / max(1, total - 1)
+162 |                 if pos < 0.2:
+163 |                     name = "Setup"; purpose = "Establish normal"; tension = 2
+    |                                   ^
+164 |                 elif pos < 0.6:
+165 |                     name = "Rising Action"; purpose = "Complicate & escalate"; tension = 5
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:163:65
+    |
+161 |                 pos = index / max(1, total - 1)
+162 |                 if pos < 0.2:
+163 |                     name = "Setup"; purpose = "Establish normal"; tension = 2
+    |                                                                 ^
+164 |                 elif pos < 0.6:
+165 |                     name = "Rising Action"; purpose = "Complicate & escalate"; tension = 5
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:165:43
+    |
+163 |                     name = "Setup"; purpose = "Establish normal"; tension = 2
+164 |                 elif pos < 0.6:
+165 |                     name = "Rising Action"; purpose = "Complicate & escalate"; tension = 5
+    |                                           ^
+166 |                 elif pos < 0.8:
+167 |                     name = "Climax"; purpose = "Confront core conflict"; tension = 8
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:165:78
+    |
+163 |                     name = "Setup"; purpose = "Establish normal"; tension = 2
+164 |                 elif pos < 0.6:
+165 |                     name = "Rising Action"; purpose = "Complicate & escalate"; tension = 5
+    |                                                                              ^
+166 |                 elif pos < 0.8:
+167 |                     name = "Climax"; purpose = "Confront core conflict"; tension = 8
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:167:36
+    |
+165 |                     name = "Rising Action"; purpose = "Complicate & escalate"; tension = 5
+166 |                 elif pos < 0.8:
+167 |                     name = "Climax"; purpose = "Confront core conflict"; tension = 8
+    |                                    ^
+168 |                 else:
+169 |                     name = "Resolution"; purpose = "Consequences & change"; tension = 3
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:167:72
+    |
+165 |                     name = "Rising Action"; purpose = "Complicate & escalate"; tension = 5
+166 |                 elif pos < 0.8:
+167 |                     name = "Climax"; purpose = "Confront core conflict"; tension = 8
+    |                                                                        ^
+168 |                 else:
+169 |                     name = "Resolution"; purpose = "Consequences & change"; tension = 3
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:169:40
+    |
+167 |                     name = "Climax"; purpose = "Confront core conflict"; tension = 8
+168 |                 else:
+169 |                     name = "Resolution"; purpose = "Consequences & change"; tension = 3
+    |                                        ^
+170 |
+171 |         return {"name": name, "purpose": purpose, "tension": tension}
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:169:75
+    |
+167 |                     name = "Climax"; purpose = "Confront core conflict"; tension = 8
+168 |                 else:
+169 |                     name = "Resolution"; purpose = "Consequences & change"; tension = 3
+    |                                                                           ^
+170 |
+171 |         return {"name": name, "purpose": purpose, "tension": tension}
+    |
+
+F841 Local variable `metrics` is assigned to but never used
+   --> src/story_engine/core/core/story_engine/story_engine_orchestrated.py:606:13
+    |
+604 |         else:
+605 |             # Fallback to original single-stage method
+606 |             metrics = [
+    |             ^^^^^^^
+607 |                 "Narrative Coherence",
+608 |                 "Character Development",
+    |
+help: Remove assignment to unused variable `metrics`
+
+F841 Local variable `variant_data` is assigned to but never used
+   --> src/story_engine/poml/poml/integration/character_simulation_poml.py:332:9
+    |
+330 |         """
+331 |         # Render variant template
+332 |         variant_data = self.poml.render(
+    |         ^^^^^^^^^^^^
+333 |             'templates/characters/character_variants.poml',
+334 |             {
+    |
+help: Remove assignment to unused variable `variant_data`
+
+F841 Local variable `data` is assigned to but never used
+   --> src/story_engine/poml/poml/integration/llm_orchestrator_poml.py:439:13
+    |
+437 |         try:
+438 |             # Parse JSON content
+439 |             data = json.loads(content)
+    |             ^^^^
+440 |             
+441 |             # Get schema from template
+    |
+help: Remove assignment to unused variable `data`
+
+F841 Local variable `simulation_id` is assigned to but never used
+   --> tests/test_autonomous_agent_breaking_points.py:256:17
+    |
+254 |                 }
+255 |                 
+256 |                 simulation_id = await engine.submit_simulation(
+    |                 ^^^^^^^^^^^^^
+257 |                     persona=LLMPersona.CHARACTER_SIMULATOR,
+258 |                     context_data=deep_context,
+    |
+help: Remove assignment to unused variable `simulation_id`
+
+F841 Local variable `response` is assigned to but never used
+   --> tests/test_breaking_points_simplified.py:108:17
+    |
+106 |             try:
+107 |                 start_time = time.time()
+108 |                 response = await self.mock_orchestrator.generate_with_persona(
+    |                 ^^^^^^^^
+109 |                     "CHARACTER_SIMULATOR", 
+110 |                     massive_context
+    |
+help: Remove assignment to unused variable `response`
+
+F841 Local variable `successful` is assigned to but never used
+   --> tests/test_breaking_points_simplified.py:171:17
+    |
+169 |                 # Check results
+170 |                 exceptions = [r for r in results if isinstance(r, Exception)]
+171 |                 successful = [r for r in results if not isinstance(r, Exception)]
+    |                 ^^^^^^^^^^
+172 |                 
+173 |                 total_time = end_time - start_time
+    |
+help: Remove assignment to unused variable `successful`
+
+F841 Local variable `timeout_result` is assigned to but never used
+   --> tests/test_breaking_points_simplified.py:350:17
+    |
+349 |                 # This should timeout or complete slowly
+350 |                 timeout_result = await asyncio.wait_for(
+    |                 ^^^^^^^^^^^^^^
+351 |                     self.mock_orchestrator.generate_with_persona("TIMEOUT_TEST", {}),
+352 |                     timeout=3.0  # 3 second timeout
+    |
+help: Remove assignment to unused variable `timeout_result`
+
+F841 Local variable `initial_object_count` is assigned to but never used
+   --> tests/test_breaking_points_simplified.py:403:13
+    |
+401 |             # Test 1: Memory accumulation
+402 |             large_objects = []
+403 |             initial_object_count = len(large_objects)
+    |             ^^^^^^^^^^^^^^^^^^^^
+404 |             
+405 |             for i in range(100):
+    |
+help: Remove assignment to unused variable `initial_object_count`
+
+F841 Local variable `test_object` is assigned to but never used
+   --> tests/test_breaking_points_simplified.py:424:21
+    |
+422 |                 if i % 20 == 0 and i > 0:
+423 |                     start_time = time.time()
+424 |                     test_object = {'test': 'memory_check', 'size': len(large_objects)}
+    |                     ^^^^^^^^^^^
+425 |                     end_time = time.time()
+    |
+help: Remove assignment to unused variable `test_object`
+
+F841 Local variable `template_files` is assigned to but never used
+   --> tests/test_output_authenticity_audit.py:192:9
+    |
+191 |         # Find template-related files
+192 |         template_files = list(self.project_root.glob("**/*template*"))
+    |         ^^^^^^^^^^^^^^
+193 |         agent_files = list(self.project_root.glob("**/autonomous_persona_agents.py"))
+    |
+help: Remove assignment to unused variable `template_files`
+
+F841 Local variable `has_variables` is assigned to but never used
+   --> tests/test_output_authenticity_audit.py:307:21
+    |
+305 |                     has_system_prompt = '<system>' in content
+306 |                     has_user_prompt = '<user>' in content
+307 |                     has_variables = '{{' in content and '}}' in content
+    |                     ^^^^^^^^^^^^^
+308 |                     
+309 |                     if not (has_system_prompt or has_user_prompt):
+    |
+help: Remove assignment to unused variable `has_variables`
+
+Found 221 errors.
+No fixes available (68 hidden fixes can be enabled with the `--unsafe-fixes` option).

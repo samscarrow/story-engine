@@ -1,0 +1,62 @@
+<document>
+  <metadata>
+    <title>World State Refinement</title>
+    <description>Normalize and refine the world state into a consistent, simulation-ready structure.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are a meticulous continuity editor helping a story simulation system.
+    Based on the provided world snapshot, produce a JSON patch that:
+    - Normalizes facts, relationships, availability, locations, props, and timeline.
+    - Adds helpful visibility metadata (public, visible_to[], rumor, confidence 0..1) where missing.
+    - Resolves obvious inconsistencies conservatively (prefer marking uncertain over deletion).
+    - Focuses on the specified characters and location if provided, but you may refine global items when necessary.
+    - NEVER invent omniscient knowledge that characters could not plausibly know; mark such items as uncertain.
+    Return ONLY JSON with keys: upserts, deletes (optional), and notes.
+  </system>
+
+  <section class="input">
+    <h2>Targeted Brief (for focus)</h2>
+    <brief>
+{{world_targeted_markdown}}
+    </brief>
+
+    <h2>Full World JSON</h2>
+    <world>{{world_json}}</world>
+
+    <focus>
+      <characters>{{focus_characters | json}}</characters>
+      <location>{{location}}</location>
+    </focus>
+  </section>
+
+  <instructions>
+    <h2>Refinement Rules</h2>
+    <ul>
+      <li>Add or update items under upserts; prefer not to delete unless clearly erroneous.</li>
+      <li>For facts: use { value, public, visible_to[], rumor, confidence } if possible.</li>
+      <li>For timeline events: prefer { time, desc, public, visible_to[], subject, actors[], participants[] }.</li>
+      <li>When uncertain, set rumor=true or confidence≤0.5 and add a short note in notes.</li>
+    </ul>
+  </instructions>
+
+  <output>
+    {
+      "upserts": {
+        "facts": {},
+        "relationships": {},
+        "availability": {},
+        "locations": {},
+        "props": {},
+        "timeline": []
+      },
+      "deletes": {
+        "facts": [],
+        "relationships": []
+      },
+      "notes": "List any key normalizations, uncertainties, or potential conflicts you identified."
+    }
+  </output>
+</document>
+

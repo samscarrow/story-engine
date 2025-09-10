@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: story
+      POSTGRES_PASSWORD: story
+      POSTGRES_DB: story
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  plot_worker:
+    build:
+      context: ../..
+    environment:
+      MQ_TYPE: rabbitmq
+      MQ_URL: amqp://guest:guest@rabbitmq:5672/
+      QUEUE_PREFIX: story
+      PREFETCH: 5
+    depends_on:
+      - rabbitmq
+    command: ["python", "-m", "services.plot_worker"]
+
+  story_initializer:
+    build:
+      context: ../..
+    environment:
+      MQ_TYPE: rabbitmq
+      MQ_URL: amqp://guest:guest@rabbitmq:5672/
+      QUEUE_PREFIX: story
+    depends_on:
+      - rabbitmq
+    command: ["python", "-m", "services.story_initializer", "'Demo prompt'" ]
+
+volumes:
+  pgdata: {}
+
+# Notes:
+# - This compose assumes the repo has a Dockerfile at project root.
+# - plot_worker starts and waits; story_initializer fires a single plot.request.
+# - Postgres is included for later milestones (outbox/artifacts).
+

@@ -1,64 +1,12 @@
 {
+  "active": "ai-load-balancer",
   "providers": [
     {
-      "name": "lmstudio-primary",
+      "name": "ai-load-balancer",
       "provider": "lmstudio",
-      "endpoint": "http://localhost:1234",
-      "model": "gemma-2-27b",
-      "temperature": 0.7,
-      "max_tokens": 1500,
-      "timeout": 60
-    },
-    {
-      "name": "kobold-primary",
-      "provider": "koboldcpp",
-      "endpoint": "http://localhost:5001",
-      "temperature": 0.5,
-      "max_tokens": 1000,
-      "top_p": 0.9,
-      "top_k": 40,
-      "repetition_penalty": 1.1,
-      "stop_sequences": ["###", "\n\n\n"],
-      "extra_params": {
-        "sampler_order": [6, 0, 1, 3, 4, 2, 5],
-        "rep_pen_range": 320
-      }
-    },
-    {
-      "name": "ollama-fallback",
-      "provider": "ollama",
-      "endpoint": "http://localhost:11434",
-      "model": "llama2",
-      "temperature": 0.6,
-      "max_tokens": 800
-    },
-    {
-      "name": "lmstudio-fast",
-      "provider": "lmstudio",
-      "endpoint": "http://localhost:1234",
-      "model": "qwen-2-0.5b",
-      "temperature": 0.5,
-      "max_tokens": 500,
-      "timeout": 30
+      "endpoint": "http://localhost:8000",
+      "model": null,
+      "timeout": 120
     }
-  ],
-  "active": "kobold-primary",
-  "fallback_chain": ["kobold-primary", "lmstudio-primary", "ollama-fallback"],
-  "profiles": {
-    "creative": {
-      "temperature": 0.9,
-      "top_p": 0.95,
-      "max_tokens": 2000
-    },
-    "balanced": {
-      "temperature": 0.7,
-      "top_p": 0.9,
-      "max_tokens": 1000
-    },
-    "focused": {
-      "temperature": 0.3,
-      "top_p": 0.7,
-      "max_tokens": 500
-    }
-  }
+  ]
 }

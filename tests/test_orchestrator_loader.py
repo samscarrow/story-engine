@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests for YAML-based orchestrator loader.
 """
 
-from core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
+from story_engine.core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
 
 
 def test_loader_registers_providers():
@@ -10,4 +10,5 @@ def test_loader_registers_providers():
     assert hasattr(orch, "providers")
     assert len(orch.providers) >= 1
     assert orch.active_provider is not None
+
 

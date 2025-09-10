@@ -8,11 +8,10 @@ import asyncio
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Tuple, Any, Protocol
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from pathlib import Path
 import random
-from enum import Enum
 import traceback
 import yaml
 
@@ -186,7 +185,6 @@ class LMStudioLLM(LLMInterface):
                                max_tokens: int = 500) -> LLMResponse:
         """Generate response via LMStudio API with structured output"""
         import aiohttp
-        import json
         
         try:
             logger.info(f"LMStudio call: endpoint={self.endpoint}, temp={temperature}")

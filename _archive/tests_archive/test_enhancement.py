@@ -4,10 +4,9 @@ Simplified version for testing iterative story improvement
 """
 
 import asyncio
-import json
 import aiohttp
 import time
-from typing import Dict, List, Optional
+from typing import Dict
 from dataclasses import dataclass
 from enum import Enum
 
@@ -174,7 +173,7 @@ Enhanced scene:"""
                 print(f"   Weaknesses: {', '.join(eval_original['weaknesses'])}")
             
             # Enhance
-            print(f"\n🔧 Enhancing scene...")
+            print("\n🔧 Enhancing scene...")
             start = time.time()
             
             # Try different enhancement focuses
@@ -198,7 +197,7 @@ Enhanced scene:"""
                 if improvement > 0:
                     print(f"✅ Improvement: +{improvement} points")
                 elif improvement == 0:
-                    print(f"➖ No change in quality score")
+                    print("➖ No change in quality score")
                 else:
                     print(f"⚠️  Quality decreased: {improvement} points")
                 
@@ -302,7 +301,7 @@ async def test_iterative_enhancement():
             break
     
     # Show final result
-    print(f"\n📊 FINAL RESULT")
+    print("\n📊 FINAL RESULT")
     print("-" * 40)
     print(f"Original: {scene.situation}")
     print(f"\nFinal: {current_scene.situation[:300]}...")

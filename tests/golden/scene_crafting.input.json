@@ -1,0 +1,9 @@
+{
+  "beat": {"name": "Setup", "purpose": "Establish", "tension": 3},
+  "characters": [
+    {"name": "Alice", "role": "protagonist", "motivation": "Find truth", "goal_in_scene": "Ask questions", "emotional_state": "anxious"},
+    {"name": "Bob", "role": "antagonist", "motivation": "Hide secret", "goal_in_scene": "Deflect", "emotional_state": "calm"}
+  ],
+  "previous_context": ""
+}
+

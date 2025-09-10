@@ -1,0 +1,24 @@
+<document>
+  <metadata>
+    <title>Plot Structure Freeform</title>
+    <description>Generates a freeform narrative plot structure.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are an expert narrative architect. Your task is to generate a freeform plot structure for a story based on the provided details. Focus on creating a compelling narrative flow.
+  </system>
+
+  <section>
+    <h1>Story Overview</h1>
+    <p><b>Title:</b> {{title}}</p>
+    <p><b>Premise:</b> {{premise}}</p>
+    <p><b>Genre:</b> {{genre}}</p>
+    <p><b>Tone:</b> {{tone}}</p>
+    <p><b>Setting:</b> {{setting}}</p>
+  </section>
+
+  <instructions>
+    Generate a {{structure | default: "three_act"}} plot structure. Describe the key events and turning points in a natural, flowing narrative. Do not use explicit headers or bullet points for each section. Just write the story's progression.
+  </instructions>
+</document>

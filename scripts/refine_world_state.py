@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Refine the latest world state using LMStudio via the orchestrator and persist the result.
 
@@ -14,14 +14,13 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import List
 
 # Add project root to path to allow direct script execution
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline
-from core.story_engine.world_state_refiner import WorldStateRefiner
-from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status
+from story_engine.core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline
+from story_engine.core.story_engine.world_state_refiner import WorldStateRefiner
+from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status
 
 
 async def main():
@@ -83,3 +82,4 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+

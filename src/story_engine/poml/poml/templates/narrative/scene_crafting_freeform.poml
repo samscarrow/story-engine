@@ -1,0 +1,32 @@
+<document>
+  <metadata>
+    <title>Scene Crafting Freeform</title>
+    <description>Generates a freeform narrative scene.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are an expert screenwriter and novelist. Your task is to generate a freeform, descriptive scene based on the provided plot point, characters, and previous context. Focus on creating a vivid and immersive narrative.
+  </system>
+
+  <section>
+    <h1>Scene Context</h1>
+    <p><b>Plot Point:</b> {{beat.name}} - {{beat.purpose}}</p>
+    <p><b>Characters:</b>
+      <for each="char" in="{{characters}}">
+        - {{char.name}}: {{char.role}}
+      </for>
+    </p>
+    <p><b>Previous Context:</b> {{previous_context}}</p>
+  </section>
+
+  <instructions>
+    Generate a detailed scene that includes:
+    - Setting details and atmosphere.
+    - Character positions, actions, and expressions.
+    - Key dialogue snippets.
+    - The emotional tone of the scene.
+    - The scene's objective or purpose.
+    Do not use explicit headers or bullet points. Just write the scene as a natural, flowing narrative.
+  </instructions>
+</document>

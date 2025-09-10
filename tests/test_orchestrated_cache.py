@@ -1,10 +1,10 @@
-"""
+﻿"""
 Test that OrchestratedStoryEngine caches repeated generation calls.
 """
 
 import asyncio
 
-from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent
+from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent
 
 
 class StubResp:
@@ -35,3 +35,4 @@ def test_orchestrated_caches_by_prompt_and_params():
         assert orch.calls == 1
 
     asyncio.run(run())
+

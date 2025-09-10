@@ -299,7 +299,6 @@ Reply with JSON: {"dialogue": "words", "thought": "thoughts", "action": "action"
 
 
 if __name__ == "__main__":
-    import sys
     
     print("🚀 GEMMA-2-27B CHARACTER SIMULATION\n")
     

@@ -1,11 +1,11 @@
-"""
+﻿"""
 Ensure OrchestratedStoryEngine can render POML prompts and call the orchestrator.
 This uses a stub orchestrator and does not require real providers.
 """
 
 import asyncio
 
-from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine
+from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine
 
 
 class StubResp:
@@ -36,3 +36,4 @@ def test_orchestrated_scene_and_dialogue_with_poml():
         assert enhanced == "ok"
 
     asyncio.run(run())
+

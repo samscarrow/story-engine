@@ -4,13 +4,12 @@ Agnostic interface for multiple LLM providers (LMStudio, KoboldCpp, OpenAI, etc.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
 import asyncio
 import aiohttp
 import json
-import os
 from datetime import datetime
 import logging
 

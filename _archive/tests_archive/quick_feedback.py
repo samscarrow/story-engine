@@ -5,7 +5,6 @@ Get focused feedback on specific architectural questions
 
 import asyncio
 import aiohttp
-import json
 
 async def ask_lmstudio(question: str, max_tokens: int = 600) -> str:
     """Ask a specific question to LMStudio"""

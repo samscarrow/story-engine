@@ -1,0 +1,735 @@
+﻿{
+    "modules":  [
+                    {
+                        "module":  "core/common",
+                        "path":  "core/common",
+                        "language":  "Python",
+                        "responsibility":  "config, env loading, logging, CLI, result store",
+                        "publicAPIs":  [
+                                           "add_model_client_args",
+                                           "get_model_and_client_config",
+                                           "detect_loaded_model",
+                                           "detect_lmstudio_model",
+                                           "detect_koboldcpp_model",
+                                           "validate_model_connection",
+                                           "validate_lmstudio_connection",
+                                           "validate_koboldcpp_connection",
+                                           "print_connection_status",
+                                           "setup_standard_args",
+                                           "_deep_merge",
+                                           "load_config",
+                                           "load_dotenv_keys",
+                                           "configure_logging",
+                                           "store_workflow_output"
+                                       ],
+                        "internalDeps":  [
+                                             "core/storage"
+                                         ],
+                        "externalDeps":  [
+                                             "argparse",
+                                             "os",
+                                             "requests",
+                                             "typing",
+                                             "__future__",
+                                             "pathlib",
+                                             "yaml",
+                                             "logging"
+                                         ],
+                        "env":  [
+                                    "DB_HOST",
+                                    "DB_NAME",
+                                    "DB_PASSWORD",
+                                    "DB_PORT",
+                                    "DB_SSLCERT",
+                                    "DB_SSLKEY",
+                                    "DB_SSLMODE",
+                                    "DB_SSLROOTCERT",
+                                    "DB_USER",
+                                    "KOBOLD_ENDPOINT",
+                                    "LM_ENDPOINT",
+                                    "LMSTUDIO_ENDPOINT",
+                                    "LMSTUDIO_MODEL"
+                                ],
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "core/domain",
+                        "path":  "core/domain",
+                        "language":  "Python",
+                        "responsibility":  "domain models (characters, scenes, narratives)",
+                        "publicAPIs":  [
+                                           "StoryRequest",
+                                           "NarrativeArc",
+                                           "SceneDescriptor"
+                                       ],
+                        "internalDeps":  [
+
+                                         ],
+                        "externalDeps":  [
+                                             "__future__",
+                                             "dataclasses",
+                                             "typing"
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "core/orchestration",
+                        "path":  "core/orchestration",
+                        "language":  "Python",
+                        "responsibility":  "LLM orchestration, agent controllers, standardized interfaces",
+                        "publicAPIs":  [
+                                           "SimulationContext",
+                                           "TemplateMetadata",
+                                           "TemplateRepository",
+                                           "AutonomousPersonaAgent",
+                                           "CharacterSimulatorAgent",
+                                           "SceneArchitectAgent",
+                                           "PersonaAgentFactory",
+                                           "ModelProvider",
+                                           "GenerationError",
+                                           "ProviderFailure",
+                                           "LLMConfig",
+                                           "LLMResponse",
+                                           "LLMProvider",
+                                           "LMStudioProvider",
+                                           "KoboldCppProvider",
+                                           "LLMOrchestrator",
+                                           "create_orchestrator_from_yaml",
+                                           "SimulationStatus",
+                                           "SimulationPriority",
+                                           "SimulationRequest",
+                                           "SimulationResult",
+                                           "SimulationScheduler",
+                                           "RecursiveSimulationEngine",
+                                           "create_recursive_simulation_engine",
+                                           "QueryType",
+                                           "StandardizedQuery",
+                                           "LLMInterface",
+                                           "StandardizedLLMInterface",
+                                           "LegacyLLMAdapter",
+                                           "create_standardized_interface",
+                                           "LLMPersona",
+                                           "PersonaConfig",
+                                           "UnifiedLLMOrchestrator",
+                                           "create_unified_orchestrator"
+                                       ],
+                        "internalDeps":  [
+                                             "poml",
+                                             "core/common"
+                                         ],
+                        "externalDeps":  [
+                                             "asyncio",
+                                             "logging",
+                                             "json",
+                                             "hashlib",
+                                             "typing",
+                                             "pathlib",
+                                             "dataclasses",
+                                             "datetime",
+                                             "abc",
+                                             "uuid",
+                                             "tempfile",
+                                             "enum",
+                                             "aiohttp",
+                                             "os",
+                                             "traceback",
+                                             "__future__",
+                                             "time",
+                                             "yaml"
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "core/story_engine",
+                        "path":  "core/story_engine",
+                        "language":  "Python",
+                        "responsibility":  "narrative graph, pipelines, world state, story arcs",
+                        "publicAPIs":  [
+                                           "FeedbackType",
+                                           "RevisionStrategy",
+                                           "StoryMetrics",
+                                           "Feedback",
+                                           "StoryVersion",
+                                           "BranchPoint",
+                                           "IterativeStoryEngine",
+                                           "AdaptiveStorySystem",
+                                           "GraphNode",
+                                           "GraphEdge",
+                                           "NarrativeGraph",
+                                           "NarrativePipeline",
+                                           "_strip_md",
+                                           "_slugify",
+                                           "SceneEntry",
+                                           "SceneBank",
+                                           "parse_screenplay_to_scenes",
+                                           "StoryStructure",
+                                           "ConflictType",
+                                           "TensionCurve",
+                                           "SceneType",
+                                           "StoryTheme",
+                                           "PlotPoint",
+                                           "StoryArc",
+                                           "Scene",
+                                           "StoryArcEngine",
+                                           "IntegratedStoryEngine",
+                                           "StoryComponent",
+                                           "_ProfilesConfig",
+                                           "OrchestratedStoryEngine",
+                                           "EnhancementFocus",
+                                           "SceneQuality",
+                                           "SceneEvaluation",
+                                           "EnhancementCycle",
+                                           "StoryEnhancementLoop",
+                                           "WorldState",
+                                           "WorldStateManager",
+                                           "WorldStateRefiner"
+                                       ],
+                        "internalDeps":  [
+                                             "core/common",
+                                             "poml",
+                                             "core/domain",
+                                             "core/cache",
+                                             "core/orchestration",
+                                             "core/storage"
+                                         ],
+                        "externalDeps":  [
+                                             "logging",
+                                             "asyncio",
+                                             "json",
+                                             "aiohttp",
+                                             "typing",
+                                             "dataclasses",
+                                             "enum",
+                                             "collections",
+                                             "numpy",
+                                             "datetime",
+                                             "__future__",
+                                             "uuid",
+                                             "time",
+                                             "sys",
+                                             "os",
+                                             "re",
+                                             "pathlib",
+                                             "random",
+                                             "character_simulation_engine_v2",
+                                             "narrative_pipeline"
+                                         ],
+                        "env":  [
+                                    "DB_DSN",
+                                    "DB_HOST",
+                                    "DB_NAME",
+                                    "DB_PASSWORD",
+                                    "DB_PORT",
+                                    "DB_SSLCERT",
+                                    "DB_SSLKEY",
+                                    "DB_SSLMODE",
+                                    "DB_SSLROOTCERT",
+                                    "DB_TYPE",
+                                    "DB_USER",
+                                    "DB_WALLET_LOCATION",
+                                    "DB_WALLET_PASSWORD"
+                                ],
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "core/character_engine",
+                        "path":  "core/character_engine",
+                        "language":  "Python",
+                        "responsibility":  "character simulation engines and group dynamics",
+                        "publicAPIs":  [
+                                           "LLMResponse",
+                                           "LLMInterface",
+                                           "MockLLM",
+                                           "OpenAILLM",
+                                           "LMStudioLLM",
+                                           "SimulationError",
+                                           "LLMError",
+                                           "RetryHandler",
+                                           "EmotionalState",
+                                           "CharacterMemory",
+                                           "CharacterState",
+                                           "SimulationEngine",
+                                           "Faction",
+                                           "ActionType",
+                                           "GroupCharacter",
+                                           "GroupDynamicsEngine",
+                                           "create_expanded_cast",
+                                           "MetaNarrativePipeline",
+                                           "RelationshipType",
+                                           "Character",
+                                           "MultiCharacterEngine",
+                                           "create_trial_characters"
+                                       ],
+                        "internalDeps":  [
+                                             "core/story_engine",
+                                             "poml",
+                                             "core/common",
+                                             "core/orchestration"
+                                         ],
+                        "externalDeps":  [
+                                             "json",
+                                             "asyncio",
+                                             "logging",
+                                             "abc",
+                                             "dataclasses",
+                                             "typing",
+                                             "datetime",
+                                             "pathlib",
+                                             "random",
+                                             "enum",
+                                             "traceback",
+                                             "yaml",
+                                             "cache_manager",
+                                             "aiohttp",
+                                             "re",
+                                             "copy",
+                                             "__future__",
+                                             "time"
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "core/cache",
+                        "path":  "core/cache",
+                        "language":  "Python",
+                        "responsibility":  "response/result caching",
+                        "publicAPIs":  [
+                                           "_stable_hash",
+                                           "CacheEntry",
+                                           "ResponseCache"
+                                       ],
+                        "internalDeps":  [
+
+                                         ],
+                        "externalDeps":  [
+                                             "__future__",
+                                             "hashlib",
+                                             "json",
+                                             "time",
+                                             "dataclasses",
+                                             "typing"
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "core/storage",
+                        "path":  "core/storage",
+                        "language":  "Python",
+                        "responsibility":  "database/storage adapters",
+                        "publicAPIs":  [
+                                           "DatabaseConnection",
+                                           "SQLiteConnection",
+                                           "PostgreSQLConnection",
+                                           "OracleConnection",
+                                           "get_database_connection"
+                                       ],
+                        "internalDeps":  [
+
+                                         ],
+                        "externalDeps":  [
+                                             "sqlite3",
+                                             "json",
+                                             "abc",
+                                             "typing",
+                                             "psycopg2",
+                                             "oracledb",
+                                             "os"
+                                         ],
+                        "env":  "TNS_ADMIN",
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "poml",
+                        "path":  "poml",
+                        "language":  "Python",
+                        "responsibility":  "POML components/templates and integration",
+                        "publicAPIs":  [
+                                           "POMLCharacterSimulationEngine",
+                                           "create_poml_engine",
+                                           "SimulationEngineMigrator",
+                                           "PromptTemplate",
+                                           "POMLOrchestrator",
+                                           "OrchestratorMigrationHelper",
+                                           "POMLConfig",
+                                           "POMLCache",
+                                           "POMLEngine",
+                                           "create_engine",
+                                           "render_template",
+                                           "StoryEnginePOMLAdapter"
+                                       ],
+                        "internalDeps":  [
+
+                                         ],
+                        "externalDeps":  [
+                                             "asyncio",
+                                             "json",
+                                             "logging",
+                                             "pathlib",
+                                             "typing",
+                                             "dataclasses",
+                                             "sys",
+                                             "character_simulation_engine_v2",
+                                             "re",
+                                             "jsonschema",
+                                             "copy",
+                                             "time",
+                                             "enum",
+                                             "os",
+                                             "yaml",
+                                             "hashlib",
+                                             "datetime"
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "scripts",
+                        "path":  "scripts",
+                        "language":  "Python",
+                        "responsibility":  "CLI runners for eval/simulations/setup",
+                        "publicAPIs":  [
+                                           "main",
+                                           "_read_inputs",
+                                           "load_character",
+                                           "handle_model_change",
+                                           "update_last_model",
+                                           "load_persona_yaml",
+                                           "build_db",
+                                           "extract_wallet",
+                                           "create_env_config",
+                                           "find_proxy_binary",
+                                           "build_command"
+                                       ],
+                        "internalDeps":  [
+                                             "core/story_engine",
+                                             "core/orchestration",
+                                             "poml",
+                                             "core/storage",
+                                             "core/common",
+                                             "core/character_engine",
+                                             "core/domain"
+                                         ],
+                        "externalDeps":  [
+                                             "argparse",
+                                             "json",
+                                             "os",
+                                             "pathlib",
+                                             "sys",
+                                             "asyncio",
+                                             "yaml",
+                                             "traceback",
+                                             "aiohttp",
+                                             "__future__",
+                                             "dataclasses",
+                                             "glob",
+                                             "hashlib",
+                                             "typing",
+                                             "time",
+                                             "zipfile",
+                                             "shutil",
+                                             "subprocess"
+                                         ],
+                        "env":  [
+                                    "CLOUDSQL_ADDRESS",
+                                    "CLOUDSQL_INSTANCE",
+                                    "CLOUDSQL_PORT",
+                                    "CLOUDSQL_PROXY_BIN",
+                                    "DB_HOST",
+                                    "DB_NAME",
+                                    "DB_PASSWORD",
+                                    "DB_PORT",
+                                    "DB_SSLCERT",
+                                    "DB_SSLKEY",
+                                    "DB_SSLMODE",
+                                    "DB_SSLROOTCERT",
+                                    "DB_USER",
+                                    "LM_ENDPOINT",
+                                    "LMSTUDIO_MODEL",
+                                    "STORE_ALL"
+                                ],
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "examples",
+                        "path":  "examples",
+                        "language":  "Python",
+                        "responsibility":  "usage examples/demonstrations",
+                        "publicAPIs":  [
+                                           "StoryProjectManager",
+                                           "print_usage_instructions",
+                                           "AutonomousPersonaDemonstration",
+                                           "MigratedCharacterSimulationEngine",
+                                           "MigratedNarrativePipeline",
+                                           "LegacyEngineAdapter",
+                                           "print_migration_benefits"
+                                       ],
+                        "internalDeps":  [
+                                             "core/orchestration"
+                                         ],
+                        "externalDeps":  [
+                                             "asyncio",
+                                             "json",
+                                             "logging",
+                                             "datetime",
+                                             "pathlib",
+                                             "typing",
+                                             "os",
+                                             "time"
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "partial"
+                    },
+                    {
+                        "module":  "tests",
+                        "path":  "tests",
+                        "language":  "Python",
+                        "responsibility":  "pytest suites and integration tests",
+                        "publicAPIs":  [
+                                           "find_mock_data_issues",
+                                           "get_line_context",
+                                           "analyze_specific_mock_implementations",
+                                           "main",
+                                           "BreakingPointTester",
+                                           "MockLLMOrchestrator",
+                                           "SimplifiedBreakingPointTester",
+                                           "TestDatabase",
+                                           "PilateStubResponse",
+                                           "PilateStubOrchestrator",
+                                           "test_full_pilate_flow_with_poml",
+                                           "_parse_eval",
+                                           "test_live_poml_pilate_flow_minimal",
+                                           "StubResp",
+                                           "CountingOrchestrator",
+                                           "test_orchestrated_caches_by_prompt_and_params",
+                                           "StubOrchestrator",
+                                           "test_orchestrated_scene_and_dialogue_with_poml",
+                                           "test_profiles_loaded_from_config_yaml",
+                                           "test_orchestrator_instantiation",
+                                           "test_register_provider",
+                                           "test_loader_registers_providers",
+                                           "MockDataEvidence",
+                                           "OutputAuthenticityAuditor",
+                                           "SpyOrchestrator",
+                                           "build_request",
+                                           "test_pilate_profiles_and_prompts_propagate_with_poml",
+                                           "StubResponse",
+                                           "test_pipeline_generate_with_stub_orchestrator",
+                                           "test_pipeline_craft_scene_shape",
+                                           "test_scene_prompt_renders_string",
+                                           "test_dialogue_prompt_renders_string",
+                                           "test_plot_structure_prompt_renders_string",
+                                           "test_quality_evaluation_prompt_renders_string",
+                                           "test_enhancement_prompt_renders_string",
+                                           "test_pipeline_uses_config_poml_flag_by_default",
+                                           "validate_character_response_shape",
+                                           "test_character_response_schema_minimal"
+                                       ],
+                        "internalDeps":  [
+                                             "core/orchestration",
+                                             "examples",
+                                             "core/storage",
+                                             "core/story_engine",
+                                             "core/domain",
+                                             "poml",
+                                             "core/common"
+                                         ],
+                        "externalDeps":  [
+                                             "os",
+                                             "sys",
+                                             "re",
+                                             "pathlib",
+                                             "typing",
+                                             "asyncio",
+                                             "pytest",
+                                             "logging",
+                                             "json",
+                                             "time",
+                                             "unittest",
+                                             "tempfile",
+                                             "shutil",
+                                             "psutil",
+                                             "dataclasses",
+                                             "xml",
+                                             "types"
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "yes"
+                    },
+                    {
+                        "module":  "scene_bank",
+                        "path":  "scene_bank",
+                        "language":  "JSON",
+                        "responsibility":  "reusable scene definitions",
+                        "publicAPIs":  [
+                                           null
+                                       ],
+                        "internalDeps":  [
+
+                                         ],
+                        "externalDeps":  [
+
+                                         ],
+                        "env":  {
+
+                                },
+                        "tests":  "partial"
+                    }
+                ],
+    "edges":  [
+                  {
+                      "from":  "scripts",
+                      "to":  "core/character_engine"
+                  },
+                  {
+                      "from":  "core/character_engine",
+                      "to":  "poml"
+                  },
+                  {
+                      "from":  "core/orchestration",
+                      "to":  "poml"
+                  },
+                  {
+                      "from":  "core/story_engine",
+                      "to":  "core/cache"
+                  },
+                  {
+                      "from":  "core/story_engine",
+                      "to":  "poml"
+                  },
+                  {
+                      "from":  "core/character_engine",
+                      "to":  "core/common"
+                  },
+                  {
+                      "from":  "tests",
+                      "to":  "core/domain"
+                  },
+                  {
+                      "from":  "core/story_engine",
+                      "to":  "core/orchestration"
+                  },
+                  {
+                      "from":  "core/story_engine",
+                      "to":  "core/storage"
+                  },
+                  {
+                      "from":  "core/character_engine",
+                      "to":  "core/orchestration"
+                  },
+                  {
+                      "from":  "scripts",
+                      "to":  "core/domain"
+                  },
+                  {
+                      "from":  "tests",
+                      "to":  "core/common"
+                  },
+                  {
+                      "from":  "core/character_engine",
+                      "to":  "core/story_engine"
+                  },
+                  {
+                      "from":  "tests",
+                      "to":  "poml"
+                  },
+                  {
+                      "from":  "core/story_engine",
+                      "to":  "core/common"
+                  },
+                  {
+                      "from":  "tests",
+                      "to":  "core/storage"
+                  },
+                  {
+                      "from":  "core/common",
+                      "to":  "core/storage"
+                  },
+                  {
+                      "from":  "tests",
+                      "to":  "core/story_engine"
+                  },
+                  {
+                      "from":  "tests",
+                      "to":  "core/orchestration"
+                  },
+                  {
+                      "from":  "scripts",
+                      "to":  "core/storage"
+                  },
+                  {
+                      "from":  "scripts",
+                      "to":  "core/story_engine"
+                  },
+                  {
+                      "from":  "scripts",
+                      "to":  "core/common"
+                  },
+                  {
+                      "from":  "examples",
+                      "to":  "core/orchestration"
+                  },
+                  {
+                      "from":  "tests",
+                      "to":  "examples"
+                  },
+                  {
+                      "from":  "core/orchestration",
+                      "to":  "core/common"
+                  },
+                  {
+                      "from":  "scripts",
+                      "to":  "poml"
+                  },
+                  {
+                      "from":  "core/story_engine",
+                      "to":  "core/domain"
+                  },
+                  {
+                      "from":  "scripts",
+                      "to":  "core/orchestration"
+                  }
+              ],
+    "envVars":  [
+                    "CLOUDSQL_ADDRESS",
+                    "CLOUDSQL_INSTANCE",
+                    "CLOUDSQL_PORT",
+                    "CLOUDSQL_PROXY_BIN",
+                    "DB_DSN",
+                    "DB_HOST",
+                    "DB_NAME",
+                    "DB_PASSWORD",
+                    "DB_PORT",
+                    "DB_SSLCERT",
+                    "DB_SSLKEY",
+                    "DB_SSLMODE",
+                    "DB_SSLROOTCERT",
+                    "DB_TYPE",
+                    "DB_USER",
+                    "DB_WALLET_LOCATION",
+                    "DB_WALLET_PASSWORD",
+                    "KOBOLD_ENDPOINT",
+                    "LM_ENDPOINT",
+                    "LMSTUDIO_ENDPOINT",
+                    "LMSTUDIO_MODEL",
+                    "STORE_ALL",
+                    "TNS_ADMIN"
+                ]
+}

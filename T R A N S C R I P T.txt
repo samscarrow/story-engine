@@ -1,0 +1,42 @@
+/ T R A N S C R I P T / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
+        return self.engine.render(
+            'simulations/character_response.poml',
+            {
+                'character': character,
+                'situation': situation,
+                'context': context_text,
+                'emphasis': emphasis,
+                'temperature': 0.8,
+                'flags': self._current_flags(character),
+            }
+        )
+
+    def get_character_prompt_roles(self, character, situation: str, emphasis: str = "neutral", world_pov:
+str = "") -> Dict[str, str]:
+        if isinstance(character, dict):
+            character = self._load_persona(character)
+        # Apply runtime flags overlay
+        character = self._apply_runtime_flags(character)
+        context_text = self._load_context(character)
+        return self.engine.render_roles(
+            'simulations/character_response.poml',
+            {
+                'character': character,
+                'situation': situation,
+                'context': context_text,
+                'world_pov': world_pov,
+                'emphasis': emphasis,
+                'temperature': 0.8,
+                'flags': self._current_flags(character),
+            }
+        )
+
+    def _current_flags(self, character: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            cid = (character.get('id') or character.get('name') or '').lower().replace(' ', '_')
+            return dict(self._runtime_flags.get(cid, {}))
+✓ • 179ms
+
+────────────────────────────────────────────────────────────────────────────────────────────────── 100% ─
+ ↑/↓ scroll   PgUp/PgDn page   Home/End jump
+ q quit   Esc edit prev

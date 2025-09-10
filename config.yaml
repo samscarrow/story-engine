@@ -1,30 +1,16 @@
 llm:
   providers:
-    - name: lmstudio
+    - name: ai-load-balancer
       provider: lmstudio
-      endpoint: http://localhost:1234
-      model: gemma-2-27b
+      endpoint: http://localhost:8000
+      model: null
       defaults:
         temperature: 0.8
         max_tokens: 600
         timeout: 180
-    - name: story-unhinged
-      provider: lmstudio
-      endpoint: http://localhost:1234
-      model: story-unhinged-base-v1-llama-3.3-70b-i1
-      defaults:
-        temperature: 0.9
-        top_p: 0.95
-        top_k: 50
-        max_tokens: 8192
-        presence_penalty: 0.2
-        frequency_penalty: 0.15
-        repeat_penalty: 1.15
-        timeout: 300
+  active: ai-load-balancer
 
 orchestrator:
-  fallback_enabled: true
-  fallback_providers: ["story-unhinged", "lmstudio"]
   timeout: 60
   retries:
     attempts: 2

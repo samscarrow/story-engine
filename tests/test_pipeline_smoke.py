@@ -1,13 +1,12 @@
-"""
+﻿"""
 Smoke test for NarrativePipeline wired with a stub orchestrator and POML enabled.
 Validates that generate_with_llm returns a string and craft_scene produces a SceneDescriptor.
 """
 
 import asyncio
-import types
 
-from core.story_engine.narrative_pipeline import NarrativePipeline
-from core.domain.models import SceneDescriptor
+from story_engine.core.story_engine.narrative_pipeline import NarrativePipeline
+from story_engine.core.domain.models import SceneDescriptor
 
 
 class StubResponse:
@@ -48,3 +47,4 @@ def test_pipeline_craft_scene_shape():
         assert scene.name == "Setup"
 
     asyncio.run(run())
+

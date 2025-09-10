@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Evaluate the quality of story content using the POML evaluation template.
 
@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import dataclasses
 import glob
 import hashlib
 import json
@@ -32,10 +31,10 @@ from typing import List, Dict, Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine  # noqa: E402
-from core.common.result_store import store_workflow_output  # noqa: E402
-from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
-from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
+from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine  # noqa: E402
+from story_engine.core.common.result_store import store_workflow_output  # noqa: E402
+from story_engine.core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
 def _read_inputs(args: argparse.Namespace) -> List[Dict[str, Any]]:
@@ -162,3 +161,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

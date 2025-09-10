@@ -1,0 +1,46 @@
+<document>
+  <metadata>
+    <title>World State Export</title>
+    <description>Structured POML representation of the full world state for narrative enhancement agents.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <world-state>
+    <facts>
+      <for each="f" in="{{world.facts | entries}}">
+        <fact key="{{f.key}}">{{f.value | json}}</fact>
+      </for>
+    </facts>
+
+    <relationships>
+      <for each="r" in="{{world.relationships | entries}}">
+        <rel key="{{r.key}}">{{r.value | json}}</rel>
+      </for>
+    </relationships>
+
+    <availability>
+      <for each="a" in="{{world.availability | entries}}">
+        <entity key="{{a.key}}">{{a.value | json}}</entity>
+      </for>
+    </availability>
+
+    <locations>
+      <for each="l" in="{{world.locations | entries}}">
+        <loc key="{{l.key}}">{{l.value | json}}</loc>
+      </for>
+    </locations>
+
+    <props>
+      <for each="p" in="{{world.props | entries}}">
+        <prop key="{{p.key}}">{{p.value | json}}</prop>
+      </for>
+    </props>
+
+    <timeline>
+      <for each="ev" in="{{world.timeline}}">
+        <event>{{ev | json}}</event>
+      </for>
+    </timeline>
+  </world-state>
+</document>
+

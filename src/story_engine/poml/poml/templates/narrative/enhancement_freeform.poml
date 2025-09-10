@@ -1,0 +1,27 @@
+<document>
+  <metadata>
+    <title>Enhancement Freeform</title>
+    <description>Generates a freeform narrative enhancement.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are an expert literary editor and ghostwriter. Your task is to generate a freeform, descriptive enhancement of the provided story content, based on the quality evaluation and enhancement focus. Focus on improving the narrative in a natural and seamless way.
+  </system>
+
+  <section>
+    <h1>Enhancement Context</h1>
+    <p><b>Original Content:</b> {{content}}</p>
+    <p><b>Quality Evaluation:</b> {{evaluation}}</p>
+    <p><b>Enhancement Focus:</b> {{focus}}</p>
+  </section>
+
+  <instructions>
+    Generate an enhanced version of the story content that:
+    - Addresses the weaknesses identified in the quality evaluation.
+    - Maintains story continuity.
+    - Enhances the specified focus aspects.
+    - Keeps the core narrative intact.
+    Do not use explicit headers or bullet points. Just write the enhanced story as a natural, flowing narrative.
+  </instructions>
+</document>

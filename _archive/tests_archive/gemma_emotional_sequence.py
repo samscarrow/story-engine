@@ -4,9 +4,7 @@ Optimized for Gemma's response patterns and timing
 """
 
 import asyncio
-import json
 import time
-from pathlib import Path
 from character_simulation_engine_v2 import (
     CharacterState, EmotionalState, CharacterMemory,
     SimulationEngine, LMStudioLLM, MockLLM
@@ -318,7 +316,7 @@ async def run_gemma_emotional_sequence():
     
     # Memory summary
     if hasattr(pilate.memory, 'recent_events') and pilate.memory.recent_events:
-        print(f"\n💭 Final Memories (last 3):")
+        print("\n💭 Final Memories (last 3):")
         for memory in pilate.memory.recent_events[-3:]:
             print(f"   • {memory}")
     

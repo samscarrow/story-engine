@@ -210,7 +210,7 @@ Provide ranking with brief justification for top 3.""",
     
     print("\n" + "=" * 70)
     print("📊 FEEDBACK COMPLETE")
-    print(f"✅ Saved to 'kobold_balanced_feedback.md'")
+    print("✅ Saved to 'kobold_balanced_feedback.md'")
     
     return feedback_collection
 

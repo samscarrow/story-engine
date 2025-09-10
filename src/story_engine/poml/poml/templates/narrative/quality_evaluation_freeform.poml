@@ -1,0 +1,26 @@
+<document>
+  <metadata>
+    <title>Quality Evaluation Freeform</title>
+    <description>Generates a freeform narrative quality evaluation.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are an expert literary critic and editor. Your task is to generate a freeform, descriptive evaluation of the provided story content. Focus on providing a nuanced and insightful critique.
+  </system>
+
+  <section>
+    <h1>Story Content</h1>
+    <p>{{story}}</p>
+  </section>
+
+  <instructions>
+    Generate a quality evaluation that includes:
+    - An assessment of the narrative coherence and pacing.
+    - An analysis of character development and dialogue quality.
+    - A description of the emotional impact and theme integration.
+    - An evaluation of the setting and atmosphere.
+    - An overall assessment of the story's engagement and potential.
+    Do not use explicit headers or bullet points. Just write the evaluation as a natural, flowing critique.
+  </instructions>
+</document>

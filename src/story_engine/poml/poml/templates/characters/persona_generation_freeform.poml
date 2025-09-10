@@ -1,0 +1,26 @@
+<document>
+  <metadata>
+    <title>Persona Generation Freeform</title>
+    <description>Generates a freeform character biography from a simple concept.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+    <system>
+    Your sole purpose is to generate a rich, detailed, and nuanced biography in prose for the character concept provided in the user prompt.
+    
+    **CRITICAL DIRECTIVES:**
+    - You MUST use the character concept provided in the user prompt.
+    - DO NOT brainstorm, suggest alternatives, or generate any content unrelated to the provided character concept.
+    - DO NOT use explicit headers or bullet points. Just write the biography as a natural, flowing narrative.
+  </system>
+
+  <instructions>
+    Generate a detailed biography for the following character concept:
+    {{concept}}
+  </instructions>
+
+  <instructions>
+    Generate a detailed biography for the following character concept:
+    {{concept}}
+  </instructions>
+</document>

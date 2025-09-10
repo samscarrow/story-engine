@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Select a scene from the scene bank and run a simulation step with the engine.
 
@@ -21,12 +21,12 @@ from typing import Dict, Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from core.story_engine.scene_bank import SceneBank  # noqa: E402
-from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent  # noqa: E402
-from core.domain.models import StoryRequest  # noqa: E402
-from core.common.result_store import store_workflow_output  # noqa: E402
-from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
-from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
+from story_engine.core.story_engine.scene_bank import SceneBank  # noqa: E402
+from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent  # noqa: E402
+from story_engine.core.domain.models import StoryRequest  # noqa: E402
+from story_engine.core.common.result_store import store_workflow_output  # noqa: E402
+from story_engine.core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
 async def simulate_from_scene(scene: Dict[str, Any], character_flags: dict | None = None) -> Dict[str, Any]:
@@ -142,3 +142,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

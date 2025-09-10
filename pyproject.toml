@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "story-engine"
+version = "0.0.1"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.12.15",
+    "dotenv>=0.9.9",
+    "oracledb>=3.3.0",
+    "pyyaml>=6.0.2",
+]
+
+[dependency-groups]
+dev = ["uv","pytest","black","ruff","setuptools>=67","wheel"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    ".venv",
+    ".ruff_cache",
+    "dist",
+    "_archive",
+]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+
+#[tool.ruff.lint.per-file-ignores]
+# (No per-file ignores; demo_prompt.py refactored to avoid E402.)

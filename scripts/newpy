@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Ensure project venv exists if VENV_PATH is defined
+if [ "${VENV_PATH:-}" != "" ] && [ ! -x "$VENV_PATH/bin/python" ]; then
+  if [ -x "./scripts/venv-create.sh" ]; then
+    ./scripts/venv-create.sh >/dev/null || true
+  fi
+fi
+
+# Prefer the active venv's python if available
+if [ "${VENV_PATH:-}" != "" ] && [ -x "$VENV_PATH/bin/python" ]; then
+  exec "$VENV_PATH/bin/python" "$@"
+fi
+
+# Fallback to uv with --active (direnv aliases uv appropriately)
+if command -v uv >/dev/null 2>&1; then
+  exec uv run --active python "$@"
+fi
+
+# Final fallback: system python3
+exec python3 "$@"
+

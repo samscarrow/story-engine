@@ -1,9 +1,9 @@
-"""
+﻿"""
 Initial tests for the consolidated LLMOrchestrator.
 """
 
 import pytest
-from core.orchestration.llm_orchestrator import LLMOrchestrator, LLMConfig, ModelProvider
+from story_engine.core.orchestration.llm_orchestrator import LLMOrchestrator, LLMConfig, ModelProvider
 
 def test_orchestrator_instantiation():
     """
@@ -31,4 +31,5 @@ def test_register_provider():
         assert orchestrator.active_provider == "test_kobold"
     except Exception as e:
         pytest.fail(f"Failed to register provider: {e}")
+
 

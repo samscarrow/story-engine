@@ -6,7 +6,6 @@ Test the Character Simulation Engine with Google's Gemma model
 import asyncio
 import json
 import time
-from pathlib import Path
 from character_simulation_engine_v2 import (
     CharacterState, EmotionalState, CharacterMemory,
     SimulationEngine, LMStudioLLM, MockLLM
@@ -308,7 +307,7 @@ async def run_gemma_emotional_test():
         print(f"⏱️  Average response time: {avg_time:.2f}s")
         print(f"📏 Average response length: {avg_length:.0f} characters")
     
-    print(f"\n🎭 Final emotional state:")
+    print("\n🎭 Final emotional state:")
     print(f"   Anger: {pilate.emotional_state.anger:.2f}")
     print(f"   Doubt: {pilate.emotional_state.doubt:.2f}")
     print(f"   Fear: {pilate.emotional_state.fear:.2f}")
@@ -362,11 +361,11 @@ async def compare_models():
             try:
                 if response.content.startswith('{'):
                     json.loads(response.content)
-                    print(f"  ✅ Valid JSON output")
+                    print("  ✅ Valid JSON output")
                 else:
-                    print(f"  ⚠️  Non-JSON output")
+                    print("  ⚠️  Non-JSON output")
             except:
-                print(f"  ⚠️  JSON parsing issues")
+                print("  ⚠️  JSON parsing issues")
                 
         except Exception as e:
             print(f"  ❌ Error: {e}")

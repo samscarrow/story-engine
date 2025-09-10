@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import argparse
 import yaml
 import json
@@ -10,9 +10,9 @@ from pathlib import Path
 # Add project root to path to allow direct script execution
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
-from poml.lib.poml_integration import StoryEnginePOMLAdapter
-from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status
+from story_engine.core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
+from story_engine.poml.lib.poml_integration import StoryEnginePOMLAdapter
+from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status
 
 STATE_FILE = Path(__file__).parent / ".last_model_used"
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Parse the Pontius Pilate screenplay into a scene bank for future simulations.
 
@@ -9,14 +9,13 @@ Usage:
 """
 
 import argparse
-import json
 import os
 from pathlib import Path
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from core.story_engine.scene_bank import parse_screenplay_to_scenes, SceneBank, SceneEntry  # noqa: E402
+from story_engine.core.story_engine.scene_bank import parse_screenplay_to_scenes, SceneBank  # noqa: E402
 
 
 def main() -> None:
@@ -47,3 +46,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

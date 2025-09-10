@@ -5,8 +5,6 @@ Watch how a character's emotional state evolves through story events using a rea
 
 import asyncio
 import json
-import yaml
-from pathlib import Path
 from character_simulation_engine_v2 import (
     CharacterState, EmotionalState, CharacterMemory, 
     SimulationEngine, LMStudioLLM, MockLLM, LLMResponse
@@ -339,13 +337,13 @@ async def run_emotional_sequence_experiment():
     
     # Record initial state
     journey.record_state("Initial State", pilate)
-    print(f"📍 Starting emotional state:")
+    print("📍 Starting emotional state:")
     print(f"   Anger: {pilate.emotional_state.anger:.2f} | Doubt: {pilate.emotional_state.doubt:.2f} | Fear: {pilate.emotional_state.fear:.2f}")
     print(f"   Compassion: {pilate.emotional_state.compassion:.2f} | Confidence: {pilate.emotional_state.confidence:.2f}")
     
     # Run through each story event
     for i, scene in enumerate(story_sequence, 1):
-        print(f"\n" + "─" * 60)
+        print("\n" + "─" * 60)
         print(f"🎭 SCENE {i}: {scene['event']}")
         print(f"📝 Situation: {scene['situation']}")
         print(f"🎯 Emphasis: {scene['emphasis']}")
@@ -411,11 +409,11 @@ async def run_emotional_sequence_experiment():
     # Show final emotional journey visualization
     journey.print_emotional_graph()
     
-    print(f"\n🎉 EMOTIONAL SEQUENCE COMPLETE")
+    print("\n🎉 EMOTIONAL SEQUENCE COMPLETE")
     print("=" * 60)
     print(f"📊 Total LLM calls: {llm.call_count}")
-    print(f"🎭 Character arc: From confident administrator to tormented judge")
-    print(f"📈 Biggest emotional changes:")
+    print("🎭 Character arc: From confident administrator to tormented judge")
+    print("📈 Biggest emotional changes:")
     
     # Calculate biggest changes
     initial = journey.emotional_history[0]

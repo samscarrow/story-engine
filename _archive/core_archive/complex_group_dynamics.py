@@ -6,7 +6,6 @@ Advanced multi-character scenarios with faction dynamics, alliances, and betraya
 import asyncio
 import json
 import aiohttp
-import random
 from typing import Dict, List, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -197,7 +196,7 @@ Respond with JSON:
         # Calculate dynamics
         dynamics = self.calculate_group_dynamics(scene['characters'])
         
-        print(f"\n📊 GROUP DYNAMICS:")
+        print("\n📊 GROUP DYNAMICS:")
         print(f"  ⚡ Tension Level: {dynamics['tension_level']:.1%}")
         print(f"  👑 Dominant Faction: {dynamics['dominant_faction'].value if dynamics['dominant_faction'] else 'Balanced'}")
         
@@ -208,7 +207,7 @@ Respond with JSON:
         
         print(f"  🏛️ Factions Present: {', '.join([f'{f.value}({c})' for f, c in faction_counts.items()])}")
         
-        print(f"\n🎭 ACTIONS UNFOLD:")
+        print("\n🎭 ACTIONS UNFOLD:")
         print("-" * 60)
         
         actions = []

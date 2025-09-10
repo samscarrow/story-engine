@@ -1,0 +1,27 @@
+<document>
+  <metadata>
+    <title>Dialogue Generation Freeform</title>
+    <description>Generates a freeform dialogue exchange.</description>
+    <version>1.0.0</version>
+  </metadata>
+
+  <system>
+    You are an expert screenwriter and novelist. Your task is to generate a freeform, natural-sounding dialogue exchange based on the provided scene, character, and interaction context. Focus on creating a vivid and immersive conversation.
+  </system>
+
+  <section>
+    <h1>Dialogue Context</h1>
+    <p><b>Scene:</b> {{scene.name}} - {{scene.situation}}</p>
+    <p><b>Character:</b> {{character.name}} - {{character.role}}</p>
+    <p><b>Interaction Context:</b> {{context.note}}</p>
+  </section>
+
+  <instructions>
+    Generate a dialogue exchange that includes:
+    - The character's speech patterns and vocabulary.
+    - The influence of their current emotional state.
+    - The emphasis mode of the scene.
+    - Realistic, natural-sounding dialogue.
+    Do not use explicit headers or bullet points. Just write the dialogue as a natural, flowing conversation.
+  </instructions>
+</document>

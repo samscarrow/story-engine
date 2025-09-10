@@ -1,4 +1,4 @@
-"""
+﻿"""
 Live-fire test for POML flow using the real orchestrator from config.yaml.
 Skips unless STORY_ENGINE_LIVE=1 and at least one provider is healthy.
 
@@ -9,8 +9,14 @@ import os
 import asyncio
 import pytest
 
-from core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent
-from core.domain.models import StoryRequest
+from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent
+from story_engine.core.domain.models import StoryRequest
+
+# Opt-in and marker for slow/live tests
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.skipif(os.getenv("STORY_ENGINE_LIVE") != "1", reason="live test opt-in (set STORY_ENGINE_LIVE=1)"),
+]
 
 
 def _parse_eval(text: str):
@@ -31,6 +37,17 @@ def _parse_eval(text: str):
 
 def test_live_poml_pilate_flow_minimal():
     engine = OrchestratedStoryEngine(use_poml=True)
+
+    # Optionally reduce provider timeouts for test runs via env
+    try:
+        active = engine.orchestrator.active_provider or next(iter(engine.orchestrator.providers))
+        prov = engine.orchestrator.providers.get(active)
+        if prov:
+            t = os.getenv("LLM_TEST_TIMEOUT")
+            if t:
+                prov.config.timeout = int(t)
+    except Exception:
+        pass
 
     # Reduce token usage for a quick live test
     profiles = engine.component_profiles
@@ -76,7 +93,9 @@ def test_live_poml_pilate_flow_minimal():
 
         # Dialogue for Pilate
         dlg = await engine.generate_dialogue(scene, request.characters[0], "Opening line")
-        assert isinstance(dlg, str) and len(dlg) > 0
+        assert isinstance(dlg, dict)
+        assert "dialogue" in dlg and len(dlg["dialogue"]) > 0
+        assert isinstance(dlg["dialogue"][0]["line"], str) and len(dlg["dialogue"][0]["line"]) > 0
 
         # Evaluation and enhancement
         ev = await engine.evaluate_quality(scene["scene_description"]) 

@@ -1,0 +1,717 @@
+﻿{
+    "edges":  [
+                  {
+                      "to":  [
+                                 "core/story_engine",
+                                 "core/orchestration",
+                                 "poml",
+                                 "core/storage",
+                                 "core/common",
+                                 "core/character_engine",
+                                 "core/domain"
+                             ],
+                      "from":  "scripts"
+                  },
+                  {
+                      "to":  [
+                                 "poml"
+                             ],
+                      "from":  "poml"
+                  },
+                  {
+                      "to":  [
+                                 "poml",
+                                 "core/common"
+                             ],
+                      "from":  "core/orchestration"
+                  },
+                  {
+                      "to":  [
+                                 "core/story_engine",
+                                 "poml",
+                                 "core/character_engine",
+                                 "core/common",
+                                 "core/orchestration"
+                             ],
+                      "from":  "core/character_engine"
+                  },
+                  {
+                      "to":  [
+                                 "core/storage"
+                             ],
+                      "from":  "core/common"
+                  },
+                  {
+                      "to":  [
+                                 "core/orchestration",
+                                 "examples",
+                                 "core/storage",
+                                 "core/story_engine",
+                                 "core/domain",
+                                 "poml",
+                                 "core/common"
+                             ],
+                      "from":  "tests"
+                  },
+                  {
+                      "to":  [
+                                 "core/orchestration",
+                                 "examples"
+                             ],
+                      "from":  "examples"
+                  },
+                  {
+                      "to":  [
+                                 "core/common",
+                                 "poml",
+                                 "core/domain",
+                                 "core/cache",
+                                 "core/orchestration",
+                                 "core/story_engine",
+                                 "core/storage"
+                             ],
+                      "from":  "core/story_engine"
+                  }
+              ],
+    "env":  [
+                {
+                    "name":  "DB_DSN",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py"
+                              ]
+                },
+                {
+                    "name":  "CLOUDSQL_PROXY_BIN",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\start_cloud_sql_proxy.py"
+                              ]
+                },
+                {
+                    "name":  "CLOUDSQL_ADDRESS",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\start_cloud_sql_proxy.py"
+                              ]
+                },
+                {
+                    "name":  "DB_WALLET_LOCATION",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py"
+                              ]
+                },
+                {
+                    "name":  "LMSTUDIO_ENDPOINT",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\config.py"
+                              ]
+                },
+                {
+                    "name":  "DB_PASSWORD",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "DB_TYPE",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py"
+                              ]
+                },
+                {
+                    "name":  "STORE_ALL",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\evaluate_poml.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_pilate_simulation.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\simulate_from_scene_bank.py"
+                              ]
+                },
+                {
+                    "name":  "DB_SSLKEY",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "LM_ENDPOINT",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\cli_utils.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\config.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\evaluate_poml.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\evaluate_poml_storytelling.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\refine_world_state.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_pilate_simulation.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\simulate_from_scene_bank.py"
+                              ]
+                },
+                {
+                    "name":  "DB_NAME",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "DB_WALLET_PASSWORD",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py"
+                              ]
+                },
+                {
+                    "name":  "CLOUDSQL_PORT",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\start_cloud_sql_proxy.py"
+                              ]
+                },
+                {
+                    "name":  "TNS_ADMIN",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\storage\\database.py"
+                              ]
+                },
+                {
+                    "name":  "KOBOLD_ENDPOINT",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\cli_utils.py"
+                              ]
+                },
+                {
+                    "name":  "LMSTUDIO_MODEL",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\cli_utils.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\config.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\evaluate_poml.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\evaluate_poml_storytelling.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\refine_world_state.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_pilate_simulation.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\simulate_from_scene_bank.py"
+                              ]
+                },
+                {
+                    "name":  "DB_SSLCERT",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "DB_HOST",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "DB_PORT",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "DB_USER",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "DB_SSLMODE",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                },
+                {
+                    "name":  "CLOUDSQL_INSTANCE",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\start_cloud_sql_proxy.py"
+                              ]
+                },
+                {
+                    "name":  "DB_SSLROOTCERT",
+                    "files":  [
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\common\\result_store.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\core\\story_engine\\world_state_manager.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\db_smoke_test.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_iterative_persona.py",
+                                  "C:\\Users\\sscar\\claude-workspace\\story-engine\\scripts\\run_meta_pipeline.py"
+                              ]
+                }
+            ],
+    "apis":  [
+                 {
+                     "symbols":  [
+                                     "main",
+                                     "_read_inputs",
+                                     "load_character",
+                                     "handle_model_change",
+                                     "update_last_model",
+                                     "load_persona_yaml",
+                                     "build_db",
+                                     "extract_wallet",
+                                     "create_env_config",
+                                     "find_proxy_binary",
+                                     "build_command"
+                                 ],
+                     "module":  "scripts"
+                 },
+                 {
+                     "symbols":  [
+                                     "POMLCharacterSimulationEngine",
+                                     "create_poml_engine",
+                                     "SimulationEngineMigrator",
+                                     "PromptTemplate",
+                                     "POMLOrchestrator",
+                                     "OrchestratorMigrationHelper",
+                                     "POMLConfig",
+                                     "POMLCache",
+                                     "POMLEngine",
+                                     "create_engine",
+                                     "render_template",
+                                     "StoryEnginePOMLAdapter"
+                                 ],
+                     "module":  "poml"
+                 },
+                 {
+                     "symbols":  [
+                                     "SimulationContext",
+                                     "TemplateMetadata",
+                                     "TemplateRepository",
+                                     "AutonomousPersonaAgent",
+                                     "CharacterSimulatorAgent",
+                                     "SceneArchitectAgent",
+                                     "PersonaAgentFactory",
+                                     "ModelProvider",
+                                     "GenerationError",
+                                     "ProviderFailure",
+                                     "LLMConfig",
+                                     "LLMResponse",
+                                     "LLMProvider",
+                                     "LMStudioProvider",
+                                     "KoboldCppProvider",
+                                     "LLMOrchestrator",
+                                     "create_orchestrator_from_yaml",
+                                     "SimulationStatus",
+                                     "SimulationPriority",
+                                     "SimulationRequest",
+                                     "SimulationResult",
+                                     "SimulationScheduler",
+                                     "RecursiveSimulationEngine",
+                                     "create_recursive_simulation_engine",
+                                     "QueryType",
+                                     "StandardizedQuery",
+                                     "LLMInterface",
+                                     "StandardizedLLMInterface",
+                                     "LegacyLLMAdapter",
+                                     "create_standardized_interface",
+                                     "LLMPersona",
+                                     "PersonaConfig",
+                                     "UnifiedLLMOrchestrator",
+                                     "create_unified_orchestrator"
+                                 ],
+                     "module":  "core/orchestration"
+                 },
+                 {
+                     "symbols":  [
+                                     "DatabaseConnection",
+                                     "SQLiteConnection",
+                                     "PostgreSQLConnection",
+                                     "OracleConnection",
+                                     "get_database_connection"
+                                 ],
+                     "module":  "core/storage"
+                 },
+                 {
+                     "symbols":  [
+                                     "LLMResponse",
+                                     "LLMInterface",
+                                     "MockLLM",
+                                     "OpenAILLM",
+                                     "LMStudioLLM",
+                                     "SimulationError",
+                                     "LLMError",
+                                     "RetryHandler",
+                                     "EmotionalState",
+                                     "CharacterMemory",
+                                     "CharacterState",
+                                     "SimulationEngine",
+                                     "Faction",
+                                     "ActionType",
+                                     "GroupCharacter",
+                                     "GroupDynamicsEngine",
+                                     "create_expanded_cast",
+                                     "MetaNarrativePipeline",
+                                     "RelationshipType",
+                                     "Character",
+                                     "MultiCharacterEngine",
+                                     "create_trial_characters"
+                                 ],
+                     "module":  "core/character_engine"
+                 },
+                 {
+                     "symbols":  [
+                                     "add_model_client_args",
+                                     "get_model_and_client_config",
+                                     "detect_loaded_model",
+                                     "detect_lmstudio_model",
+                                     "detect_koboldcpp_model",
+                                     "validate_model_connection",
+                                     "validate_lmstudio_connection",
+                                     "validate_koboldcpp_connection",
+                                     "print_connection_status",
+                                     "setup_standard_args",
+                                     "_deep_merge",
+                                     "load_config",
+                                     "load_dotenv_keys",
+                                     "configure_logging",
+                                     "store_workflow_output"
+                                 ],
+                     "module":  "core/common"
+                 },
+                 {
+                     "symbols":  [
+                                     "find_mock_data_issues",
+                                     "get_line_context",
+                                     "analyze_specific_mock_implementations",
+                                     "main",
+                                     "BreakingPointTester",
+                                     "MockLLMOrchestrator",
+                                     "SimplifiedBreakingPointTester",
+                                     "TestDatabase",
+                                     "PilateStubResponse",
+                                     "PilateStubOrchestrator",
+                                     "test_full_pilate_flow_with_poml",
+                                     "_parse_eval",
+                                     "test_live_poml_pilate_flow_minimal",
+                                     "StubResp",
+                                     "CountingOrchestrator",
+                                     "test_orchestrated_caches_by_prompt_and_params",
+                                     "StubOrchestrator",
+                                     "test_orchestrated_scene_and_dialogue_with_poml",
+                                     "test_profiles_loaded_from_config_yaml",
+                                     "test_orchestrator_instantiation",
+                                     "test_register_provider",
+                                     "test_loader_registers_providers",
+                                     "MockDataEvidence",
+                                     "OutputAuthenticityAuditor",
+                                     "SpyOrchestrator",
+                                     "build_request",
+                                     "test_pilate_profiles_and_prompts_propagate_with_poml",
+                                     "StubResponse",
+                                     "test_pipeline_generate_with_stub_orchestrator",
+                                     "test_pipeline_craft_scene_shape",
+                                     "test_scene_prompt_renders_string",
+                                     "test_dialogue_prompt_renders_string",
+                                     "test_plot_structure_prompt_renders_string",
+                                     "test_quality_evaluation_prompt_renders_string",
+                                     "test_enhancement_prompt_renders_string",
+                                     "test_pipeline_uses_config_poml_flag_by_default",
+                                     "validate_character_response_shape",
+                                     "test_character_response_schema_minimal"
+                                 ],
+                     "module":  "tests"
+                 },
+                 {
+                     "symbols":  [
+                                     "_stable_hash",
+                                     "CacheEntry",
+                                     "ResponseCache"
+                                 ],
+                     "module":  "core/cache"
+                 },
+                 {
+                     "symbols":  [
+                                     "StoryProjectManager",
+                                     "print_usage_instructions",
+                                     "AutonomousPersonaDemonstration",
+                                     "MigratedCharacterSimulationEngine",
+                                     "MigratedNarrativePipeline",
+                                     "LegacyEngineAdapter",
+                                     "print_migration_benefits"
+                                 ],
+                     "module":  "examples"
+                 },
+                 {
+                     "symbols":  [
+                                     "FeedbackType",
+                                     "RevisionStrategy",
+                                     "StoryMetrics",
+                                     "Feedback",
+                                     "StoryVersion",
+                                     "BranchPoint",
+                                     "IterativeStoryEngine",
+                                     "AdaptiveStorySystem",
+                                     "GraphNode",
+                                     "GraphEdge",
+                                     "NarrativeGraph",
+                                     "NarrativePipeline",
+                                     "_strip_md",
+                                     "_slugify",
+                                     "SceneEntry",
+                                     "SceneBank",
+                                     "parse_screenplay_to_scenes",
+                                     "StoryStructure",
+                                     "ConflictType",
+                                     "TensionCurve",
+                                     "SceneType",
+                                     "StoryTheme",
+                                     "PlotPoint",
+                                     "StoryArc",
+                                     "Scene",
+                                     "StoryArcEngine",
+                                     "IntegratedStoryEngine",
+                                     "StoryComponent",
+                                     "_ProfilesConfig",
+                                     "OrchestratedStoryEngine",
+                                     "EnhancementFocus",
+                                     "SceneQuality",
+                                     "SceneEvaluation",
+                                     "EnhancementCycle",
+                                     "StoryEnhancementLoop",
+                                     "WorldState",
+                                     "WorldStateManager",
+                                     "WorldStateRefiner"
+                                 ],
+                     "module":  "core/story_engine"
+                 },
+                 {
+                     "symbols":  [
+                                     "StoryRequest",
+                                     "NarrativeArc",
+                                     "SceneDescriptor"
+                                 ],
+                     "module":  "core/domain"
+                 }
+             ],
+    "extDeps":  [
+                    {
+                        "deps":  [
+                                     "argparse",
+                                     "json",
+                                     "os",
+                                     "pathlib",
+                                     "sys",
+                                     "asyncio",
+                                     "yaml",
+                                     "traceback",
+                                     "aiohttp",
+                                     "__future__",
+                                     "dataclasses",
+                                     "glob",
+                                     "hashlib",
+                                     "typing",
+                                     "time",
+                                     "zipfile",
+                                     "shutil",
+                                     "subprocess"
+                                 ],
+                        "module":  "scripts"
+                    },
+                    {
+                        "deps":  [
+                                     "asyncio",
+                                     "json",
+                                     "logging",
+                                     "pathlib",
+                                     "typing",
+                                     "dataclasses",
+                                     "sys",
+                                     "character_simulation_engine_v2",
+                                     "re",
+                                     "jsonschema",
+                                     "copy",
+                                     "time",
+                                     "enum",
+                                     "os",
+                                     "yaml",
+                                     "hashlib",
+                                     "datetime"
+                                 ],
+                        "module":  "poml"
+                    },
+                    {
+                        "deps":  [
+                                     "asyncio",
+                                     "logging",
+                                     "json",
+                                     "hashlib",
+                                     "typing",
+                                     "pathlib",
+                                     "dataclasses",
+                                     "datetime",
+                                     "abc",
+                                     "uuid",
+                                     "",
+                                     "tempfile",
+                                     "enum",
+                                     "aiohttp",
+                                     "os",
+                                     "traceback",
+                                     "__future__",
+                                     "time",
+                                     "yaml"
+                                 ],
+                        "module":  "core/orchestration"
+                    },
+                    {
+                        "deps":  [
+                                     "sqlite3",
+                                     "json",
+                                     "abc",
+                                     "typing",
+                                     "psycopg2",
+                                     "oracledb",
+                                     "os",
+                                     ""
+                                 ],
+                        "module":  "core/storage"
+                    },
+                    {
+                        "deps":  [
+                                     "json",
+                                     "asyncio",
+                                     "logging",
+                                     "abc",
+                                     "dataclasses",
+                                     "typing",
+                                     "datetime",
+                                     "pathlib",
+                                     "random",
+                                     "enum",
+                                     "traceback",
+                                     "yaml",
+                                     "cache_manager",
+                                     "aiohttp",
+                                     "re",
+                                     "copy",
+                                     "__future__",
+                                     "time"
+                                 ],
+                        "module":  "core/character_engine"
+                    },
+                    {
+                        "deps":  [
+                                     "argparse",
+                                     "os",
+                                     "requests",
+                                     "typing",
+                                     "__future__",
+                                     "pathlib",
+                                     "yaml",
+                                     "logging",
+                                     ""
+                                 ],
+                        "module":  "core/common"
+                    },
+                    {
+                        "deps":  [
+                                     "os",
+                                     "sys",
+                                     "re",
+                                     "pathlib",
+                                     "typing",
+                                     "asyncio",
+                                     "pytest",
+                                     "logging",
+                                     "json",
+                                     "time",
+                                     "unittest",
+                                     "tempfile",
+                                     "shutil",
+                                     "psutil",
+                                     "dataclasses",
+                                     "xml",
+                                     "types"
+                                 ],
+                        "module":  "tests"
+                    },
+                    {
+                        "deps":  [
+                                     "__future__",
+                                     "hashlib",
+                                     "json",
+                                     "time",
+                                     "dataclasses",
+                                     "typing"
+                                 ],
+                        "module":  "core/cache"
+                    },
+                    {
+                        "deps":  [
+                                     "asyncio",
+                                     "json",
+                                     "logging",
+                                     "datetime",
+                                     "pathlib",
+                                     "typing",
+                                     "os",
+                                     "time"
+                                 ],
+                        "module":  "examples"
+                    },
+                    {
+                        "deps":  [
+                                     "logging",
+                                     "asyncio",
+                                     "json",
+                                     "aiohttp",
+                                     "typing",
+                                     "dataclasses",
+                                     "enum",
+                                     "collections",
+                                     "numpy",
+                                     "datetime",
+                                     "__future__",
+                                     "uuid",
+                                     "time",
+                                     "sys",
+                                     "os",
+                                     "re",
+                                     "pathlib",
+                                     "random",
+                                     "character_simulation_engine_v2",
+                                     "",
+                                     "narrative_pipeline"
+                                 ],
+                        "module":  "core/story_engine"
+                    },
+                    {
+                        "deps":  [
+                                     "__future__",
+                                     "dataclasses",
+                                     "typing"
+                                 ],
+                        "module":  "core/domain"
+                    }
+                ]
+}

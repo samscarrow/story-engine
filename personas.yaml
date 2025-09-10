@@ -1,0 +1,73 @@
+personas:
+  character_simulator:
+    template_path: "personas/character_simulator.poml"
+    default_temperature: 0.8
+    default_max_tokens: 600
+    response_format: "text"
+
+  dialogue_coach:
+    template_path: "narrative/dialogue_generation_structured.poml"
+    default_temperature: 0.9
+    default_max_tokens: 500
+    response_format: "text"
+
+  scene_architect:
+    template_path: "personas/scene_architect.poml"
+    default_temperature: 0.7
+    default_max_tokens: 700
+    response_format: "text"
+
+  story_designer:
+    template_path: "narrative/plot_structure_structured.poml"
+    default_temperature: 0.6
+    default_max_tokens: 800
+    response_format: "text"
+
+  narrative_analyst:
+    template_path: "personas/narrative_analyst.poml"
+    default_temperature: 0.3
+    default_max_tokens: 500
+    response_format: "text"
+
+  quality_assessor:
+    template_path: "narrative/quality_evaluation_structured.poml"
+    default_temperature: 0.3
+    default_max_tokens: 400
+    response_format: "text"
+
+  world_builder:
+    template_path: "meta/world_state_refine.poml"
+    default_temperature: 0.6
+    default_max_tokens: 600
+    response_format: "text"
+
+  story_enhancer:
+    template_path: "narrative/enhancement_structured.poml"
+    default_temperature: 0.6
+    default_max_tokens: 600
+    response_format: "text"
+
+  continuity_checker:
+    template_path: "meta/continuity_check.poml"
+    default_temperature: 0.2
+    default_max_tokens: 600
+    response_format: "text"
+
+  plausibility_judge:
+    template_path: "meta/plausibility_check.poml"
+    default_temperature: 0.2
+    default_max_tokens: 500
+    response_format: "text"
+
+  group_facilitator:
+    template_path: "personas/group_facilitator.poml"
+    default_temperature: 0.8
+    default_max_tokens: 700
+    response_format: "text"
+
+  faction_mediator:
+    template_path: "simulations/group_dynamics_response.poml"
+    default_temperature: 0.8
+    default_max_tokens: 700
+    response_format: "text"
+

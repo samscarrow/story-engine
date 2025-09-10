@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project-name-example"
+version = "0.0.1"
+requires-python = ">=3.12"
+
+[project.optional-dependencies]
+dev = ["uv", "pytest", "black", "ruff", "setuptools>=67", "wheel"]
+
+[dependency-groups]
+dev = ["uv", "pytest", "black", "ruff", "setuptools>=67", "wheel"]
+
+[tool.uv]
+default-groups = ["dev"]

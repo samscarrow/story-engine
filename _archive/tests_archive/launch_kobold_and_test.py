@@ -5,8 +5,6 @@ Automates the process of starting the server and running tests
 
 import subprocess
 import asyncio
-import time
-import sys
 import os
 
 async def check_server_ready(max_attempts=30):
@@ -59,7 +57,7 @@ async def main():
         "--port", "5001"
     ]
     
-    print(f"📟 Launching KoboldCpp...")
+    print("📟 Launching KoboldCpp...")
     print(f"Command: {' '.join(cmd)}")
     print()
     
@@ -94,7 +92,7 @@ async def main():
             print("❌ Server failed to start. Check the output above for errors.")
         
     except FileNotFoundError:
-        print(f"❌ Could not find koboldcpp.exe")
+        print("❌ Could not find koboldcpp.exe")
         print("Please make sure koboldcpp.exe is in the current directory")
     except Exception as e:
         print(f"❌ Error: {e}")

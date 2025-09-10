@@ -1,9 +1,9 @@
-"""
+﻿"""
 Basic tests for POML adapter rendering to ensure integration wiring works.
 These tests do not validate full POML semantics, only that rendering returns strings.
 """
 
-from poml.lib.poml_integration import StoryEnginePOMLAdapter
+from story_engine.poml.lib.poml_integration import StoryEnginePOMLAdapter
 
 
 def test_scene_prompt_renders_string():
@@ -25,4 +25,5 @@ def test_dialogue_prompt_renders_string():
     prompt = adapter.get_dialogue_prompt(character=character, scene=scene, dialogue_context=ctx)
     assert isinstance(prompt, str)
     assert len(prompt) > 0
+
 

@@ -1,9 +1,9 @@
-"""
+﻿"""
 Basic tests for additional POML adapter methods: plot structure and evaluation.
 These ensure integration wiring returns strings.
 """
 
-from poml.lib.poml_integration import StoryEnginePOMLAdapter
+from story_engine.poml.lib.poml_integration import StoryEnginePOMLAdapter
 
 
 def test_plot_structure_prompt_renders_string():
@@ -48,3 +48,4 @@ def test_enhancement_prompt_renders_string():
     assert len(prompt) > 0
     assert focus in prompt
     assert evaluation.split(';')[0] in prompt
+

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Run an iterative persona-constrained simulation and persist results to the DB.
 
@@ -15,9 +15,9 @@ from typing import Any, Dict
 
 import yaml
 
-from core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline
-from core.storage import get_database_connection
-from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status
+from story_engine.core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline
+from story_engine.core.storage import get_database_connection
+from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status
 
 
 def load_persona_yaml(char_id: str) -> Dict[str, Any]:
@@ -29,30 +29,34 @@ def load_persona_yaml(char_id: str) -> Dict[str, Any]:
 
 
 def build_db():
-    """Build a DB connection from environment variables; defaults to PostgreSQL if DB_USER present, otherwise SQLite."""
+    """Build a DB connection from environment variables.
+
+    Honors `DB_TYPE` (oracle|postgresql). If no DB_USER is set, falls back to SQLite.
+    """
     db_user = os.getenv('DB_USER')
+    db_type = os.getenv('DB_TYPE', 'postgresql').lower()
     if db_user:
-        # Prefer PostgreSQL
-        db_name = os.getenv('DB_NAME', 'story_db')
-        db_password = os.getenv('DB_PASSWORD')
-        db_host = os.getenv('DB_HOST', '127.0.0.1')
-        db_port = int(os.getenv('DB_PORT', '5432'))
-        # Optional SSL
-        sslmode = os.getenv('DB_SSLMODE')
-        sslrootcert = os.getenv('DB_SSLROOTCERT')
-        sslcert = os.getenv('DB_SSLCERT')
-        sslkey = os.getenv('DB_SSLKEY')
+        if db_type == 'oracle':
+            return get_database_connection(
+                'oracle',
+                user=db_user,
+                password=os.getenv('DB_PASSWORD'),
+                dsn=os.getenv('DB_DSN'),
+                wallet_location=os.getenv('DB_WALLET_LOCATION'),
+                wallet_password=os.getenv('DB_WALLET_PASSWORD'),
+            )
+        # Default to PostgreSQL
         return get_database_connection(
             'postgresql',
-            db_name=db_name,
+            db_name=os.getenv('DB_NAME', 'story_db'),
             user=db_user,
-            password=db_password,
-            host=db_host,
-            port=db_port,
-            sslmode=sslmode,
-            sslrootcert=sslrootcert,
-            sslcert=sslcert,
-            sslkey=sslkey,
+            password=os.getenv('DB_PASSWORD'),
+            host=os.getenv('DB_HOST', '127.0.0.1'),
+            port=int(os.getenv('DB_PORT', '5432')),
+            sslmode=os.getenv('DB_SSLMODE'),
+            sslrootcert=os.getenv('DB_SSLROOTCERT'),
+            sslcert=os.getenv('DB_SSLCERT'),
+            sslkey=os.getenv('DB_SSLKEY'),
         )
     # Fallback to SQLite local file inside repo
     return get_database_connection('sqlite', db_name=str(Path('workflow_outputs.db')))
@@ -121,4 +125,5 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
 

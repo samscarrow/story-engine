@@ -1,5 +1,8 @@
 # Character Simulation Engine - Story Engine
 
+[![CI](https://github.com/samscarrow/story-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/samscarrow/story-engine/actions/workflows/ci.yml)
+[![Tests](https://github.com/samscarrow/story-engine/actions/workflows/tests.yml/badge.svg)](https://github.com/samscarrow/story-engine/actions/workflows/tests.yml)
+
 A production-ready character behavior simulation system that generates authentic narrative content through psychological modeling rather than templated writing.
 
 ## 🎭 What We Built
@@ -100,6 +103,20 @@ python lmstudio_setup_guide.py
 python real_llm_emotional_sequence.py
 ```
 
+### ai-lb Integration
+- See `docs/ai-lb-integration.md` for a concise setup and verification guide.
+
+### Model Selection
+- The engine can auto-select a viable text model when `LM_MODEL` and provider model are unset.
+- Prefer small models via:
+  - Env: `LM_PREFER_SMALL=1`
+  - YAML: `llm.prefer_small_models: true`
+- One-off selection helper:
+  - Print chosen model: `python scripts/choose_model.py`
+  - Prefer small: `python scripts/choose_model.py --prefer-small`
+  - Export for current shell: `eval "$(python scripts/choose_model.py --prefer-small --export)"`
+  - Write to .env: `python scripts/choose_model.py --prefer-small --write-env .env`
+
 ### Testing
 ```bash
 # Run full test suite
@@ -108,6 +125,18 @@ python test_character_simulation.py -v
 # Specific test categories
 python test_character_simulation.py TestEmotionalState -v
 ```
+
+#### Pytest (recommended)
+- Fast (excludes slow by default):
+  - `pytest -q` or `pytest -n auto --dist=loadfile -q`
+- Only slow/live tests:
+  - `pytest -q -m slow`
+- Opt-in live run with shorter LLM timeouts:
+  - `STORY_ENGINE_LIVE=1 LLM_TEST_TIMEOUT=20 pytest -q -m slow`
+
+CI
+- GitHub Actions workflow `.github/workflows/tests.yml` runs unit tests on push/PR.
+- Live tests are opt-in via workflow_dispatch; set `run_live=true` when triggering manually.
 
 ## 🤖 LLM Setup for Real Testing
 
@@ -123,6 +152,13 @@ python test_character_simulation.py TestEmotionalState -v
 3. Start local server (localhost:1234)
 4. Enable structured output in settings
 5. Run `python lmstudio_setup_guide.py` to test
+
+### Model Selection
+- The engine filters out non-text models (embeddings, TTS/STT) when discovering models from `/v1/models`.
+- Prefer small models (<= ~4B) by setting either:
+  - Env var: `LM_PREFER_SMALL=1`
+  - YAML: in `config.yaml` under `llm.prefer_small_models: true`
+  The orchestrator and CLI will then pick small text models first when auto-selecting.
 
 ## 📊 Performance Stats
 
@@ -190,3 +226,22 @@ result = await engine.run_simulation(
 5. **Extend Psychology Model**: Add new emotional dimensions or memory types
 
 The system is ready for both experimentation and production use - from character psychology research to powering dynamic narrative experiences!
+
+## 🏃 One-Command Demo
+
+Generate an evaluatable narrative, continuity report, metrics, and a human-readable summary:
+
+```bash
+python -m story_engine.scripts.run_demo --runs 3 --emphasis doubt
+```
+
+Outputs are written to `dist/run-<timestamp>/`:
+- `story.json` – scene plan, runs, narrative graph
+- `continuity_report.json` – violations and suggested fixes
+- `metrics.json` – schema validity, continuity, repetition
+- `console.md` – readable sample with key stats
+- `config.snapshot.yaml`, `env.capture` – reproducibility snapshot
+
+Use `--live` to route through the unified orchestrator (if configured), `--use-poml` to enable POML prompts, and `--strict-persona` to enforce persona guardrails.
+
+Note: The demo smoke test is included in CI and runs on push/PR to ensure artifacts are generated and well-formed.

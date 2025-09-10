@@ -1,0 +1,12 @@
+# Code owners for auto-review routing
+
+# Engine and POML integration
+/src/story_engine/poml/poml/lib/* @engine-team
+/src/story_engine/poml/poml/integration/* @orchestrator-team
+
+# Templates
+/src/story_engine/poml/poml/templates/** @templates-team
+
+# Tests
+/tests/** @qa-team
+

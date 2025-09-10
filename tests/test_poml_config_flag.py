@@ -1,10 +1,10 @@
-"""
+﻿"""
 Tests that engines honor the POML feature flag from config.yaml
 when an explicit argument is not provided.
 """
 
-from core.story_engine.narrative_pipeline import NarrativePipeline
-from core.common.config import load_config
+from story_engine.core.story_engine.narrative_pipeline import NarrativePipeline
+from story_engine.core.common.config import load_config
 
 
 def test_pipeline_uses_config_poml_flag_by_default():
@@ -14,4 +14,5 @@ def test_pipeline_uses_config_poml_flag_by_default():
     pipeline = NarrativePipeline(orchestrator=None, use_poml=None)
 
     assert pipeline.use_poml == expected
+
 

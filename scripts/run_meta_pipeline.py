@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Run meta-narrative pipeline:
   simulations (multi) → reviewer throughlines → select best → synthesize meta → screenplay draft
@@ -18,13 +18,12 @@ import os
 import sys
 from pathlib import Path
 from typing import List
-import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline  # noqa: E402
-from core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
-from core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
+from story_engine.core.character_engine.meta_narrative_pipeline import MetaNarrativePipeline  # noqa: E402
+from story_engine.core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
+from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
 
 
 def load_character(name: str) -> dict:
@@ -109,19 +108,30 @@ async def run(
 
     if store_db or os.getenv("STORE_ALL") == "1" or os.getenv("DB_PASSWORD"):
         try:
-            from core.storage import get_database_connection
-            db = get_database_connection(
-                db_type="postgresql",
-                db_name=os.getenv("DB_NAME", "story_db"),
-                user=os.getenv("DB_USER", "story"),
-                password=os.getenv("DB_PASSWORD"),
-                host=os.getenv("DB_HOST", "localhost"),
-                port=int(os.getenv("DB_PORT", "5432")),
-                sslmode=os.getenv("DB_SSLMODE"),
-                sslrootcert=os.getenv("DB_SSLROOTCERT"),
-                sslcert=os.getenv("DB_SSLCERT"),
-                sslkey=os.getenv("DB_SSLKEY"),
-            )
+            from story_engine.core.storage import get_database_connection
+            db_type = os.getenv("DB_TYPE", "postgresql").lower()
+            if db_type == "oracle":
+                db = get_database_connection(
+                    db_type="oracle",
+                    user=os.getenv("DB_USER"),
+                    password=os.getenv("DB_PASSWORD"),
+                    dsn=os.getenv("DB_DSN"),
+                    wallet_location=os.getenv("DB_WALLET_LOCATION"),
+                    wallet_password=os.getenv("DB_WALLET_PASSWORD"),
+                )
+            else:
+                db = get_database_connection(
+                    db_type="postgresql",
+                    db_name=os.getenv("DB_NAME", "story_db"),
+                    user=os.getenv("DB_USER", "story"),
+                    password=os.getenv("DB_PASSWORD"),
+                    host=os.getenv("DB_HOST", "localhost"),
+                    port=int(os.getenv("DB_PORT", "5432")),
+                    sslmode=os.getenv("DB_SSLMODE"),
+                    sslrootcert=os.getenv("DB_SSLROOTCERT"),
+                    sslcert=os.getenv("DB_SSLCERT"),
+                    sslkey=os.getenv("DB_SSLKEY"),
+                )
             db.connect()
             db.store_output(workflow_name, result)
             print(f"Stored result in DB under workflow '{workflow_name}'")
@@ -211,3 +221,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

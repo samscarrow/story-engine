@@ -1,0 +1,55 @@
+Alice
+      protagonist
+
+        Small town
+
+        Scholar
+
+          {{ trait }}
+
+            value
+
+            fear
+
+            desire
+
+        0.1/10
+
+          ❄️ Irritated
+          💧 Frustrated
+          🌡️ Angry
+          🔥 Furious
+
+        0.2/10
+
+          ❄️ Questioning
+          💧 Uncertain
+          🌡️ Doubtful
+          🔥 Lost
+
+        0.3/10
+
+          ❄️ Uneasy
+          💧 Anxious
+          🌡️ Afraid
+          🔥 Terrified
+
+        0.6/10
+
+          ❄️ Detached
+          💧 Sympathetic
+          🌡️ Caring
+          🔥 Deeply Moved
+
+        0.7/10
+
+          ❄️ Shaken
+          💧 Uncertain
+          🌡️ Assured
+          🔥 Commanding
+
+              event
+
+        No significant recent events
+
+      Find the truth

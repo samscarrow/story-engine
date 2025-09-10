@@ -1,21 +1,29 @@
-
+﻿
 import unittest
 import os
-from core.storage.database import SQLiteConnection
+import tempfile
+import shutil
+from story_engine.core.storage.database import SQLiteConnection
 
 class TestDatabase(unittest.TestCase):
 
     def setUp(self):
-        """Set up a temporary database for testing."""
-        self.db_name = "test_workflow_outputs.db"
+        """Set up a temporary, per-test database (xdist-safe)."""
+        # Create a unique temp directory per test to avoid xdist collisions
+        self.tempdir = tempfile.mkdtemp(prefix="story-db-")
+        self.db_name = os.path.join(self.tempdir, "test.db")
         self.db = SQLiteConnection(db_name=self.db_name)
         self.db.connect()
 
     def tearDown(self):
         """Clean up the temporary database."""
         self.db.disconnect()
-        if os.path.exists(self.db_name):
-            os.remove(self.db_name)
+        try:
+            if os.path.exists(self.db_name):
+                os.remove(self.db_name)
+        finally:
+            # Remove the temp directory tree
+            shutil.rmtree(self.tempdir, ignore_errors=True)
 
     def test_store_and_get_output(self):
         """Test storing and retrieving a workflow output."""
@@ -53,3 +61,4 @@ class TestDatabase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

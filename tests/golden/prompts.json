@@ -1,0 +1,172 @@
+[
+  {
+    "id": "pilate_oath",
+    "title": "The Governor’s Oath",
+    "premise": "Pilate weighs imperial duty against justice during a charged festival.",
+    "genre": "Historical Drama",
+    "tone": "Grave",
+    "setting": "Jerusalem",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "caiaphas", "name": "Caiaphas", "role": "antagonist"}
+    ]
+  },
+  {
+    "id": "whispered_dream",
+    "title": "The Whispered Dream",
+    "premise": "A troubling dream warning challenges Pilate’s resolve before sentencing.",
+    "genre": "Historical Drama",
+    "tone": "Grave",
+    "setting": "Jerusalem",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "pilates_wife", "name": "Pilate's Wife", "role": "concerned"}
+    ]
+  },
+  {
+    "id": "sand_and_iron",
+    "title": "Sand and Iron",
+    "premise": "The cohort’s unrest forces Pilate to choose force or restraint.",
+    "genre": "Historical Drama",
+    "tone": "Tense",
+    "setting": "Antonia Fortress",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "centurion", "name": "Roman Centurion", "role": "pragmatist"}
+    ]
+  },
+  {
+    "id": "price_of_peace",
+    "title": "The Price of Peace",
+    "premise": "A quiet negotiation for calm demands a public injustice.",
+    "genre": "Historical Drama",
+    "tone": "Somber",
+    "setting": "Governor’s Courtyard",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "elder", "name": "Temple Elder", "role": "calculating"}
+    ]
+  },
+  {
+    "id": "voices_in_portico",
+    "title": "Voices in the Portico",
+    "premise": "The crowd fractures between mercy and order; Pilate must read the tide.",
+    "genre": "Historical Drama",
+    "tone": "Grave",
+    "setting": "Portico of Solomon",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "herald", "name": "Crowd Herald", "role": "agitated"}
+    ]
+  },
+  {
+    "id": "the_basin",
+    "title": "The Basin",
+    "premise": "Ritual washing cannot cleanse a stain Pilate can already foresee.",
+    "genre": "Historical Drama",
+    "tone": "Reflective",
+    "setting": "Praetorium",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "scribe", "name": "Scribe", "role": "formalist"}
+    ]
+  },
+  {
+    "id": "prisoners_exchange",
+    "title": "The Prisoner’s Exchange",
+    "premise": "A political trade risks normalizing injustice as expedience.",
+    "genre": "Historical Drama",
+    "tone": "Tense",
+    "setting": "Outer Gate",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "barabbas", "name": "Barabbas", "role": "defiant"}
+    ]
+  },
+  {
+    "id": "unsent_letter",
+    "title": "A Letter Left Unsent",
+    "premise": "Pilate drafts a report to Rome he cannot bring himself to send.",
+    "genre": "Historical Drama",
+    "tone": "Somber",
+    "setting": "Private Study",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "clerk", "name": "Clerk", "role": "loyal"}
+    ]
+  },
+  {
+    "id": "stone_and_silence",
+    "title": "Stone and Silence",
+    "premise": "After the uproar, the city’s quiet forces Pilate to reckon with echoes.",
+    "genre": "Historical Drama",
+    "tone": "Reflective",
+    "setting": "Jerusalem Streets (dawn)",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "patrolman", "name": "Patrolman", "role": "tired"}
+    ]
+  },
+  {
+    "id": "crowds_tutor",
+    "title": "The Crowd’s Tutor",
+    "premise": "A rhetorician stokes public fervor; Pilate must unmask the technique.",
+    "genre": "Historical Drama",
+    "tone": "Analytical",
+    "setting": "City Square",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "orator", "name": "Orator", "role": "cunning"}
+    ]
+  },
+  {
+    "id": "under_laurel_seal",
+    "title": "Under the Laurel Seal",
+    "premise": "A courier from Rome brings guidance that pleases no one.",
+    "genre": "Historical Drama",
+    "tone": "Grave",
+    "setting": "Governor’s Hall",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "courier", "name": "Roman Courier", "role": "formal"}
+    ]
+  },
+  {
+    "id": "broken_standard",
+    "title": "The Broken Standard",
+    "premise": "A desecrated legionary standard becomes political fuel.",
+    "genre": "Historical Drama",
+    "tone": "Tense",
+    "setting": "Garrison Yard",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "aquilifer", "name": "Standard-Bearer", "role": "ashamed"}
+    ]
+  },
+  {
+    "id": "temple_money",
+    "title": "The Temple Money",
+    "premise": "Coinage disputes blur lines between piety and policy.",
+    "genre": "Historical Drama",
+    "tone": "Grave",
+    "setting": "Temple Courts",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "moneychanger", "name": "Moneychanger", "role": "practical"}
+    ]
+  }
+]
+

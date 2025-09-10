@@ -1,0 +1,54 @@
+[
+  {
+    "id": "silver_basin",
+    "title": "The Basin",
+    "premise": "A symbolic washing cannot avert the moral stain to come.",
+    "genre": "Historical Drama",
+    "tone": "Reflective",
+    "setting": "Praetorium",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"}
+    ]
+  },
+  {
+    "id": "silver_gatewatch",
+    "title": "Gate Watch",
+    "premise": "Curfew talk at the gate tests restraint vs. deterrence.",
+    "genre": "Historical Drama",
+    "tone": "Tense",
+    "setting": "City Gate",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "captain", "name": "Watch Captain", "role": "hardline"}
+    ]
+  },
+  {
+    "id": "silver_whisper",
+    "title": "A Whisper at Dusk",
+    "premise": "A private warning competes with public pressure.",
+    "genre": "Historical Drama",
+    "tone": "Somber",
+    "setting": "Private Quarters",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "wife", "name": "Pilate's Wife", "role": "concerned"}
+    ]
+  },
+  {
+    "id": "silver_standard",
+    "title": "The Standard",
+    "premise": "A damaged standard becomes fuel for unrest.",
+    "genre": "Historical Drama",
+    "tone": "Tense",
+    "setting": "Garrison Yard",
+    "structure": "three_act",
+    "characters": [
+      {"id": "pilate", "name": "Pontius Pilate", "role": "conflicted judge"},
+      {"id": "bearer", "name": "Standard-Bearer", "role": "ashamed"}
+    ]
+  }
+]
+

@@ -4,7 +4,6 @@ Production-ready character simulation using actual LLMs only
 """
 
 import asyncio
-import json
 import time
 from typing import Dict, Any, Optional
 from character_simulation_engine_v2 import (
@@ -291,11 +290,11 @@ async def run_pilate_trial():
     print(f"  Confidence: {pilate.emotional_state.confidence:.2f}")
     
     if hasattr(pilate.memory, 'recent_events') and pilate.memory.recent_events:
-        print(f"\n💭 Final memories:")
+        print("\n💭 Final memories:")
         for memory in pilate.memory.recent_events[-3:]:
             print(f"  • {memory}")
     
-    print(f"\n✨ Simulation complete!")
+    print("\n✨ Simulation complete!")
 
 
 async def test_single_response():

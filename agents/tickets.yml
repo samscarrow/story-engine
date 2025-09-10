@@ -1,0 +1,68 @@
+# Tickets manifest for POML overhaul bootstrap
+# Used by .github/workflows/bootstrap_poml_overhaul.yml to create issues
+
+tickets:
+  - key: ENG-01
+    title: "ENG-01: Integrate Microsoft POML SDK (primary) + native fallback"
+    agent: engine_integrator
+    milestone: "M2 SDK Integration"
+    labels: ["agent:engine_integrator", "area:engine", "type:feature", "priority:p0", "size:M"]
+    assignees: []
+    body_from_agent: true
+
+  - key: ENG-02
+    title: "ENG-02: Adapter uses roles when POML_ROLES=1"
+    agent: orchestrator_refactorer
+    milestone: "M3 Orchestrator & Adapter"
+    labels: ["agent:orchestrator_refactorer", "area:orchestrator", "type:feature", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: true
+
+  - key: VAL-01
+    title: "VAL-01: Schema enforcement + JSON cleanup"
+    agent: validation_engineer
+    milestone: "M4 Validation & Schemas"
+    labels: ["agent:validation_engineer", "area:validation", "type:feature", "priority:p0", "size:M"]
+    assignees: []
+    body_from_agent: true
+
+  - key: TL-01
+    title: "TL-01: POML render CLI goldens (openai_chat)"
+    agent: tooling_engineer
+    milestone: "M5 CLI & Tooling"
+    labels: ["agent:tooling_engineer", "area:tooling", "type:feature", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: true
+
+  - key: TPL-01
+    title: "TPL-01: Goldens + path normalization"
+    agent: templates_curator
+    milestone: "M6 Templates & Goldens"
+    labels: ["agent:templates_curator", "area:templates", "type:feature", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: true
+
+  - key: PERF-01
+    title: "PERF-01: Cache fingerprint + hot reload (dev)"
+    agent: cache_engineer
+    milestone: "M7 Cache/Hot Reload"
+    labels: ["agent:cache_engineer", "area:engine", "type:feature", "priority:p2", "size:S"]
+    assignees: []
+    body_from_agent: true
+
+  - key: CI-01
+    title: "CI-01: Add golden check workflow + docs"
+    agent: docs_ci_writer
+    milestone: "M8 CI & Docs"
+    labels: ["agent:docs_ci_writer", "area:ci", "type:feature", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: true
+
+  - key: SEC-01
+    title: "SEC-01: Template sandboxing + allowlist"
+    agent: security_engineer
+    milestone: "M4 Validation & Schemas"
+    labels: ["agent:security_engineer", "area:security", "type:feature", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: true
+

@@ -1,0 +1,11 @@
+{
+  "world": {
+    "facts": {"era": "ancient", "city": "Jerusalem"},
+    "relationships": {"Rome": {"status": "occupier"}, "Jews": {"status": "subject"}},
+    "availability": {"troops": {"count": 200}},
+    "locations": {"Praetorium": {"type": "hall"}},
+    "timeline": [{"time": "t0", "desc": "Festival begins"}],
+    "props": {"seal": {"owner": "Rome"}}
+  }
+}
+

@@ -1,0 +1,113 @@
+You are a master storyteller crafting a dramatic scene. 
+    Create vivid, tension-filled situations that give characters opportunities for meaningful interaction and conflict.
+    Focus on specific details that bring the scene to life.
+
+    Scene: Setup
+
+      Establish
+      Advance the plot
+
+        Tension Level: 3/10
+
+          ⚡ CRITICAL DRAMATIC MOMENT - Maximum tension required!
+
+          🔥 High tension - Stakes are escalating
+
+          💧 Moderate tension - Building pressure
+
+    Characters Present
+
+          {{ character.name }}
+
+      Consider these character dynamics:
+
+        Who has the most power in this scene?
+        What does each character want from the others?
+        What are they willing to do to get it?
+        What are they afraid of losing?
+
+    Story Context
+
+        What Just Happened
+
+          This scene should flow naturally from the previous events while escalating or shifting the dramatic tension.
+
+        Opening Scene
+        This is the beginning of the narrative. Establish:
+
+          The world and its rules
+          The immediate situation
+          The central conflict or question
+          The mood and tone
+
+    Scene Creation Instructions
+
+      Essential Elements
+
+        Location and Time
+        Provide specific details about:
+
+          Exact location (not just "a room" but "the prefect's private chamber")
+          Time of day and how it affects the scene
+          Environmental conditions that add pressure or atmosphere
+
+        Immediate Conflict or Tension
+        Clearly establish:
+
+          What is happening RIGHT NOW that demands response
+          Why this moment cannot be avoided or delayed
+          What forces are in opposition
+          What decision or action is required
+
+        What's at Risk
+        Make clear:
+
+          What each character stands to gain or lose
+          The immediate consequences of action/inaction
+          The broader implications for the story
+
+            ⚠️ This is a turning point - stakes must be life-changing
+
+        Character Expression Opportunities
+        Ensure the scene allows characters to:
+
+          Reveal their true nature through choices
+          Express their unique voice and perspective
+          Interact meaningfully with others
+          Face their fears or desires
+
+    Sensory Details
+
+      After describing the situation, provide THREE specific sensory details that enhance the scene:
+
+        Visual Detail:
+        One striking visual element that captures the scene's essence
+        The flickering torchlight casting dancing shadows on stone walls
+
+        Auditory Detail:
+        A sound that adds tension or atmosphere
+        The distant roar of the crowd growing louder
+
+        Atmospheric Detail:
+        A feeling, smell, or environmental element
+        The oppressive heat making everyone's tempers shorter
+
+    Response Format
+
+      Provide your response in this structure:
+
+      SCENE SITUATION (2-3 sentences):
+      [Describe the immediate situation with specific location, time, and conflict]
+
+      SENSORY DETAILS:
+
+        Sight: [One vivid visual detail]
+        Sound: [One evocative sound]
+        Atmosphere: [One environmental/feeling detail]
+
+    Now create a powerful scene for "Setup" that:
+
+      Fulfills the purpose: Establish
+      Maintains tension level 3/10
+      Gives [{'name': 'Alice', 'role': 'protagonist', 'motivation': 'Find truth', 'goal_in_scene': 'Ask questions', 'emotional_state': 'anxious'}, {'name': 'Bob', 'role': 'antagonist', 'motivation': 'Hide secret', 'goal_in_scene': 'Deflect', 'emotional_state': 'calm'}] meaningful dramatic opportunities
+      Flows naturally from:

@@ -93,7 +93,7 @@ async def test_gemma2_directly():
                     if json_start >= 0 and json_end > json_start:
                         data = json.loads(content[json_start:json_end])
                     else:
-                        print(f"❌ No JSON in response")
+                        print("❌ No JSON in response")
                         print(f"📝 Raw: {content[:200]}")
                         continue
                 

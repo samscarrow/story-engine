@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Cross-platform launcher for the Cloud SQL Auth Proxy (macOS/Linux/Windows).
 
@@ -39,7 +39,7 @@ sys.path.insert(0, str(ROOT))
 
 try:
     # Load CLOUDSQL_* from .env if available
-    from core.common.dotenv_loader import load_dotenv_keys  # type: ignore
+    from story_engine.core.common.dotenv_loader import load_dotenv_keys  # type: ignore
     load_dotenv_keys(keys_prefixes=("CLOUDSQL_",))
 except Exception:
     # Best-effort only
@@ -126,4 +126,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
