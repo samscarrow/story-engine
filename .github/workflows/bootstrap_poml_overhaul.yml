@@ -11,7 +11,7 @@ on:
         description: "Create standard milestones"
         required: false
         default: "true"
-      project_url:
+      project_url: https://github.com/users/samscarrow/projects/2/
         description: "Optional GitHub Projects URL to add issues to"
         required: false
 
