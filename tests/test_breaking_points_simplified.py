@@ -420,7 +420,7 @@ class SimplifiedBreakingPointTester:
                 # Check if we can still create new objects efficiently
                 if i % 20 == 0 and i > 0:
                     start_time = time.time()
-                    {'test': 'memory_check', 'size': len(large_objects)}
+                    logger.info({'test': 'memory_check', 'size': len(large_objects)})
                     end_time = time.time()
                     
                     creation_time = end_time - start_time
