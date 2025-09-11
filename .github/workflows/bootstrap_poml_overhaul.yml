@@ -12,9 +12,9 @@ on:
         required: false
         default: "true"
       project_url:
-        description: "Optional GitHub Projects URL to add issues to"
+        description: "Optional GitHub Projects URL to add issues to (e.g., https://github.com/users/<username>/projects/<project_number>)"
         required: false
-        default: "https://github.com/users/samscarrow/projects/2"
+        default: ""
 
 permissions:
   issues: write
