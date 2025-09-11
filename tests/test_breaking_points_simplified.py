@@ -399,7 +399,6 @@ class SimplifiedBreakingPointTester:
         try:
             # Test 1: Memory accumulation
             large_objects = []
-            len(large_objects)
             
             for i in range(100):
                 # Create progressively larger objects
