@@ -6,21 +6,22 @@ import sys
 from pathlib import Path
 
 
-def run_demo_and_get_outdir(env: dict[str, str]) -> Path:
-    # Resolve Python interpreter:
-    # 1) Respect explicit PYTHON in env
+def resolve_python_exec(env: dict[str, str]) -> str:
+    # 1) Respect explicit PYTHON in env or os.environ
+    python_exec = env.get("PYTHON") or os.environ.get("PYTHON")
+    if python_exec:
+        return python_exec
     # 2) If VENV_PATH is provided (direnv-managed), use its python if present
+    venv_path = env.get("VENV_PATH") or os.environ.get("VENV_PATH")
+    if venv_path:
+        candidate = Path(venv_path) / "bin" / "python"
+        if candidate.exists():
+            return str(candidate)
     # 3) Fall back to the current interpreter (sys.executable)
-    python_exec = env.get("PYTHON", os.environ.get("PYTHON"))
-    if not python_exec:
-        venv_path = env.get("VENV_PATH") or os.environ.get("VENV_PATH")
-        if venv_path:
-            candidate = Path(venv_path) / "bin" / "python"
-            if candidate.exists():
-                python_exec = str(candidate)
-    if not python_exec:
-        python_exec = sys.executable
+    return sys.executable
 
+def run_demo_and_get_outdir(env: dict[str, str]) -> Path:
+    python_exec = resolve_python_exec(env)
     cmd = [
         python_exec,
         "-m",
