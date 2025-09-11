@@ -68,10 +68,10 @@ tickets:
 
   # Lint/CI refactor tasks
   - key: LINT-01
-    title: "LINT-01: Orchestrator import ordering (E402) cleanup"
+    title: "LINT-01: Orchestrator cleanup (E402, E501)"
     agent: orchestrator_refactorer
     milestone: "M8 CI & Docs"
-    labels: ["agent:orchestrator_refactorer", "area:orchestrator", "type:chore", "priority:p1", "size:S"]
+    labels: ["agent:orchestrator_refactorer", "area:orchestrator", "type:chore", "priority:p1", "size:M"]
     assignees: []
     body_from_agent: false
 
@@ -93,9 +93,9 @@ tickets:
 
   - key: LINT-04
     title: "LINT-04: Narrative modules cleanup (E402/E501)"
-    agent: docs_ci_writer
+    agent: tooling_engineer
     milestone: "M8 CI & Docs"
-    labels: ["agent:docs_ci_writer", "area:engine", "type:chore", "priority:p2", "size:M"]
+    labels: ["agent:tooling_engineer", "area:engine", "type:chore", "priority:p2", "size:M"]
     assignees: []
     body_from_agent: false
 
