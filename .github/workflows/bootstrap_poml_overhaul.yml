@@ -15,6 +15,7 @@ on:
         description: "Optional GitHub Projects URL to add issues to (e.g., https://github.com/users/<username>/projects/<project_number>)"
         required: false
         default: ""
+        type: string
 
 permissions:
   issues: write
