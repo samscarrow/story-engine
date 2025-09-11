@@ -188,8 +188,7 @@ class OutputAuthenticityAuditor:
         """
         logger.info("Auditing template generation validity...")
         
-        # Find template-related files
-        list(self.project_root.glob("**/*template*"))
+        # Find relevant agent files
         agent_files = list(self.project_root.glob("**/autonomous_persona_agents.py"))
         
         for file_path in agent_files:
