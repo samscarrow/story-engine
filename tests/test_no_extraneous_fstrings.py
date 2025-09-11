@@ -18,7 +18,7 @@ EXCLUDE_DIRS = {
 
 
 def iter_py_files(root: Path):
-    for dirpath, dirnames, filenames in os.walk(Path.cwd()):
+    for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [
             d for d in dirnames if d not in EXCLUDE_DIRS and not d.endswith(".egg-info")
         ]
