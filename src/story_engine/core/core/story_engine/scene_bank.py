@@ -12,7 +12,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 
-_SCENE_HEADER_RE = re.compile(r"^(COLD OPEN:?|ACT\s+\w+:|INT\.|EXT\.|INT/EXT\.)", re.IGNORECASE)
+_SCENE_HEADER_RE = re.compile(
+    r"^(COLD OPEN:?|ACT\s+\w+:|INT\.|EXT\.|INT/EXT\.)", re.IGNORECASE
+)
 
 
 def _strip_md(line: str) -> str:
@@ -74,7 +76,12 @@ class SceneBank:
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.path, "w", encoding="utf-8") as f:
-            json.dump({"scenes": [asdict(s) for s in self.scenes.values()]}, f, indent=2, ensure_ascii=False)
+            json.dump(
+                {"scenes": [asdict(s) for s in self.scenes.values()]},
+                f,
+                indent=2,
+                ensure_ascii=False,
+            )
 
     def add(self, scene: SceneEntry) -> None:
         self.scenes[scene.id] = scene
@@ -114,7 +121,7 @@ class SceneBank:
 def parse_screenplay_to_scenes(text: str, source: str) -> List[SceneEntry]:
     # Preprocess markdown to make headings consistent
     raw_lines = text.splitlines()
-    lines = [_strip_md(l) for l in raw_lines]
+    lines = [_strip_md(ln) for ln in raw_lines]
     scenes: List[SceneEntry] = []
     current_title: Optional[str] = None
     current_header: Optional[str] = None
@@ -128,19 +135,23 @@ def parse_screenplay_to_scenes(text: str, source: str) -> List[SceneEntry]:
             scene_id = _slugify(f"{current_act or 'act'}-{title}")
             body = "\n".join(buf).strip()
             tags: List[str] = []
-            if current_header.upper().startswith("INT") or current_header.upper().startswith("EXT"):
+            if current_header.upper().startswith(
+                "INT"
+            ) or current_header.upper().startswith("EXT"):
                 tags.append("screenplay-scene")
             if current_act:
                 tags.append(current_act.lower())
-            scenes.append(SceneEntry(
-                id=scene_id,
-                title=title.strip(),
-                header=(current_header or "").strip(),
-                act=current_act,
-                body=body,
-                tags=tags,
-                source=source,
-            ))
+            scenes.append(
+                SceneEntry(
+                    id=scene_id,
+                    title=title.strip(),
+                    header=(current_header or "").strip(),
+                    act=current_act,
+                    body=body,
+                    tags=tags,
+                    source=source,
+                )
+            )
         buf = []
 
     for raw in lines:
@@ -153,8 +164,10 @@ def parse_screenplay_to_scenes(text: str, source: str) -> List[SceneEntry]:
             _flush()
             continue
         # Normalize COLD OPEN variants
-        if line.upper().startswith("COLD OPEN") and not line.upper().startswith("COLD OPEN:"):
-            line = "COLD OPEN: " + line[len("COLD OPEN"):].strip()
+        if line.upper().startswith("COLD OPEN") and not line.upper().startswith(
+            "COLD OPEN:"
+        ):
+            line = "COLD OPEN: " + line[len("COLD OPEN") :].strip()
 
         if _SCENE_HEADER_RE.match(line):
             # Handle act lines separately to carry act context

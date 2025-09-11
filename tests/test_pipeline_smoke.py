@@ -19,7 +19,7 @@ class StubResponse:
 class StubOrchestrator:
     async def generate(self, prompt: str, **kwargs):
         # Always return a canned response
-        return StubResponse("{\"dialogue\": \"Hi\", \"thought\": \"Okay\", \"action\": \"Nods\"}")
+        return StubResponse('{"dialogue": "Hi", "thought": "Okay", "action": "Nods"}')
 
 
 def test_pipeline_generate_with_stub_orchestrator():
@@ -27,7 +27,9 @@ def test_pipeline_generate_with_stub_orchestrator():
     pipeline = NarrativePipeline(orchestrator=orch, use_poml=True)
 
     async def run():
-        out = await pipeline.generate_with_llm("Test prompt", context="", temperature=0.8)
+        out = await pipeline.generate_with_llm(
+            "Test prompt", context="", temperature=0.8
+        )
         assert isinstance(out, str)
         assert len(out) > 0
 
@@ -47,4 +49,3 @@ def test_pipeline_craft_scene_shape():
         assert scene.name == "Setup"
 
     asyncio.run(run())
-

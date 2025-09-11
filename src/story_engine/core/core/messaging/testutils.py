@@ -11,7 +11,9 @@ def assert_type_matches_topic(topic: str, msg: Message) -> None:
     Raises AssertionError with a helpful message if they differ.
     """
     if msg.type != topic:
-        original = msg.headers.get("original_type") if isinstance(msg.headers, dict) else None
+        original = (
+            msg.headers.get("original_type") if isinstance(msg.headers, dict) else None
+        )
         raise AssertionError(
             f"Message.type '{msg.type}' does not match topic '{topic}'. "
             f"original_type={original!r} mismatch={msg.headers.get('type_mismatch') if isinstance(msg.headers, dict) else None}"

@@ -5,7 +5,9 @@ This uses a stub orchestrator and does not require real providers.
 
 import asyncio
 
-from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine
+from story_engine.core.story_engine.story_engine_orchestrated import (
+    OrchestratedStoryEngine,
+)
 
 
 class StubResp:
@@ -32,8 +34,9 @@ def test_orchestrated_scene_and_dialogue_with_poml():
         assert scene["scene_description"] == "ok"
         dlg = await engine.generate_dialogue(scene, characters[0], "Opening line")
         assert dlg == "ok"
-        enhanced = await engine.enhance_content(scene["scene_description"], {"evaluation_text": "Good pacing"}, "pacing")
+        enhanced = await engine.enhance_content(
+            scene["scene_description"], {"evaluation_text": "Good pacing"}, "pacing"
+        )
         assert enhanced == "ok"
 
     asyncio.run(run())
-

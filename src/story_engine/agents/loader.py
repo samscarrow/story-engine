@@ -20,4 +20,3 @@ def get_agent_prompt(agent: str) -> str:
     if not path.exists():
         raise FileNotFoundError(f"Agent prompt not found: {agent}")
     return path.read_text(encoding="utf-8")
-

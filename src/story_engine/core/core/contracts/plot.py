@@ -34,4 +34,3 @@ class PlotDone:
     job_id: str
     outline_id: str
     outline_ref: str
-

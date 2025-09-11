@@ -42,7 +42,9 @@ class GenerationDBLogger:
 
     def _connect(self):
         assert self._oracledb is not None
-        return self._oracledb.connect(user=self._user, password=self._password, dsn=self._dsn)
+        return self._oracledb.connect(
+            user=self._user, password=self._password, dsn=self._dsn
+        )
 
     def _ensure_provider(self, cur, name: str, ptype: str, endpoint: str) -> int:
         pid = cur.var(int)
@@ -62,7 +64,9 @@ class GenerationDBLogger:
         )
         return int(pid.getvalue())
 
-    def _lookup_model_id(self, cur, provider_id: int, model_key: Optional[str]) -> Optional[int]:
+    def _lookup_model_id(
+        self, cur, provider_id: int, model_key: Optional[str]
+    ) -> Optional[int]:
         if not model_key:
             return None
         cur.execute(
@@ -94,7 +98,9 @@ class GenerationDBLogger:
             conn = self._connect()
             try:
                 cur = conn.cursor()
-                provider_id = self._ensure_provider(cur, provider_name, provider_type, provider_endpoint)
+                provider_id = self._ensure_provider(
+                    cur, provider_name, provider_type, provider_endpoint
+                )
                 model_id = self._lookup_model_id(cur, provider_id, model_key)
 
                 # Build request/response JSON payloads
@@ -131,8 +137,12 @@ class GenerationDBLogger:
                     response_json=json.dumps(response_json) if response_json else None,
                     latency_ms=float(latency_ms) if latency_ms is not None else None,
                     status=status,
-                    started=time.strftime("%Y-%m-%dT%H:%M:%S.%f%z", time.localtime(started)),
-                    finished=time.strftime("%Y-%m-%dT%H:%M:%S.%f%z", time.localtime(finished)),
+                    started=time.strftime(
+                        "%Y-%m-%dT%H:%M:%S.%f%z", time.localtime(started)
+                    ),
+                    finished=time.strftime(
+                        "%Y-%m-%dT%H:%M:%S.%f%z", time.localtime(finished)
+                    ),
                 )
                 conn.commit()
             finally:
@@ -158,7 +168,9 @@ class GenerationDBLogger:
             conn = self._connect()
             try:
                 cur = conn.cursor()
-                provider_id = self._ensure_provider(cur, provider_name, provider_type, provider_endpoint)
+                provider_id = self._ensure_provider(
+                    cur, provider_name, provider_type, provider_endpoint
+                )
                 model_id = self._lookup_model_id(cur, provider_id, model_key)
                 cur.execute(
                     """

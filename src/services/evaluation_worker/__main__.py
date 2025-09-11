@@ -5,10 +5,32 @@ import time
 
 from story_engine.core.core.common.config import load_config
 from story_engine.core.core.common.logging import configure_json_logging
-from story_engine.core.core.messaging.interface import InMemoryBus, Message, Consumer, Publisher
+
+try:
+    from story_engine.core.core.messaging.interface import (
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
+except Exception:
+    from story_engine.core.messaging.interface import (  # type: ignore
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
 from story_engine.core.core.messaging.rabbitmq import RabbitMQBus
 from story_engine.core.core.contracts.evaluation import EvaluationRequest
-from story_engine.core.core.contracts.topics import EVALUATION_REQUEST, EVALUATION_DONE
+
+try:
+    from story_engine.core.core.contracts.topics import (
+        EVALUATION_REQUEST,
+        EVALUATION_DONE,
+    )
+except Exception:
+    EVALUATION_REQUEST = "evaluation.request"  # type: ignore
+    EVALUATION_DONE = "evaluation.done"  # type: ignore
 from story_engine.core.core.messaging.helpers import register_dlq_logger
 
 

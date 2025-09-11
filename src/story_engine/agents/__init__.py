@@ -5,4 +5,3 @@ __all__ = [
     "get_agent_prompt",
     "AGENTS_DIR",
 ]
-

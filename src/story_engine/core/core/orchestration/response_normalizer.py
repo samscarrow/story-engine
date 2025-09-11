@@ -18,7 +18,9 @@ def _first_non_empty(*vals: Optional[str]) -> str:
     return ""
 
 
-def normalize_openai_chat(data: Dict[str, Any], headers: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def normalize_openai_chat(
+    data: Dict[str, Any], headers: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Normalize an OpenAI-compatible chat completion response.
 
     Returns a dict with:
@@ -83,4 +85,3 @@ def normalize_openai_chat(data: Dict[str, Any], headers: Optional[Dict[str, Any]
     }
 
     return {"text": text or "", "reasoning": reasoning or "", "meta": meta}
-

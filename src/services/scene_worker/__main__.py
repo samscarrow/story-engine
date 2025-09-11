@@ -6,11 +6,28 @@ import uuid
 
 from story_engine.core.core.common.config import load_config
 from story_engine.core.core.common.logging import configure_json_logging
-from story_engine.core.core.messaging.interface import InMemoryBus, Message, Consumer, Publisher
+
+try:
+    from story_engine.core.core.messaging.interface import (
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
+except Exception:  # fallback to legacy alias path
+    from story_engine.core.messaging.interface import (  # type: ignore
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
 from story_engine.core.core.messaging.rabbitmq import RabbitMQBus
 from story_engine.core.core.contracts.scene import SceneRequest
-from story_engine.core.core.contracts.topics import SCENE_REQUEST, SCENE_DONE
 from story_engine.core.core.messaging.helpers import register_dlq_logger
+
+# Use explicit string constants to avoid import fragility in CI environments
+SCENE_REQUEST = "scene.request"
+SCENE_DONE = "scene.done"
 
 
 def _select_bus(cfg) -> Publisher | Consumer:
@@ -30,8 +47,12 @@ def _handle_scene_request(msg: Message, pub: Publisher) -> None:
     log = logging.getLogger("scene_worker")
     req = SceneRequest.validate(msg.payload)
     scene_id = str(uuid.uuid4())
+    # Build a short placeholder description without exceeding line length
+    beat = req.beat_name or "unknown"
+    prompt_snippet = (req.prompt or "")[:40]
     scene_description = (
-        f"Scene for beat '{req.beat_name or 'unknown'}': placeholder description based on prompt '{req.prompt[:40]}'."
+        f"Scene for beat '{beat}': placeholder description "
+        f"based on prompt '{prompt_snippet}'."
     )
     done = Message(
         type=SCENE_DONE,

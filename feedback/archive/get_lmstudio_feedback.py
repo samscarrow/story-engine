@@ -64,9 +64,9 @@ Focus on practical, implementable improvements that would significantly enhance 
                 
                 # Save feedback
                 with open('architecture_feedback_from_lmstudio.md', 'w') as f:
-                    f.write(f"# Architecture Feedback from LMStudio\n\n")
+                    f.write("# Architecture Feedback from LMStudio\n\n")
                     f.write(f"Model: {data.get('model', 'unknown')}\n\n")
-                    f.write(f"## Feedback\n\n")
+                    f.write("## Feedback\n\n")
                     f.write(feedback)
                 
                 print("\n" + "=" * 60)
@@ -125,7 +125,7 @@ Focus on improvements that would have the highest impact on narrative quality an
                 
                 # Save improvements
                 with open('specific_improvements.md', 'w') as f:
-                    f.write(f"# Specific Implementation Improvements\n\n")
+                    f.write("# Specific Implementation Improvements\n\n")
                     f.write(improvements)
                 
                 print("\n✅ Improvements saved to 'specific_improvements.md'")
@@ -187,7 +187,7 @@ This should create a "writers room" simulation where specialized AI agents colla
                 
                 # Save design
                 with open('agent_architecture_design.md', 'w') as f:
-                    f.write(f"# Multi-Agent Architecture Design\n\n")
+                    f.write("# Multi-Agent Architecture Design\n\n")
                     f.write(agent_design)
                 
                 print("\n✅ Agent design saved to 'agent_architecture_design.md'")

@@ -14,32 +14,30 @@ except ImportError:
     print("oracledb not available - run: pip install oracledb")
     sys.exit(1)
 
+
 def create_apex_integration():
     """Create database views and procedures to support APEX applications."""
-    
-    load_dotenv('.env.oracle')
-    
-    user = os.getenv('DB_USER')
-    password = os.getenv('DB_PASSWORD') 
-    dsn = os.getenv('DB_DSN')
-    wallet_location = os.getenv('DB_WALLET_LOCATION')
-    
+
+    load_dotenv(".env.oracle")
+
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    dsn = os.getenv("DB_DSN")
+    wallet_location = os.getenv("DB_WALLET_LOCATION")
+
     wallet_path = str(Path(wallet_location).resolve())
-    os.environ['TNS_ADMIN'] = wallet_path
-    
+    os.environ["TNS_ADMIN"] = wallet_path
+
     try:
         print("Connecting to Oracle database...")
         conn = oracledb.connect(
-            user=user,
-            password=password,
-            dsn=dsn,
-            config_dir=wallet_path
+            user=user, password=password, dsn=dsn, config_dir=wallet_path
         )
-        
+
         cursor = conn.cursor()
-        
+
         print("Creating APEX-friendly database objects...")
-        
+
         # 1. Dashboard Views
         dashboard_views = [
             # Workflow Summary View
@@ -73,7 +71,6 @@ def create_apex_integration():
             GROUP BY workflow_name
             ORDER BY last_execution DESC
             """,
-            
             # Recent Activity View
             """
             CREATE OR REPLACE VIEW apex_recent_activity AS
@@ -93,7 +90,6 @@ def create_apex_integration():
             WHERE timestamp >= SYSDATE - 7  -- Last 7 days
             ORDER BY timestamp DESC
             """,
-            
             # System Health View
             """
             CREATE OR REPLACE VIEW apex_system_health AS
@@ -140,10 +136,10 @@ def create_apex_integration():
                     1
                 ) as activity_last_24h_pct
             FROM scenes
-            """
+            """,
         ]
-        
-        # 2. Character Management Views  
+
+        # 2. Character Management Views
         character_views = [
             # Character Details View
             """
@@ -161,7 +157,6 @@ def create_apex_integration():
             FROM characters c
             ORDER BY c.updated_at DESC
             """,
-            
             # Character Relationships View (if we had relationships table)
             """
             CREATE OR REPLACE VIEW apex_character_network AS
@@ -179,9 +174,9 @@ def create_apex_integration():
             GROUP BY c1.id, c1.name, c2.id, c2.name
             HAVING COUNT(*) > 0
             ORDER BY interaction_count DESC
-            """
+            """,
         ]
-        
+
         # 3. Story Analytics Views
         analytics_views = [
             # Quality Metrics View
@@ -199,7 +194,6 @@ def create_apex_integration():
             GROUP BY workflow_name, TO_CHAR(timestamp, 'YYYY-MM'), JSON_VALUE(metadata, '$.model_used')
             ORDER BY month_year DESC, avg_quality DESC
             """,
-            
             # Performance Trends View
             """
             CREATE OR REPLACE VIEW apex_performance_trends AS
@@ -215,25 +209,29 @@ def create_apex_integration():
             WHERE timestamp >= SYSDATE - 30  -- Last 30 days
             GROUP BY TO_CHAR(timestamp, 'YYYY-MM-DD')
             ORDER BY date_key DESC
-            """
+            """,
         ]
-        
+
         # Create all views
         all_views = dashboard_views + character_views + analytics_views
-        
+
         for i, view_sql in enumerate(all_views, 1):
             try:
                 cursor.execute(view_sql)
                 # Extract view name from SQL
-                view_name = view_sql.split("VIEW ")[1].split(" ")[0].replace("apex_", "")
+                view_name = (
+                    view_sql.split("VIEW ")[1].split(" ")[0].replace("apex_", "")
+                )
                 print(f"   ✓ Created view: apex_{view_name}")
             except oracledb.Error as e:
                 if "ORA-00955" in str(e):  # Already exists
-                    view_name = view_sql.split("VIEW ")[1].split(" ")[0].replace("apex_", "")
+                    view_name = (
+                        view_sql.split("VIEW ")[1].split(" ")[0].replace("apex_", "")
+                    )
                     print(f"   - View apex_{view_name} already exists")
                 else:
                     print(f"   ✗ Error creating view: {e}")
-                    
+
         # 4. Utility Procedures for APEX
         procedures = [
             # Procedure to trigger story generation
@@ -264,7 +262,6 @@ def create_apex_integration():
                     p_result := 'Error: ' || SQLERRM;
             END;
             """,
-            
             # Procedure to clean up old data
             """
             CREATE OR REPLACE PROCEDURE apex_cleanup_old_data(
@@ -287,9 +284,9 @@ def create_apex_integration():
                     p_result := 'Error: ' || SQLERRM;
                     ROLLBACK;
             END;
-            """
+            """,
         ]
-        
+
         for proc_sql in procedures:
             try:
                 cursor.execute(proc_sql)
@@ -301,10 +298,10 @@ def create_apex_integration():
                     print(f"   - Procedure {proc_name} already exists")
                 else:
                     print(f"   ✗ Error creating procedure: {e}")
-        
+
         # 5. Create sample data for testing
         print("\nCreating sample data for APEX testing...")
-        
+
         sample_data = [
             # Sample workflow outputs
             """
@@ -328,7 +325,6 @@ def create_apex_integration():
                 SELECT 1 FROM workflow_outputs WHERE workflow_name = 'character_generation'
             )
             """,
-            
             # Sample characters
             """
             INSERT INTO characters (id, name, persona_data)
@@ -353,25 +349,25 @@ def create_apex_integration():
             ) WHERE NOT EXISTS (
                 SELECT 1 FROM characters WHERE id = 'char_aragorn'
             )
-            """
+            """,
         ]
-        
+
         for sample_sql in sample_data:
             try:
                 cursor.execute(sample_sql)
                 print("   ✓ Created sample data")
             except oracledb.Error as e:
                 print(f"   - Sample data might already exist: {e}")
-        
+
         conn.commit()
         cursor.close()
         conn.close()
-        
+
         print("\n=== APEX INTEGRATION SETUP COMPLETE ===")
         print("\nDatabase objects created:")
         print("📊 Dashboard Views:")
         print("   - apex_workflow_summary")
-        print("   - apex_recent_activity") 
+        print("   - apex_recent_activity")
         print("   - apex_system_health")
         print("\n👥 Character Views:")
         print("   - apex_character_details")
@@ -382,18 +378,19 @@ def create_apex_integration():
         print("\n⚙️ Utility Procedures:")
         print("   - apex_trigger_story_generation")
         print("   - apex_cleanup_old_data")
-        
+
         print("\nNext Steps:")
         print("1. Access APEX at your provided URL")
         print("2. Create new application workspace")
         print("3. Use these views as data sources for APEX pages")
         print("4. Build interactive dashboards and forms")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"✗ Error: {e}")
         return False
+
 
 if __name__ == "__main__":
     print("Oracle APEX Integration Setup")
@@ -405,6 +402,6 @@ if __name__ == "__main__":
     print("- Utility procedures for story operations")
     print("- Sample data for testing")
     print()
-    
+
     success = create_apex_integration()
     sys.exit(0 if success else 1)

@@ -29,8 +29,16 @@ class SceneRequest:
             raise ValueError("scene.request 'constraints' must be an object")
         return SceneRequest(
             job_id=str(payload["job_id"]),
-            outline_id=(payload.get("outline_id") if payload.get("outline_id") is not None else None),
-            beat_name=(payload.get("beat_name") if payload.get("beat_name") is not None else None),
+            outline_id=(
+                payload.get("outline_id")
+                if payload.get("outline_id") is not None
+                else None
+            ),
+            beat_name=(
+                payload.get("beat_name")
+                if payload.get("beat_name") is not None
+                else None
+            ),
             prompt=str(payload["prompt"]),
             characters=list(payload["characters"]),
             constraints=dict(payload["constraints"]),
@@ -42,4 +50,3 @@ class SceneDone:
     job_id: str
     scene_id: str
     scene_description: str
-

@@ -43,4 +43,3 @@ VALIDATORS: Dict[str, Validator] = {
     DIALOGUE_REQUEST: DialogueRequest.validate,
     EVALUATION_REQUEST: EvaluationRequest.validate,
 }
-

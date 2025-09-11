@@ -47,5 +47,4 @@ def test_enhancement_prompt_renders_string():
     assert isinstance(prompt, str)
     assert len(prompt) > 0
     assert focus in prompt
-    assert evaluation.split(';')[0] in prompt
-
+    assert evaluation.split(";")[0] in prompt

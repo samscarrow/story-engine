@@ -4,7 +4,10 @@ Test that OrchestratedStoryEngine caches repeated generation calls.
 
 import asyncio
 
-from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent
+from story_engine.core.story_engine.story_engine_orchestrated import (
+    OrchestratedStoryEngine,
+    StoryComponent,
+)
 
 
 class StubResp:
@@ -28,11 +31,14 @@ def test_orchestrated_caches_by_prompt_and_params():
     engine = OrchestratedStoryEngine(orchestrator=orch)
 
     async def run():
-        text1 = await engine.generate_component(StoryComponent.SCENE_DETAILS, "prompt A", temperature=0.8)
-        text2 = await engine.generate_component(StoryComponent.SCENE_DETAILS, "prompt A", temperature=0.8)
+        text1 = await engine.generate_component(
+            StoryComponent.SCENE_DETAILS, "prompt A", temperature=0.8
+        )
+        text2 = await engine.generate_component(
+            StoryComponent.SCENE_DETAILS, "prompt A", temperature=0.8
+        )
         assert text1 == text2 == "ok"
         # Only first call should hit orchestrator due to cache
         assert orch.calls == 1
 
     asyncio.run(run())
-

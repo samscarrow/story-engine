@@ -45,7 +45,9 @@ def _choose_small_model(models: List[Dict[str, Any]]) -> Optional[str]:
     return choose_first_id(filtered)
 
 
-@pytest.mark.parametrize("spec", PROMPTS, ids=[p.get("id", str(i)) for i, p in enumerate(PROMPTS)])
+@pytest.mark.parametrize(
+    "spec", PROMPTS, ids=[p.get("id", str(i)) for i, p in enumerate(PROMPTS)]
+)
 def test_silver_parallel_small_models(spec: Dict[str, Any]) -> None:
     engine = OrchestratedStoryEngine(use_poml=True)
 
@@ -106,7 +108,9 @@ def test_silver_parallel_small_models(spec: Dict[str, Any]) -> None:
 
         # Optional dialogue if at least one character
         if req.characters:
-            dlg = await engine.generate_dialogue(scene, req.characters[0], "Opening line")
+            dlg = await engine.generate_dialogue(
+                scene, req.characters[0], "Opening line"
+            )
             assert isinstance(dlg, dict) and "dialogue" in dlg
             assert len(dlg["dialogue"]) > 0
 

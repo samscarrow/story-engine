@@ -35,10 +35,22 @@ def _select_bus(cfg) -> Publisher:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Story Initializer Service")
     parser.add_argument("prompt", help="Seed prompt for the story")
-    parser.add_argument("--job-id", default=None, help="Job identifier (defaults to UUID)")
-    parser.add_argument("--send-scene", action="store_true", help="Also publish a demo scene.request")
-    parser.add_argument("--send-dialogue", action="store_true", help="Also publish a demo dialogue.request")
-    parser.add_argument("--send-evaluation", action="store_true", help="Also publish a demo evaluation.request")
+    parser.add_argument(
+        "--job-id", default=None, help="Job identifier (defaults to UUID)"
+    )
+    parser.add_argument(
+        "--send-scene", action="store_true", help="Also publish a demo scene.request"
+    )
+    parser.add_argument(
+        "--send-dialogue",
+        action="store_true",
+        help="Also publish a demo dialogue.request",
+    )
+    parser.add_argument(
+        "--send-evaluation",
+        action="store_true",
+        help="Also publish a demo evaluation.request",
+    )
     args = parser.parse_args()
 
     configure_json_logging()
@@ -92,7 +104,9 @@ def main() -> None:
         DialogueRequest.validate(dialogue_payload)
         bus.publish(
             "dialogue.request",
-            Message(type="dialogue.request", payload=dialogue_payload, correlation_id=job_id),
+            Message(
+                type="dialogue.request", payload=dialogue_payload, correlation_id=job_id
+            ),
         )
 
     # Optional demo evaluation request
@@ -108,7 +122,11 @@ def main() -> None:
         EvaluationRequest.validate(evaluation_payload)
         bus.publish(
             "evaluation.request",
-            Message(type="evaluation.request", payload=evaluation_payload, correlation_id=job_id),
+            Message(
+                type="evaluation.request",
+                payload=evaluation_payload,
+                correlation_id=job_id,
+            ),
         )
     # For demo CLI, just wait briefly
     time.sleep(0.1)

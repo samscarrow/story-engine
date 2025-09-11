@@ -19,14 +19,24 @@ import argparse
 import sys
 import asyncio
 
-from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine
+from story_engine.core.story_engine.story_engine_orchestrated import (
+    OrchestratedStoryEngine,
+)
 
 
 async def _main() -> int:
-    parser = argparse.ArgumentParser(description="Choose and set LLM model via engine filter")
-    parser.add_argument("--prefer-small", action="store_true", help="Prefer smaller text models")
-    parser.add_argument("--export", action="store_true", help="Print export line for LM_MODEL")
-    parser.add_argument("--write-env", metavar="PATH", help="Write LM_MODEL into a dotenv-style file")
+    parser = argparse.ArgumentParser(
+        description="Choose and set LLM model via engine filter"
+    )
+    parser.add_argument(
+        "--prefer-small", action="store_true", help="Prefer smaller text models"
+    )
+    parser.add_argument(
+        "--export", action="store_true", help="Print export line for LM_MODEL"
+    )
+    parser.add_argument(
+        "--write-env", metavar="PATH", help="Write LM_MODEL into a dotenv-style file"
+    )
     args = parser.parse_args()
 
     engine = OrchestratedStoryEngine(use_poml=False)
@@ -57,4 +67,3 @@ async def _main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(_main()))
-

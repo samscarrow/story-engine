@@ -37,4 +37,3 @@ class EvaluationRequest:
 class EvaluationDone:
     job_id: str
     evaluation_text: str
-

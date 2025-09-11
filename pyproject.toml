@@ -46,6 +46,8 @@ select = ["E", "F"]
 "src/story_engine/core/core/messaging/testutils.py" = ["E501"]
 "src/story_engine/core/core/orchestration/autonomous_persona_agents.py" = ["E501"]
 "src/story_engine/core/core/orchestration/standardized_llm_interface.py" = ["E402"]
+"tests/*.py" = ["E501"]
+"src/story_engine/poml/poml/lib/poml_integration.py" = ["E501"]
 
 #[tool.ruff.lint.per-file-ignores]
 # (No per-file ignores; demo_prompt.py refactored to avoid E402.)

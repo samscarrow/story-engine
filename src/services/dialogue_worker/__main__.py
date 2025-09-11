@@ -5,10 +5,29 @@ import time
 
 from story_engine.core.core.common.config import load_config
 from story_engine.core.core.common.logging import configure_json_logging
-from story_engine.core.core.messaging.interface import InMemoryBus, Message, Consumer, Publisher
+
+try:
+    from story_engine.core.core.messaging.interface import (
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
+except Exception:  # fallback to legacy alias path
+    from story_engine.core.messaging.interface import (  # type: ignore
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
 from story_engine.core.core.messaging.rabbitmq import RabbitMQBus
 from story_engine.core.core.contracts.dialogue import DialogueRequest
-from story_engine.core.core.contracts.topics import DIALOGUE_REQUEST, DIALOGUE_DONE
+
+try:
+    from story_engine.core.core.contracts.topics import DIALOGUE_REQUEST, DIALOGUE_DONE
+except Exception:  # fallback string constants
+    DIALOGUE_REQUEST = "dialogue.request"  # type: ignore
+    DIALOGUE_DONE = "dialogue.done"  # type: ignore
 from story_engine.core.core.messaging.helpers import register_dlq_logger
 
 

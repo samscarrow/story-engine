@@ -31,10 +31,16 @@ from typing import List, Dict, Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine  # noqa: E402
+from story_engine.core.story_engine.story_engine_orchestrated import (
+    OrchestratedStoryEngine,
+)  # noqa: E402
 from story_engine.core.common.result_store import store_workflow_output  # noqa: E402
 from story_engine.core.common.dotenv_loader import load_dotenv_keys  # noqa: E402
-from story_engine.core.common.cli_utils import add_model_client_args, get_model_and_client_config, print_connection_status  # noqa: E402
+from story_engine.core.common.cli_utils import (
+    add_model_client_args,
+    get_model_and_client_config,
+    print_connection_status,
+)  # noqa: E402
 
 
 def _read_inputs(args: argparse.Namespace) -> List[Dict[str, Any]]:
@@ -62,7 +68,11 @@ def _read_inputs(args: argparse.Namespace) -> List[Dict[str, Any]]:
     return items
 
 
-async def _evaluate_items(items: List[Dict[str, Any]], use_poml: bool, character_flags: Dict[str, Dict[str, Any]] | None = None) -> List[Dict[str, Any]]:
+async def _evaluate_items(
+    items: List[Dict[str, Any]],
+    use_poml: bool,
+    character_flags: Dict[str, Dict[str, Any]] | None = None,
+) -> List[Dict[str, Any]]:
     # Load DB_* from .env for auto-store
     load_dotenv_keys()
     engine = OrchestratedStoryEngine(use_poml=use_poml, runtime_flags=character_flags)
@@ -76,43 +86,56 @@ async def _evaluate_items(items: List[Dict[str, Any]], use_poml: bool, character
 
         res = await engine.evaluate_quality(content)
         content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:12]
-        out.append({
-            "source": it["source"],
-            "content_hash": content_hash,
-            "evaluation_text": res.get("evaluation_text", ""),
-            "scores": res.get("scores", {}),
-            "meta": res.get("meta", {}),
-        })
+        out.append(
+            {
+                "source": it["source"],
+                "content_hash": content_hash,
+                "evaluation_text": res.get("evaluation_text", ""),
+                "scores": res.get("scores", {}),
+                "meta": res.get("meta", {}),
+            }
+        )
 
     return out
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Evaluate story content quality using POML")
-    
+
     # Add standardized model/client arguments
     add_model_client_args(p)
-    
+
     g_in = p.add_argument_group("inputs")
     g_in.add_argument("--text", help="Inline text to evaluate", default=None)
-    g_in.add_argument("--file", nargs="*", help="One or more file globs to evaluate", default=[])
+    g_in.add_argument(
+        "--file", nargs="*", help="One or more file globs to evaluate", default=[]
+    )
     g_in.add_argument("--stdin", action="store_true", help="Read content from STDIN")
 
     g_out = p.add_argument_group("output")
-    g_out.add_argument("--out", help="Write JSONL to this file; default prints to stdout", default=None)
+    g_out.add_argument(
+        "--out", help="Write JSONL to this file; default prints to stdout", default=None
+    )
 
     g_cfg = p.add_argument_group("config")
-    g_cfg.add_argument("--live", action="store_true", help="Use live provider (LM Studio) via env vars")
+    g_cfg.add_argument(
+        "--live", action="store_true", help="Use live provider (LM Studio) via env vars"
+    )
 
     # Character/runtime flags
-    g_cfg.add_argument("--char-flag", action="append", default=[], help="Per-character runtime flags id:key=value; repeatable")
+    g_cfg.add_argument(
+        "--char-flag",
+        action="append",
+        default=[],
+        help="Per-character runtime flags id:key=value; repeatable",
+    )
 
     args = p.parse_args()
-    
+
     # Get model/client configuration
     model_config = get_model_and_client_config(args)
     print_connection_status(model_config)
-    
+
     # Configure environment for model/client
     if model_config.get("endpoint"):
         os.environ["LM_ENDPOINT"] = model_config["endpoint"]
@@ -135,12 +158,19 @@ def main() -> None:
     use_poml = True  # Always use POML evaluation template here
 
     # Optional live mode prompt
-    if args.live and (not os.environ.get("LM_ENDPOINT") or not os.environ.get("LMSTUDIO_MODEL")):
-        print("! --live is set but LM_ENDPOINT/LMSTUDIO_MODEL not found in env; using defaults.", file=sys.stderr)
+    if args.live and (
+        not os.environ.get("LM_ENDPOINT") or not os.environ.get("LMSTUDIO_MODEL")
+    ):
+        print(
+            "! --live is set but LM_ENDPOINT/LMSTUDIO_MODEL not found in env; using defaults.",
+            file=sys.stderr,
+        )
 
     items = _read_inputs(args)
     # Use asyncio.run for modern event loop management (Py3.7+)
-    results = asyncio.run(_evaluate_items(items, use_poml, character_flags=cflags or None))
+    results = asyncio.run(
+        _evaluate_items(items, use_poml, character_flags=cflags or None)
+    )
 
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
@@ -161,4 +191,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

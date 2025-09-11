@@ -9,13 +9,19 @@ import os
 import asyncio
 import pytest
 
-from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent
+from story_engine.core.story_engine.story_engine_orchestrated import (
+    OrchestratedStoryEngine,
+    StoryComponent,
+)
 from story_engine.core.domain.models import StoryRequest
 
 # Opt-in and marker for slow/live tests
 pytestmark = [
     pytest.mark.slow,
-    pytest.mark.skipif(os.getenv("STORY_ENGINE_LIVE") != "1", reason="live test opt-in (set STORY_ENGINE_LIVE=1)"),
+    pytest.mark.skipif(
+        os.getenv("STORY_ENGINE_LIVE") != "1",
+        reason="live test opt-in (set STORY_ENGINE_LIVE=1)",
+    ),
 ]
 
 
@@ -24,10 +30,10 @@ def _parse_eval(text: str):
     if not isinstance(text, str):
         return scores
     for line in text.splitlines():
-        if ':' in line and '/' in line:
+        if ":" in line and "/" in line:
             try:
-                metric, rest = line.split(':', 1)
-                num = rest.strip().split('/')[0]
+                metric, rest = line.split(":", 1)
+                num = rest.strip().split("/")[0]
                 score = float(num)
                 scores[metric.strip()] = score
             except Exception:
@@ -40,7 +46,9 @@ def test_live_poml_pilate_flow_minimal():
 
     # Optionally reduce provider timeouts for test runs via env
     try:
-        active = engine.orchestrator.active_provider or next(iter(engine.orchestrator.providers))
+        active = engine.orchestrator.active_provider or next(
+            iter(engine.orchestrator.providers)
+        )
         prov = engine.orchestrator.providers.get(active)
         if prov:
             t = os.getenv("LLM_TEST_TIMEOUT")
@@ -87,23 +95,39 @@ def test_live_poml_pilate_flow_minimal():
 
         # Scene from first beat
         scene = await engine.generate_scene(beats[0], request.characters)
-        assert isinstance(scene.get("scene_description", ""), str) and len(scene["scene_description"]) > 0
+        assert (
+            isinstance(scene.get("scene_description", ""), str)
+            and len(scene["scene_description"]) > 0
+        )
         # Content should reference setting/characters roughly
-        assert any(k in scene["scene_description"].lower() for k in ["pilate", "jerusalem", "crowd"]) 
+        assert any(
+            k in scene["scene_description"].lower()
+            for k in ["pilate", "jerusalem", "crowd"]
+        )
 
         # Dialogue for Pilate
-        dlg = await engine.generate_dialogue(scene, request.characters[0], "Opening line")
+        dlg = await engine.generate_dialogue(
+            scene, request.characters[0], "Opening line"
+        )
         assert isinstance(dlg, dict)
         assert "dialogue" in dlg and len(dlg["dialogue"]) > 0
-        assert isinstance(dlg["dialogue"][0]["line"], str) and len(dlg["dialogue"][0]["line"]) > 0
+        assert (
+            isinstance(dlg["dialogue"][0]["line"], str)
+            and len(dlg["dialogue"][0]["line"]) > 0
+        )
 
         # Evaluation and enhancement
-        ev = await engine.evaluate_quality(scene["scene_description"]) 
-        assert isinstance(ev.get("evaluation_text", ""), str) and len(ev["evaluation_text"]) > 0
-        scores = _parse_eval(ev["evaluation_text"]) 
+        ev = await engine.evaluate_quality(scene["scene_description"])
+        assert (
+            isinstance(ev.get("evaluation_text", ""), str)
+            and len(ev["evaluation_text"]) > 0
+        )
+        scores = _parse_eval(ev["evaluation_text"])
         # At least 3 metrics detected with plausible scores
         assert len([s for s in scores.values() if 0 < s <= 10]) >= 3
-        enhanced = await engine.enhance_content(scene["scene_description"], ev, "pacing and emotion")
+        enhanced = await engine.enhance_content(
+            scene["scene_description"], ev, "pacing and emotion"
+        )
         assert isinstance(enhanced, str) and len(enhanced) > 0
 
     asyncio.run(run())

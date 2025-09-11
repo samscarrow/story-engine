@@ -10,7 +10,9 @@ class _Subscribable(Protocol):
     def subscribe(self, topic: str, handler, *, prefetch: int = 1) -> None: ...
 
 
-def register_dlq_logger(bus: _Subscribable, request_topic: str, logger_name: str) -> None:
+def register_dlq_logger(
+    bus: _Subscribable, request_topic: str, logger_name: str
+) -> None:
     """Subscribe a simple DLQ handler that logs validation errors.
 
     - bus: object with .subscribe(topic, handler)
@@ -35,4 +37,3 @@ def register_dlq_logger(bus: _Subscribable, request_topic: str, logger_name: str
     except Exception:
         # In-memory bus may not be ready; ignore optional wiring errors
         pass
-

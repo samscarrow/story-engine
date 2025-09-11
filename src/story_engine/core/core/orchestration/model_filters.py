@@ -54,13 +54,7 @@ def _lower_str(x: Any) -> str:
 
 
 def _get_model_id(m: Dict[str, Any]) -> str:
-    return (
-        m.get("id")
-        or m.get("name")
-        or m.get("model")
-        or m.get("slug")
-        or ""
-    )
+    return m.get("id") or m.get("name") or m.get("model") or m.get("slug") or ""
 
 
 def _has_any_token(s: str, tokens: Iterable[str]) -> bool:
@@ -101,7 +95,10 @@ def is_text_generation_model(model: Dict[str, Any]) -> bool:
                     return False
     elif isinstance(caps, (list, tuple, set)):
         caps_l = {_lower_str(c) for c in caps}
-        if any(c in caps_l for c in ("embedding", "embeddings", "audio", "speech", "stt", "tts")):
+        if any(
+            c in caps_l
+            for c in ("embedding", "embeddings", "audio", "speech", "stt", "tts")
+        ):
             return False
 
     # Modalities field (string or list) e.g., ["text","vision"] or ["audio"]
@@ -120,7 +117,10 @@ def is_text_generation_model(model: Dict[str, Any]) -> bool:
     for key in ("type", "task", "pipeline_tag", "category"):
         val = _lower_str(model.get(key))
         if val:
-            if any(tok in val for tok in ("embed", "embedding", "tts", "stt", "audio", "asr")):
+            if any(
+                tok in val
+                for tok in ("embed", "embedding", "tts", "stt", "audio", "asr")
+            ):
                 return False
             if any(tok in val for tok in ("text", "chat", "generation")):
                 return True
@@ -166,4 +166,3 @@ def choose_first_id(models: Iterable[Dict[str, Any]]) -> Optional[str]:
         if mid:
             return str(mid)
     return None
-

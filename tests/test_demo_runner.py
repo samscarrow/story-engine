@@ -2,12 +2,29 @@ import json
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 
+def resolve_python_exec(env: dict[str, str]) -> str:
+    # 1) Respect explicit PYTHON in env or os.environ
+    python_exec = env.get("PYTHON") or os.environ.get("PYTHON")
+    if python_exec:
+        return python_exec
+    # 2) If VENV_PATH is provided (direnv-managed), use its python if present
+    venv_path = env.get("VENV_PATH") or os.environ.get("VENV_PATH")
+    if venv_path:
+        candidate = Path(venv_path) / "bin" / "python"
+        if candidate.exists():
+            return str(candidate)
+    # 3) Fall back to the current interpreter (sys.executable)
+    return sys.executable
+
+
 def run_demo_and_get_outdir(env: dict[str, str]) -> Path:
+    python_exec = resolve_python_exec(env)
     cmd = [
-        env.get("PYTHON") or os.environ.get("PYTHON") or str((Path(__file__).resolve().parents[1] / ".venv" / "bin" / "python")),
+        python_exec,
         "-m",
         "story_engine.scripts.run_demo",
         "--runs",
@@ -51,7 +68,9 @@ def test_demo_runner_smoke(tmp_path: Path):
         path = outdir / name
         assert path.exists(), f"Missing artifact: {path}"
     # Config snapshot may be YAML or JSON depending on optional PyYAML
-    assert (outdir / "config.snapshot.yaml").exists() or (outdir / "config.snapshot.json").exists()
+    assert (outdir / "config.snapshot.yaml").exists() or (
+        outdir / "config.snapshot.json"
+    ).exists()
 
     # Basic JSON structure checks
     story = json.loads((outdir / "story.json").read_text())
