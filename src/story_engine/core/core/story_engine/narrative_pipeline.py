@@ -180,7 +180,7 @@ Scene situation:"""
         # Generate sensory details
         sensory_prompt = (
             f"For this scene: {situation[:100]}... Provide ONE sensory detail each: "
-            f"sight, sound, atmosphere. Brief, evocative."
+            "sight, sound, atmosphere. Brief, evocative."
         )
         sensory_response = await self.generate_with_llm(sensory_prompt, temperature=0.9)
         
