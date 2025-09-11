@@ -1,21 +1,21 @@
-﻿import logging
-
-logger = logging.getLogger(__name__)
-
-"""
+﻿"""
 Iterative Story Development System
 Enhances story generation through feedback loops, evaluation, and refinement
 """
 
 import asyncio
 import json
-import aiohttp
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass
-from enum import Enum
+import logging
 from collections import defaultdict
-import numpy as np
+from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+
+import aiohttp
+import numpy as np
+
+logger = logging.getLogger(__name__)
 
 class FeedbackType(Enum):
     """Types of feedback for story iteration"""
@@ -248,14 +248,20 @@ class IterativeStoryEngine:
         
         # Pacing feedback
         if metrics.pacing_score < 0.6:
-            feedback_items.append(Feedback(
-                element_id="pacing",
-                feedback_type=FeedbackType.PACING,
-                severity=0.8,
-                description="Pacing is uneven across scenes",
-                suggested_revision=RevisionStrategy.ACCELERATE if metrics.pacing_score < 0.3 else RevisionStrategy.MAINTAIN,
-                specific_notes="Consider balancing scene lengths and intensity"
-            ))
+            feedback_items.append(
+                Feedback(
+                    element_id="pacing",
+                    feedback_type=FeedbackType.PACING,
+                    severity=0.8,
+                    description="Pacing is uneven across scenes",
+                    suggested_revision=(
+                        RevisionStrategy.ACCELERATE
+                        if metrics.pacing_score < 0.3
+                        else RevisionStrategy.MAINTAIN
+                    ),
+                    specific_notes="Consider balancing scene lengths and intensity",
+                )
+            )
         
         # Consistency feedback
         if metrics.consistency_score < 0.7:

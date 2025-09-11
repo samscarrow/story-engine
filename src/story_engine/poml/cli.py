@@ -25,7 +25,13 @@ def _load_data(path: str) -> Dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="story-engine-poml", description="Render POML templates")
-    parser.add_argument("template", help="Template path relative to poml templates root, e.g. simulations/character_response.poml")
+    parser.add_argument(
+        "template",
+        help=(
+            "Template path relative to poml templates root, "
+            "e.g. simulations/character_response.poml"
+        ),
+    )
     parser.add_argument("--data", help="JSON or YAML input file")
     parser.add_argument("--format", default="openai_chat", choices=["openai_chat", "text"], help="Render format")
     parser.add_argument("--roles", action="store_true", help="Output system and user roles as JSON")
@@ -72,4 +78,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

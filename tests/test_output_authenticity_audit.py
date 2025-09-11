@@ -189,7 +189,7 @@ class OutputAuthenticityAuditor:
         logger.info("Auditing template generation validity...")
         
         # Find template-related files
-        template_files = list(self.project_root.glob("**/*template*"))
+        list(self.project_root.glob("**/*template*"))
         agent_files = list(self.project_root.glob("**/autonomous_persona_agents.py"))
         
         for file_path in agent_files:
@@ -304,7 +304,6 @@ class OutputAuthenticityAuditor:
                     # Check for functional template elements
                     has_system_prompt = '<system>' in content
                     has_user_prompt = '<user>' in content
-                    has_variables = '{{' in content and '}}' in content
                     
                     if not (has_system_prompt or has_user_prompt):
                         self.add_evidence(

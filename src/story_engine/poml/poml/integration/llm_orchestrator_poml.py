@@ -250,8 +250,11 @@ class POMLOrchestrator:
             # Enforce schema and cleanup for JSON if declared
             parsed_payload = {}
             try:
-                parsed_payload = self._enforce_schema_and_clean_json(template_path, getattr(response, 'content', '') or '')
-            except ValueError as ve:
+                parsed_payload = self._enforce_schema_and_clean_json(
+                    template_path,
+                    getattr(response, 'content', '') or '',
+                )
+            except ValueError:
                 # Reraise to caller after metrics update in except below
                 raise
 
@@ -314,7 +317,12 @@ class POMLOrchestrator:
             # Try to call with system if supported; fall back to concatenation
             response = None
             try:
-                response = await llm.generate_response(prompt=prompt_user, system=prompt_system, temperature=temperature, max_tokens=max_tokens)
+                response = await llm.generate_response(
+                    prompt=prompt_user,
+                    system=prompt_system,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
             except TypeError:
                 joined = (f"[SYSTEM]\n{prompt_system}\n\n[USER]\n{prompt_user}").strip()
                 response = await llm.generate_response(prompt=joined, temperature=temperature, max_tokens=max_tokens)
@@ -324,7 +332,7 @@ class POMLOrchestrator:
             parsed_payload = {}
             try:
                 parsed_payload = self._enforce_schema_and_clean_json(template_path, raw_text)
-            except ValueError as ve:
+            except ValueError:
                 raise
 
             result = {
@@ -664,7 +672,7 @@ class POMLOrchestrator:
         """
         try:
             # Parse JSON content
-            data = json.loads(content)
+            json.loads(content)
             
             # Get schema from template
             schema_template = template_path.replace('templates/', 'templates/schemas/')

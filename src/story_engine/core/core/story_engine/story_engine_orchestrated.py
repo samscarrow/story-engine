@@ -160,17 +160,29 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
             if total > 0:
                 pos = index / max(1, total - 1)
                 if pos < 0.2:
-                    name = "Setup"; purpose = "Establish normal"; tension = 2
+                    name = "Setup"
+                    purpose = "Establish normal"
+                    tension = 2
                 elif pos < 0.6:
-                    name = "Rising Action"; purpose = "Complicate & escalate"; tension = 5
+                    name = "Rising Action"
+                    purpose = "Complicate & escalate"
+                    tension = 5
                 elif pos < 0.8:
-                    name = "Climax"; purpose = "Confront core conflict"; tension = 8
+                    name = "Climax"
+                    purpose = "Confront core conflict"
+                    tension = 8
                 else:
-                    name = "Resolution"; purpose = "Consequences & change"; tension = 3
+                    name = "Resolution"
+                    purpose = "Consequences & change"
+                    tension = 3
 
         return {"name": name, "purpose": purpose, "tension": tension}
 
-    def _emphasis_and_goals(self, characters: List[Dict[str, Any]], beat_info: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
+    def _emphasis_and_goals(
+        self,
+        characters: List[Dict[str, Any]],
+        beat_info: Dict[str, Any],
+    ) -> Dict[str, Dict[str, str]]:
         """Compute per-character emphasis and simple goals based on tension and roles."""
         tension10 = int(beat_info.get("tension", 5))
         tension = max(0.0, min(1.0, tension10 / 10.0))
@@ -603,16 +615,6 @@ Response format: Just the dialogue, no attribution."""
             }
         else:
             # Fallback to original single-stage method
-            metrics = [
-                "Narrative Coherence",
-                "Character Development",
-                "Pacing",
-                "Emotional Impact",
-                "Dialogue Quality",
-                "Setting/Atmosphere",
-                "Theme Integration",
-                "Overall Engagement",
-            ]
             prompt = f"""Evaluate this story content on these metrics (1-10 scale):
 
 Story Content:

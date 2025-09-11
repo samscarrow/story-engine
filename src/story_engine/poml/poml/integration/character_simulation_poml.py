@@ -329,7 +329,7 @@ class POMLCharacterSimulationEngine:
             Modified character state
         """
         # Render variant template
-        variant_data = self.poml.render(
+        self.poml.render(
             'templates/characters/character_variants.poml',
             {
                 'base_character': base_character,

@@ -51,7 +51,12 @@ class PersonaConfig:
 class UnifiedLLMOrchestrator:
     """Unified orchestrator that standardizes all LLM queries using personas and POML templates."""
 
-    def __init__(self, orchestrator: LLMOrchestrator, poml_config: Optional[Dict] = None, persona_config_path: str = "personas.yaml"):
+    def __init__(
+        self,
+        orchestrator: LLMOrchestrator,
+        poml_config: Optional[Dict] = None,
+        persona_config_path: str = "personas.yaml",
+    ):
         self.orchestrator = orchestrator
         self.poml = POMLEngine(config_file=poml_config.get('config_file') if poml_config else None)
         self.adapter = StoryEnginePOMLAdapter(self.poml)

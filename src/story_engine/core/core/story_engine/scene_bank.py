@@ -114,7 +114,7 @@ class SceneBank:
 def parse_screenplay_to_scenes(text: str, source: str) -> List[SceneEntry]:
     # Preprocess markdown to make headings consistent
     raw_lines = text.splitlines()
-    lines = [_strip_md(l) for l in raw_lines]
+    lines = [_strip_md(ln) for ln in raw_lines]
     scenes: List[SceneEntry] = []
     current_title: Optional[str] = None
     current_header: Optional[str] = None

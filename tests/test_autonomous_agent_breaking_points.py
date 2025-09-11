@@ -253,7 +253,7 @@ class BreakingPointTester:
                     'spawn_count': 3    # Each level spawns 3 more
                 }
                 
-                simulation_id = await engine.submit_simulation(
+                await engine.submit_simulation(
                     persona=LLMPersona.CHARACTER_SIMULATOR,
                     context_data=deep_context,
                     priority=SimulationPriority.HIGH

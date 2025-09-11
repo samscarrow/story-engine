@@ -38,7 +38,14 @@ class NarrativeGraph:
         self.nodes[nid] = GraphNode(id=nid, type='scene', data=plan)
         return nid
 
-    def link(self, src_id: str, dst_id: str, edge_type: str, weight: float = 1.0, data: Optional[Dict[str, Any]] = None):
+    def link(
+        self,
+        src_id: str,
+        dst_id: str,
+        edge_type: str,
+        weight: float = 1.0,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> None:
         if src_id not in self.nodes or dst_id not in self.nodes:
             raise ValueError('Invalid node id for edge')
         self.edges.append(GraphEdge(src=src_id, dst=dst_id, type=edge_type, weight=weight, data=data or {}))
@@ -56,4 +63,3 @@ class NarrativeGraph:
     def persist(self, storage, workflow_name: str = 'narrative_graph') -> None:
         payload = self.to_dict()
         storage.store_output(workflow_name, payload)
-

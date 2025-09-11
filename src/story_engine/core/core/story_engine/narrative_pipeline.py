@@ -6,16 +6,17 @@ Now supports optional POML prompts and an injected LLM orchestrator.
 
 import asyncio
 import json
-import aiohttp
-from typing import Dict, List, Optional, Any
-import time
 import logging
+import time
+from typing import Any, Dict, List, Optional
 
-logger = logging.getLogger(__name__)
+import aiohttp
 
-from story_engine.core.domain.models import NarrativeArc, SceneDescriptor
 from story_engine.core.cache.response_cache import ResponseCache
 from story_engine.core.common.config import load_config
+from story_engine.core.domain.models import NarrativeArc, SceneDescriptor
+
+logger = logging.getLogger(__name__)
 
 class NarrativePipeline:
     """Complete pipeline from arc to character responses"""

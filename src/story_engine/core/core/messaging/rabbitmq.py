@@ -21,7 +21,7 @@ import logging
 import threading
 import time
 from dataclasses import asdict
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from .interface import Consumer, Handler, Message, Publisher
 try:
@@ -180,25 +180,70 @@ class RabbitMQBus(Publisher, Consumer):
 
                 def _make_callback(topic: str):
                     def _on_message(ch, method, properties, body):
-                        try:
-                            data = json.loads(body.decode("utf-8"))
-                            msg = Message(
-                                type=topic,
-                                payload=data.get("payload") or {},
-                                id=data.get("id") or None,  # default in dataclass if None
-                                correlation_id=properties.correlation_id or data.get("correlation_id"),
-                                causation_id=data.get("causation_id"),
-                                created_at=data.get("created_at") or time.time(),
-                                retry_count=(data.get("retry_count") or 0),
-                                headers=(properties.headers or data.get("headers") or {}),
-                            )
+                        data = json.loads(body.decode("utf-8"))
+                        msg = Message(
+                            type=topic,
+                            payload=data.get("payload") or {},
+                            id=data.get("id") or None,  # default in dataclass if None
+                            correlation_id=properties.correlation_id or data.get("correlation_id"),
+                            causation_id=data.get("causation_id"),
+                            created_at=data.get("created_at") or time.time(),
+                            retry_count=(data.get("retry_count") or 0),
+                            headers=(properties.headers or data.get("headers") or {}),
+                        )
+                        # Validate before processing
+                        validator = VALIDATORS.get(topic)
+                        if validator is not None:
+                            try:
+                                validator(msg.payload)
+                            except Exception as ve:
+                                # Publish enriched DLQ diagnostics and ACK original
+                                dlq = dlq_topic(topic)
+                                ch.queue_declare(queue=self._dlq_name(topic), durable=True)
+                                dlq_body = json.dumps(
+                                    asdict(
+                                        Message(
+                                            type=dlq,
+                                            payload={
+                                                "original": msg.payload,
+                                                "error": str(ve),
+                                                "original_type": msg.headers.get("original_type"),
+                                            },
+                                            correlation_id=msg.correlation_id,
+                                            causation_id=msg.id,
+                                            headers={"validation_error": True},
+                                        )
+                                    )
+                                ).encode("utf-8")
+                                ch.basic_publish(
+                                    exchange="",
+                                    routing_key=self._queue_name(dlq),
+                                    body=dlq_body,
+                                    properties=pika.BasicProperties(
+                                        content_type="application/json",
+                                        delivery_mode=2,
+                                        correlation_id=msg.correlation_id,
+                                    ),
+                                )
+                                ch.basic_ack(delivery_tag=method.delivery_tag)
+                                return
 
-                            # Validate before processing
-                            validator = VALIDATORS.get(topic)
-                            if validator is not None:
-                                try:
-                                    validator(msg.payload)
-                                except Exception as ve:
+                        # Retry processing with exponential backoff for non-validation errors
+                        attempts = 0
+                        while True:
+                            try:
+                                self._handlers[topic](msg, self)
+                                ch.basic_ack(delivery_tag=method.delivery_tag)
+                                break
+                            except Exception as pe:
+                                attempts += 1
+                                if attempts > self.max_retries:
+                                    log.exception(
+                                        "handler error for topic %s after %s attempts: %s",
+                                        topic,
+                                        attempts - 1,
+                                        pe,
+                                    )
                                     # Publish enriched DLQ diagnostics and ACK original
                                     dlq = dlq_topic(topic)
                                     ch.queue_declare(queue=self._dlq_name(topic), durable=True)
@@ -208,12 +253,12 @@ class RabbitMQBus(Publisher, Consumer):
                                                 type=dlq,
                                                 payload={
                                                     "original": msg.payload,
-                                                    "error": str(ve),
-                                                    "original_type": msg.headers.get("original_type"),
+                                                    "error": str(pe),
+                                                    "attempts": attempts - 1,
                                                 },
                                                 correlation_id=msg.correlation_id,
                                                 causation_id=msg.id,
-                                                headers={"validation_error": True},
+                                                headers={"retries_exhausted": True},
                                             )
                                         )
                                     ).encode("utf-8")
@@ -228,57 +273,11 @@ class RabbitMQBus(Publisher, Consumer):
                                         ),
                                     )
                                     ch.basic_ack(delivery_tag=method.delivery_tag)
-                                    return
-
-                            # Retry processing with exponential backoff for non-validation errors
-                            attempts = 0
-                            while True:
-                                try:
-                                    self._handlers[topic](msg, self)
-                                    ch.basic_ack(delivery_tag=method.delivery_tag)
                                     break
-                                except Exception as pe:
-                                    attempts += 1
-                                    if attempts > self.max_retries:
-                                        log.exception(
-                                            "handler error for topic %s after %s attempts: %s",
-                                            topic,
-                                            attempts - 1,
-                                            pe,
-                                        )
-                                        # Publish enriched DLQ diagnostics and ACK original
-                                        dlq = dlq_topic(topic)
-                                        ch.queue_declare(queue=self._dlq_name(topic), durable=True)
-                                        dlq_body = json.dumps(
-                                            asdict(
-                                                Message(
-                                                    type=dlq,
-                                                    payload={
-                                                        "original": msg.payload,
-                                                        "error": str(pe),
-                                                        "attempts": attempts - 1,
-                                                    },
-                                                    correlation_id=msg.correlation_id,
-                                                    causation_id=msg.id,
-                                                    headers={"retries_exhausted": True},
-                                                )
-                                            )
-                                        ).encode("utf-8")
-                                        ch.basic_publish(
-                                            exchange="",
-                                            routing_key=self._queue_name(dlq),
-                                            body=dlq_body,
-                                            properties=pika.BasicProperties(
-                                                content_type="application/json",
-                                                delivery_mode=2,
-                                                correlation_id=msg.correlation_id,
-                                            ),
-                                        )
-                                        ch.basic_ack(delivery_tag=method.delivery_tag)
-                                        break
-                                    # Backoff before retrying
-                                    sleep_for = min(2 ** (attempts - 1), 10)
-                                    time.sleep(sleep_for)
+                                # Backoff before retrying
+                                sleep_for = min(2 ** (attempts - 1), 10)
+                                time.sleep(sleep_for)
+
 
                     return _on_message
 

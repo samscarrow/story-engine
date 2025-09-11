@@ -105,7 +105,7 @@ class SimplifiedBreakingPointTester:
             # Test template generation with massive context
             try:
                 start_time = time.time()
-                response = await self.mock_orchestrator.generate_with_persona(
+                await self.mock_orchestrator.generate_with_persona(
                     "CHARACTER_SIMULATOR", 
                     massive_context
                 )
@@ -346,7 +346,7 @@ class SimplifiedBreakingPointTester:
                 start_time = time.time()
                 
                 # This should timeout or complete slowly
-                timeout_result = await asyncio.wait_for(
+                await asyncio.wait_for(
                     self.mock_orchestrator.generate_with_persona("TIMEOUT_TEST", {}),
                     timeout=3.0  # 3 second timeout
                 )
@@ -399,7 +399,7 @@ class SimplifiedBreakingPointTester:
         try:
             # Test 1: Memory accumulation
             large_objects = []
-            initial_object_count = len(large_objects)
+            len(large_objects)
             
             for i in range(100):
                 # Create progressively larger objects
@@ -420,7 +420,7 @@ class SimplifiedBreakingPointTester:
                 # Check if we can still create new objects efficiently
                 if i % 20 == 0 and i > 0:
                     start_time = time.time()
-                    test_object = {'test': 'memory_check', 'size': len(large_objects)}
+                    {'test': 'memory_check', 'size': len(large_objects)}
                     end_time = time.time()
                     
                     creation_time = end_time - start_time
