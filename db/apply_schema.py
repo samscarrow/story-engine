@@ -28,7 +28,7 @@ def read_statements(path: str):
     statements: list[str] = []
     for block in blocks:
         # Drop pure comment lines
-        lines_no_comments = [l for l in block.splitlines() if not l.strip().startswith("--")]
+        lines_no_comments = [line for line in block.splitlines() if not line.strip().startswith("--")]
         cleaned_block = "\n".join(lines_no_comments)
         upper = cleaned_block.upper()
 

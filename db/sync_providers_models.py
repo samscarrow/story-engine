@@ -4,7 +4,7 @@ import os
 import sys
 import json
 import argparse
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 # Ensure required DB environment is present even outside direnv
 def _ensure_oracle_env() -> None:
@@ -140,8 +140,6 @@ def main():
 
     # Collect health across providers
     import asyncio
-
-    models_by_provider: Dict[str, List[Dict[str, Any]]] = {}
 
     async def _collect():
         health = await orch.health_check_all()
