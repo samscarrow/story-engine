@@ -3,7 +3,12 @@ Initial tests for the consolidated LLMOrchestrator.
 """
 
 import pytest
-from story_engine.core.orchestration.llm_orchestrator import LLMOrchestrator, LLMConfig, ModelProvider
+from story_engine.core.orchestration.llm_orchestrator import (
+    LLMOrchestrator,
+    LLMConfig,
+    ModelProvider,
+)
+
 
 def test_orchestrator_instantiation():
     """
@@ -16,14 +21,14 @@ def test_orchestrator_instantiation():
     except Exception as e:
         pytest.fail(f"Failed to instantiate LLMOrchestrator: {e}")
 
+
 def test_register_provider():
     """
     Tests if a provider can be registered successfully.
     """
     orchestrator = LLMOrchestrator()
     config = LLMConfig(
-        provider=ModelProvider.KOBOLDCPP,
-        endpoint="http://localhost:5001"
+        provider=ModelProvider.KOBOLDCPP, endpoint="http://localhost:5001"
     )
     try:
         orchestrator.register_provider("test_kobold", config)
@@ -31,5 +36,3 @@ def test_register_provider():
         assert orchestrator.active_provider == "test_kobold"
     except Exception as e:
         pytest.fail(f"Failed to register provider: {e}")
-
-

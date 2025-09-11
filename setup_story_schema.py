@@ -13,48 +13,48 @@ except ImportError:
     print("oracledb not available - run: pip install oracledb")
     sys.exit(1)
 
+
 def create_story_schema():
     """Create dedicated STORY_DB schema with proper permissions."""
-    
+
     # Load environment variables
-    load_dotenv('.env.oracle')
-    
-    admin_user = os.getenv('DB_USER')  # Should be ADMIN
-    admin_password = os.getenv('DB_PASSWORD')
-    dsn = os.getenv('DB_DSN')
-    wallet_location = os.getenv('DB_WALLET_LOCATION')
-    
+    load_dotenv(".env.oracle")
+
+    admin_user = os.getenv("DB_USER")  # Should be ADMIN
+    admin_password = os.getenv("DB_PASSWORD")
+    dsn = os.getenv("DB_DSN")
+    wallet_location = os.getenv("DB_WALLET_LOCATION")
+
     # Get password for new STORY_DB user
     story_password = getpass.getpass("Enter password for STORY_DB user: ")
     if not story_password:
         print("Password required")
         return False
-    
+
     # Set wallet location
     wallet_path = str(Path(wallet_location).resolve())
-    os.environ['TNS_ADMIN'] = wallet_path
-    
+    os.environ["TNS_ADMIN"] = wallet_path
+
     try:
         print("1. Connecting as ADMIN...")
         conn = oracledb.connect(
-            user=admin_user,
-            password=admin_password,
-            dsn=dsn,
-            config_dir=wallet_path
+            user=admin_user, password=admin_password, dsn=dsn, config_dir=wallet_path
         )
-        
+
         cursor = conn.cursor()
-        
+
         print("2. Checking if STORY_DB user already exists...")
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) FROM all_users WHERE username = 'STORY_DB'
-        """)
+        """
+        )
         exists = cursor.fetchone()[0]
-        
+
         if exists:
             print("⚠️  STORY_DB user already exists")
             drop = input("Drop and recreate? (y/N): ").lower().strip()
-            if drop == 'y':
+            if drop == "y":
                 print("   Dropping existing STORY_DB user...")
                 cursor.execute("DROP USER story_db CASCADE")
                 print("   ✓ Dropped existing user")
@@ -63,48 +63,47 @@ def create_story_schema():
                 cursor.close()
                 conn.close()
                 return True
-        
+
         print("3. Creating STORY_DB user...")
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             CREATE USER story_db IDENTIFIED BY "{story_password}"
-        """)
+        """
+        )
         print("   ✓ Created STORY_DB user")
-        
+
         print("4. Granting basic privileges...")
         privileges = [
             "CONNECT",
-            "RESOURCE", 
+            "RESOURCE",
             "CREATE TABLE",
             "CREATE SEQUENCE",
             "CREATE VIEW",
             "CREATE PROCEDURE",
-            "CREATE TRIGGER"
+            "CREATE TRIGGER",
         ]
-        
+
         for priv in privileges:
             cursor.execute(f"GRANT {priv} TO story_db")
             print(f"   ✓ Granted {priv}")
-        
+
         print("5. Granting tablespace quota...")
         cursor.execute("GRANT UNLIMITED TABLESPACE TO story_db")
         print("   ✓ Granted unlimited tablespace")
-        
+
         print("6. Creating story engine tables...")
-        
+
         # Connect as STORY_DB user
         cursor.close()
         conn.close()
-        
+
         print("   Connecting as STORY_DB...")
         story_conn = oracledb.connect(
-            user="story_db",
-            password=story_password,
-            dsn=dsn,
-            config_dir=wallet_path
+            user="story_db", password=story_password, dsn=dsn, config_dir=wallet_path
         )
-        
+
         story_cursor = story_conn.cursor()
-        
+
         # Create tables
         tables = [
             # Main workflow outputs table
@@ -119,7 +118,6 @@ def create_story_schema():
                     UNIQUE (workflow_name, timestamp)
             )
             """,
-            
             # Characters table
             """
             CREATE TABLE characters (
@@ -131,7 +129,6 @@ def create_story_schema():
                 metadata JSON
             )
             """,
-            
             # World states table
             """
             CREATE TABLE world_states (
@@ -145,7 +142,6 @@ def create_story_schema():
                 FOREIGN KEY (character_id) REFERENCES characters(id)
             )
             """,
-            
             # Scenes table
             """
             CREATE TABLE scenes (
@@ -158,9 +154,9 @@ def create_story_schema():
                 metadata JSON,
                 FOREIGN KEY (world_state_id) REFERENCES world_states(id)
             )
-            """
+            """,
         ]
-        
+
         for i, table_sql in enumerate(tables, 1):
             try:
                 story_cursor.execute(table_sql)
@@ -173,7 +169,7 @@ def create_story_schema():
                 else:
                     print(f"   ✗ Error creating table: {e}")
                     raise
-        
+
         print("7. Creating indexes...")
         indexes = [
             "CREATE INDEX workflow_outputs_name_idx ON workflow_outputs(workflow_name)",
@@ -181,9 +177,9 @@ def create_story_schema():
             "CREATE INDEX characters_name_idx ON characters(name)",
             "CREATE INDEX world_states_char_idx ON world_states(character_id)",
             "CREATE INDEX world_states_loc_idx ON world_states(location)",
-            "CREATE INDEX scenes_world_idx ON scenes(world_state_id)"
+            "CREATE INDEX scenes_world_idx ON scenes(world_state_id)",
         ]
-        
+
         for idx_sql in indexes:
             try:
                 story_cursor.execute(idx_sql)
@@ -195,30 +191,34 @@ def create_story_schema():
                     print(f"   - Index {idx_name} already exists")
                 else:
                     print(f"   ⚠️  Warning creating index: {e}")
-        
+
         story_conn.commit()
-        
+
         print("8. Testing basic operations...")
-        
+
         # Test insert
-        story_cursor.execute("""
+        story_cursor.execute(
+            """
             INSERT INTO workflow_outputs (workflow_name, output_data, metadata)
             VALUES ('schema_setup_test', '{"status": "success", "tables_created": 4}', 
                     '{"setup_version": "1.0", "test": true}')
-        """)
-        
+        """
+        )
+
         # Test select
-        story_cursor.execute("""
+        story_cursor.execute(
+            """
             SELECT workflow_name, output_data FROM workflow_outputs 
             WHERE workflow_name = 'schema_setup_test'
-        """)
-        
+        """
+        )
+
         result = story_cursor.fetchone()
         if result:
             print(f"   ✓ Test insert/select successful: {result[0]}")
-        
+
         story_conn.commit()
-        
+
         print("9. Generating updated .env.oracle file...")
         env_content = f"""# Oracle Database Configuration - STORY_DB Schema
 # Generated by setup_story_schema.py
@@ -239,20 +239,20 @@ TNS_ADMIN={wallet_location}
 # Note: This configuration uses the dedicated STORY_DB schema
 # Previous ADMIN configuration backed up to .env.oracle.admin
 """
-        
+
         # Backup existing .env.oracle
-        if Path('.env.oracle').exists():
-            Path('.env.oracle').rename('.env.oracle.admin')
+        if Path(".env.oracle").exists():
+            Path(".env.oracle").rename(".env.oracle.admin")
             print("   ✓ Backed up existing .env.oracle to .env.oracle.admin")
-        
+
         # Write new configuration
-        with open('.env.oracle', 'w') as f:
+        with open(".env.oracle", "w") as f:
             f.write(env_content)
         print("   ✓ Created new .env.oracle with STORY_DB configuration")
-        
+
         story_cursor.close()
         story_conn.close()
-        
+
         print("\n=== STORY_DB SCHEMA SETUP COMPLETE ===")
         print("\nTables created:")
         print("- workflow_outputs (main story engine outputs)")
@@ -263,24 +263,25 @@ TNS_ADMIN={wallet_location}
         print("1. Test connection with: python test_oracle_connection_full.py")
         print("2. Update application code to use STORY_DB schema")
         print("3. Run story engine tests")
-        
+
         return True
-        
+
     except oracledb.Error as e:
         print(f"✗ Oracle error: {e}")
-        
+
         if "12506" in str(e):
             print("! Database appears to be paused - resume in Oracle Cloud Console")
         elif "1017" in str(e):
             print("! Invalid username/password")
         elif "12154" in str(e):
             print("! TNS could not resolve connect identifier")
-            
+
         return False
-        
+
     except Exception as e:
         print(f"✗ Unexpected error: {e}")
         return False
+
 
 if __name__ == "__main__":
     print("Oracle Story Engine Schema Setup")
@@ -292,10 +293,10 @@ if __name__ == "__main__":
     print("- Appropriate indexes for performance")
     print("- Updated .env.oracle configuration")
     print()
-    
-    if input("Continue? (y/N): ").lower().strip() != 'y':
+
+    if input("Continue? (y/N): ").lower().strip() != "y":
         print("Aborted")
         sys.exit(0)
-    
+
     success = create_story_schema()
     sys.exit(0 if success else 1)

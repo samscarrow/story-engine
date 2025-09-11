@@ -14,5 +14,3 @@ def test_pipeline_uses_config_poml_flag_by_default():
     pipeline = NarrativePipeline(orchestrator=None, use_poml=None)
 
     assert pipeline.use_poml == expected
-
-

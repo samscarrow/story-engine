@@ -15,11 +15,16 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
-from story_engine.core.story_engine.scene_bank import parse_screenplay_to_scenes, SceneBank  # noqa: E402
+from story_engine.core.story_engine.scene_bank import (
+    parse_screenplay_to_scenes,
+    SceneBank,
+)  # noqa: E402
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Build a scene bank from a screenplay text (txt or md)")
+    p = argparse.ArgumentParser(
+        description="Build a scene bank from a screenplay text (txt or md)"
+    )
     p.add_argument("--source", default="pontius-pilot-screenplay.md")
     p.add_argument("--out", default="scene_bank/pilate_md_scenes.json")
     args = p.parse_args()
@@ -46,4 +51,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

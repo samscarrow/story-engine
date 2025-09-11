@@ -37,4 +37,3 @@ class SceneDescriptor:
     goals: Dict[str, str]
     emphasis: Dict[str, str]
     sensory: Dict[str, str] = field(default_factory=dict)
-

@@ -19,6 +19,7 @@ try:
     from story_engine.core.core.contracts.topics import VALIDATORS, dlq_topic
 except Exception:  # pragma: no cover - fallback if contracts not available yet
     VALIDATORS = {}
+
     def dlq_topic(topic: str) -> str:  # type: ignore
         return f"dlq.{topic}"
 
@@ -39,12 +40,16 @@ Handler = Callable[[Message, "Publisher"], None]
 
 
 class Publisher:
-    def publish(self, topic: str, message: Message) -> None:  # pragma: no cover - interface
+    def publish(
+        self, topic: str, message: Message
+    ) -> None:  # pragma: no cover - interface
         raise NotImplementedError
 
 
 class Consumer:
-    def subscribe(self, topic: str, handler: Handler, *, prefetch: int = 1) -> None:  # pragma: no cover - interface
+    def subscribe(
+        self, topic: str, handler: Handler, *, prefetch: int = 1
+    ) -> None:  # pragma: no cover - interface
         raise NotImplementedError
 
 
@@ -122,7 +127,9 @@ class InMemoryBus(Publisher, Consumer):
                     dlq_handler(dlq_msg, self)
                     return
                 # If no DLQ, surface the error
-                raise ValueError(f"Message type '{msg.type}' does not match subscribed topic '{topic}'")
+                raise ValueError(
+                    f"Message type '{msg.type}' does not match subscribed topic '{topic}'"
+                )
 
             validator = VALIDATORS.get(topic)
             if validator is not None:

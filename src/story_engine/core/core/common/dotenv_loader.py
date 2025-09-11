@@ -5,7 +5,9 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 
-def load_dotenv_keys(path: Optional[str | Path] = None, keys_prefixes: Optional[Iterable[str]] = None) -> None:
+def load_dotenv_keys(
+    path: Optional[str | Path] = None, keys_prefixes: Optional[Iterable[str]] = None
+) -> None:
     """Lightweight .env loader that only loads selected prefixes.
 
     - Skips lines that are comments or malformed
@@ -35,4 +37,3 @@ def load_dotenv_keys(path: Optional[str | Path] = None, keys_prefixes: Optional[
     except Exception:
         # Best-effort; ignore errors
         return
-

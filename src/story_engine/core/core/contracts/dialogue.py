@@ -25,9 +25,15 @@ class DialogueRequest:
             raise ValueError("dialogue.request 'context' must be an object")
         return DialogueRequest(
             job_id=str(payload["job_id"]),
-            scene_id=(payload.get("scene_id") if payload.get("scene_id") is not None else None),
+            scene_id=(
+                payload.get("scene_id") if payload.get("scene_id") is not None else None
+            ),
             character_id=str(payload["character_id"]),
-            opening_line=(payload.get("opening_line") if payload.get("opening_line") is not None else None),
+            opening_line=(
+                payload.get("opening_line")
+                if payload.get("opening_line") is not None
+                else None
+            ),
             context=dict(payload["context"]),
         )
 
@@ -37,4 +43,3 @@ class DialogueDone:
     job_id: str
     scene_id: str | None
     text: str
-

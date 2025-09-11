@@ -21,7 +21,9 @@ EXCLUDE_DIRS = {".git", ".venv", "dist", "build", "__pycache__", "node_modules"}
 def iter_py_files(root: Path) -> Iterable[Path]:
     for dirpath, dirnames, filenames in os.walk(root):
         # prune excluded dirs
-        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS and not d.endswith(".egg-info")]
+        dirnames[:] = [
+            d for d in dirnames if d not in EXCLUDE_DIRS and not d.endswith(".egg-info")
+        ]
         for fn in filenames:
             if fn.endswith(".py"):
                 yield Path(dirpath) / fn
@@ -54,15 +56,15 @@ def strip_extraneous_fprefix(src: str) -> str:
                 continue
             quote = s[i]
             # Determine triple vs single
-            is_triple = s[i:i+3] in {"'''", '"""'}
+            is_triple = s[i : i + 3] in {"'''", '"""'}
             if is_triple:
-                q = s[i:i+3]
+                q = s[i : i + 3]
                 j = s.rfind(q)
-                body = s[i+3:j] if j >= 0 else ""
+                body = s[i + 3 : j] if j >= 0 else ""
             else:
                 # find closing quote; naive but fine since token is a full string literal already
                 j = len(s) - 1
-                body = s[i+1:j] if j > i else ""
+                body = s[i + 1 : j] if j > i else ""
 
             has_brace = ("{" in body) or ("}" in body)
             if not has_brace and ("f" in prefix.lower()):
@@ -99,4 +101,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))
-

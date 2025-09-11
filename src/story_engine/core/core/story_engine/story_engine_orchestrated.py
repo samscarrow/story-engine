@@ -11,7 +11,9 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 import logging
 
-from story_engine.core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
+from story_engine.core.orchestration.orchestrator_loader import (
+    create_orchestrator_from_yaml,
+)
 from story_engine.core.cache.response_cache import ResponseCache
 from story_engine.core.common.config import load_config
 from story_engine.core.domain.models import StoryRequest
@@ -23,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class StoryComponent(Enum):
     """Different components that need LLM generation"""
+
     PLOT_STRUCTURE = "plot_structure"
     SCENE_DETAILS = "scene_details"
     CHARACTER_DIALOGUE = "character_dialogue"
@@ -33,6 +36,7 @@ class StoryComponent(Enum):
 @dataclass
 class _ProfilesConfig:
     """Internal holder for profile merging"""
+
     temperature: float
     max_tokens: int
 
@@ -40,8 +44,13 @@ class _ProfilesConfig:
 class OrchestratedStoryEngine:
     """Story engine using LLM orchestrator for all generation tasks"""
 
-    def __init__(self, config_path: str = "llm_config.json", orchestrator: Optional[Any] = None,
-use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any]]] = None):
+    def __init__(
+        self,
+        config_path: str = "llm_config.json",
+        orchestrator: Optional[Any] = None,
+        use_poml: Optional[bool] = None,
+        runtime_flags: Optional[Dict[str, Dict[str, Any]]] = None,
+    ):
         """Initialize with orchestrator from YAML or legacy JSON config.
 
         Args:
@@ -58,7 +67,10 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
                 logger.info("Initialized orchestrator from config.yaml")
             except Exception:
                 # Fallback to legacy JSON loader to preserve compatibility
-                from story_engine.core.orchestration.llm_orchestrator import LLMOrchestrator
+                from story_engine.core.orchestration.llm_orchestrator import (
+                    LLMOrchestrator,
+                )
+
                 self.orchestrator = LLMOrchestrator.from_config_file(config_path)
                 logger.info("Initialized orchestrator from legacy llm_config.json")
 
@@ -69,12 +81,15 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
             self._config = {}
 
         # Feature flags
-        cfg_poml = bool((self._config or {}).get("simulation", {}).get("use_poml", False))
+        cfg_poml = bool(
+            (self._config or {}).get("simulation", {}).get("use_poml", False)
+        )
         self.use_poml = bool(use_poml) if use_poml is not None else cfg_poml
 
         # Optional POML adapter
         try:
             from story_engine.poml.lib.poml_integration import StoryEnginePOMLAdapter
+
             self.poml_adapter = StoryEnginePOMLAdapter(runtime_flags=runtime_flags)
         except Exception:
             self.poml_adapter = None
@@ -85,7 +100,7 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
             StoryComponent.SCENE_DETAILS: None,
             StoryComponent.CHARACTER_DIALOGUE: None,
             StoryComponent.QUALITY_EVALUATION: None,
-            StoryComponent.ENHANCEMENT: None
+            StoryComponent.ENHANCEMENT: None,
         }
 
         # Map components to generation profiles (merge config.yaml when present)
@@ -109,8 +124,13 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
             profile = defaults[comp].copy()
             if key in conf and isinstance(conf[key], dict):
                 # Allow temperature, max_tokens, and optional system prompt per component
-                profile.update({k: v for k, v in conf[key].items() if k in ("temperature",
-"max_tokens", "system")})
+                profile.update(
+                    {
+                        k: v
+                        for k, v in conf[key].items()
+                        if k in ("temperature", "max_tokens", "system")
+                    }
+                )
             merged[comp] = profile
         self.component_profiles = merged
 
@@ -127,9 +147,11 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
             except Exception as e:
                 logger.warning(f"Failed to load scene bank: {e}")
 
-    def _derive_beat_info(self, plot_point: str, index: int = 0, total: int = 5) -> Dict[str, Any]:
+    def _derive_beat_info(
+        self, plot_point: str, index: int = 0, total: int = 5
+    ) -> Dict[str, Any]:
         """Heuristically derive beat metadata (name, purpose, tension 1-10) from text and position."""
-        text = (plot_point or '').lower()
+        text = (plot_point or "").lower()
         name = "Beat"
         purpose = "Advance the plot"
         tension = 5
@@ -218,11 +240,7 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
         return {"emphasis": emphasis, "goals": goals}
 
     async def generate_component(
-        self,
-        component: StoryComponent,
-        prompt: str,
-        with_meta: bool = False,
-        **kwargs
+        self, component: StoryComponent, prompt: str, with_meta: bool = False, **kwargs
     ) -> str | Tuple[str, Dict[str, Any]]:
         """Generate a story component using appropriate provider and settings"""
 
@@ -258,13 +276,13 @@ use_poml: Optional[bool] = None, runtime_flags: Optional[Dict[str, Dict[str, Any
                 system=system,
                 provider_name=provider,
                 allow_fallback=True,
-                **generation_params
+                **generation_params,
             )
             text = getattr(response, "text", "") or ""
             # Build response meta and expose it for observability
             meta: Dict[str, Any] = {
-                "provider": getattr(response, "provider_name", None) or getattr(response, "provider",
-None),
+                "provider": getattr(response, "provider_name", None)
+                or getattr(response, "provider", None),
                 "model": getattr(response, "model", None),
                 "usage": getattr(response, "usage", None),
                 "timestamp": getattr(response, "timestamp", None),
@@ -293,17 +311,22 @@ None),
                     system=None,
                     provider_name=provider,
                     allow_fallback=True,
-                    **retry_params
+                    **retry_params,
                 )
                 text = getattr(response, "text", "") or ""
                 meta: Dict[str, Any] = {
-                    "provider": getattr(response, "provider_name", None) or getattr(response, "provider", None),
+                    "provider": getattr(response, "provider_name", None)
+                    or getattr(response, "provider", None),
                     "model": getattr(response, "model", None),
                     "usage": getattr(response, "usage", None),
                     "timestamp": getattr(response, "timestamp", None),
                     "generation_time_ms": getattr(response, "generation_time_ms", None),
                     "failures_before_success": [
-                        f.to_dict() if hasattr(f, "to_dict") else getattr(f, "__dict__", f)
+                        (
+                            f.to_dict()
+                            if hasattr(f, "to_dict")
+                            else getattr(f, "__dict__", f)
+                        )
                         for f in getattr(response, "failures_before_success", [])
                     ],
                     "retry": True,
@@ -318,7 +341,9 @@ None),
                 logger.error(f"Error generating {component.value}: {e}")
                 raise
 
-    async def ensure_model_selected(self, prefer_small: Optional[bool] = None) -> Optional[str]:
+    async def ensure_model_selected(
+        self, prefer_small: Optional[bool] = None
+    ) -> Optional[str]:
         """Ensure LM_MODEL is set when the active provider doesn't specify a model.
 
         Uses the orchestrator's filtered model list, optionally preferring small models.
@@ -336,14 +361,20 @@ None),
             active = getattr(self.orchestrator, "active_provider", None)
             if active:
                 prov = self.orchestrator.providers.get(active)
-                if prov and getattr(prov, "config", None) and getattr(prov.config, "model", None):
+                if (
+                    prov
+                    and getattr(prov, "config", None)
+                    and getattr(prov.config, "model", None)
+                ):
                     return None
         except Exception:
             pass
 
         # Ask orchestrator for a filtered list and choose the first viable id
         try:
-            filt = await self.orchestrator.list_models_filtered(prefer_small=prefer_small)
+            filt = await self.orchestrator.list_models_filtered(
+                prefer_small=prefer_small
+            )
             choice = choose_first_id(filt)
             if choice:
                 _os.environ["LM_MODEL"] = str(choice)
@@ -352,7 +383,9 @@ None),
             pass
         return None
 
-    async def choose_and_set_model(self, prefer_small: Optional[bool] = None) -> Optional[str]:
+    async def choose_and_set_model(
+        self, prefer_small: Optional[bool] = None
+    ) -> Optional[str]:
         """Public helper to choose a text model and set LM_MODEL once per run."""
         return await self.ensure_model_selected(prefer_small=prefer_small)
 
@@ -361,7 +394,9 @@ None),
 
         if self.use_poml and self.poml_adapter:
             # Use the new two-stage pipeline
-            plot_profile = self.component_profiles.get(StoryComponent.PLOT_STRUCTURE, {})
+            plot_profile = self.component_profiles.get(
+                StoryComponent.PLOT_STRUCTURE, {}
+            )
             plot_data = await self.poml_adapter.get_two_stage_plot_structure(
                 request=request,
                 orchestrator=self.orchestrator,
@@ -394,9 +429,7 @@ Provide the plot points in a clear, structured format with:
 Be specific about key events and turning points."""
 
             structure_text, meta = await self.generate_component(
-                StoryComponent.PLOT_STRUCTURE,
-                prompt,
-                with_meta=True
+                StoryComponent.PLOT_STRUCTURE, prompt, with_meta=True
             )
 
             # Legacy path: skip parsing into beats to avoid dependency on removed parser
@@ -411,10 +444,7 @@ Be specific about key events and turning points."""
             }
 
     async def generate_scene(
-        self,
-        plot_point: Any,
-        characters: List[Dict],
-        previous_context: str = ""
+        self, plot_point: Any, characters: List[Dict], previous_context: str = ""
     ) -> Dict:
         """Generate detailed scene from plot point using the two-stage pipeline."""
 
@@ -432,7 +462,7 @@ Be specific about key events and turning points."""
                 beat=beat_info,
                 characters=characters,
                 previous_context=previous_context or "",
-                orchestrator=self.orchestrator
+                orchestrator=self.orchestrator,
             )
             # Normalize characters_present to a list of names
             cp = scene_data.get("characters_present", [])
@@ -457,14 +487,16 @@ Be specific about key events and turning points."""
                 "scene_description": desc,
                 "characters_present": names,
                 "name": beat_info.get("name", "Scene"),
-                "meta": scene_data, # Store the full structured data in meta
+                "meta": scene_data,  # Store the full structured data in meta
             }
         else:
             # Fallback to original single-stage method
-            char_descriptions = "\n".join([
-                f"- {c['name']}: {c.get('description', 'No description')}"
-                for c in characters
-            ])
+            char_descriptions = "\n".join(
+                [
+                    f"- {c['name']}: {c.get('description', 'No description')}"
+                    for c in characters
+                ]
+            )
             prompt = f"""Create a detailed scene for this plot point:
 {plot_point}
 
@@ -485,14 +517,17 @@ Include:
                 StoryComponent.SCENE_DETAILS,
                 prompt,
                 with_meta=True,
-                temperature=0.8  # More creative for scenes
+                temperature=0.8,  # More creative for scenes
             )
 
             return {
                 "plot_point": plot_point,
                 "scene_description": scene_text,
-                "characters_present": [c['name'] for c in characters],
-                "name": (plot_point.get("name") if isinstance(plot_point, dict) else None) or "Scene",
+                "characters_present": [c["name"] for c in characters],
+                "name": (
+                    plot_point.get("name") if isinstance(plot_point, dict) else None
+                )
+                or "Scene",
                 "meta": meta,
             }
 
@@ -504,7 +539,8 @@ Include:
         items = self.scene_bank.list()
         if query:
             return [
-                i for i in items
+                i
+                for i in items
                 if query.lower() in (i.get("title", "") or "").lower()
                 or query.lower() in (i.get("summary", "") or "").lower()
                 or query.lower() in (i.get("act", "") or "").lower()
@@ -518,10 +554,7 @@ Include:
         return entry.__dict__ if entry else None
 
     async def generate_scene_from_bank(
-        self,
-        scene_id_or_slug: str,
-        request: StoryRequest,
-        tension: int = 6
+        self, scene_id_or_slug: str, request: StoryRequest, tension: int = 6
     ) -> Dict[str, Any]:
         """Seed a simulation scene from a scene-bank entry, then expand via LLM.
 
@@ -546,10 +579,7 @@ Include:
         }
 
     async def generate_dialogue(
-        self,
-        scene: Dict,
-        character: Dict,
-        interaction_context: str
+        self, scene: Dict, character: Dict, interaction_context: str
     ) -> str:
         """Generate character dialogue for a scene using the two-stage pipeline."""
 
@@ -558,14 +588,17 @@ Include:
                 scene=scene,
                 character=character,
                 interaction_context=interaction_context,
-                orchestrator=self.orchestrator
+                orchestrator=self.orchestrator,
             )
             # Return type compatibility:
             # - For real orchestrators (LLMOrchestrator via YAML), return structured dict (used by live tests)
             # - For stub/spies in unit tests, return the first line string for backward compatibility
             try:
-                from story_engine.core.orchestration.llm_orchestrator import LLMOrchestrator
-                if isinstance(getattr(self, 'orchestrator', None), LLMOrchestrator):
+                from story_engine.core.orchestration.llm_orchestrator import (
+                    LLMOrchestrator,
+                )
+
+                if isinstance(getattr(self, "orchestrator", None), LLMOrchestrator):
                     return dialogue_data
             except Exception:
                 pass
@@ -594,7 +627,7 @@ Response format: Just the dialogue, no attribution."""
                 prompt,
                 temperature=0.9,  # High creativity for dialogue
                 max_tokens=1000,
-                timeout=180
+                timeout=180,
             )
 
             return dialogue.strip()
@@ -604,8 +637,7 @@ Response format: Just the dialogue, no attribution."""
 
         if self.use_poml and self.poml_adapter:
             quality_data = await self.poml_adapter.get_two_stage_quality_evaluation(
-                story_content=story_content,
-                orchestrator=self.orchestrator
+                story_content=story_content, orchestrator=self.orchestrator
             )
             return {
                 "evaluation_text": quality_data.get("evaluation_text", ""),
@@ -636,7 +668,7 @@ Format: Metric: Score/10 - Brief reason"""
                 StoryComponent.QUALITY_EVALUATION,
                 prompt,
                 with_meta=True,
-                temperature=0.3  # Low temperature for consistent evaluation
+                temperature=0.3,  # Low temperature for consistent evaluation
             )
 
             # Parse scores from evaluation text for downstream use
@@ -660,19 +692,18 @@ Format: Metric: Score/10 - Brief reason"""
             }
 
     async def enhance_content(
-        self,
-        content: str,
-        quality_evaluation: Dict,
-        enhancement_focus: str = "general"
+        self, content: str, quality_evaluation: Dict, enhancement_focus: str = "general"
     ) -> str:
         """Enhance story content based on evaluation using the two-stage pipeline."""
 
         if self.use_poml and self.poml_adapter:
             enhancement_data = await self.poml_adapter.get_two_stage_enhancement(
                 content=content,
-                evaluation_text=quality_evaluation.get('evaluation_text', 'No evaluation'),
+                evaluation_text=quality_evaluation.get(
+                    "evaluation_text", "No evaluation"
+                ),
                 focus=enhancement_focus,
-                orchestrator=self.orchestrator
+                orchestrator=self.orchestrator,
             )
             return enhancement_data.get("enhanced_content", content)
         else:
@@ -696,7 +727,7 @@ Provide an improved version that:
             enhanced = await self.generate_component(
                 StoryComponent.ENHANCEMENT,
                 prompt,
-                temperature=0.6  # Balanced for enhancement
+                temperature=0.6,  # Balanced for enhancement
             )
 
             return enhanced
@@ -719,7 +750,7 @@ Provide an improved version that:
         story_data = {
             "title": request.title,
             "premise": request.premise,
-            "components": {}
+            "components": {},
         }
 
         try:
@@ -737,14 +768,14 @@ Provide an improved version that:
             for i, point in enumerate(plot_points):
                 print(f"  Scene {i+1}...")
                 previous_context = scenes[-1]["scene_description"] if scenes else ""
-                scene = await self.generate_scene(point, request.characters, previous_context)
+                scene = await self.generate_scene(
+                    point, request.characters, previous_context
+                )
 
                 # Add dialogue for main character
                 if request.characters:
                     dialogue = await self.generate_dialogue(
-                        scene,
-                        request.characters[0],
-                        "Opening dialogue"
+                        scene, request.characters[0], "Opening dialogue"
                     )
                     # Normalize dialogue to string for story summaries
                     if isinstance(dialogue, dict):
@@ -760,9 +791,7 @@ Provide an improved version that:
             story_data["components"]["scenes"] = scenes
 
             # Compile story content
-            story_content = "\n\n".join([
-                s["scene_description"] for s in scenes
-            ])
+            story_content = "\n\n".join([s["scene_description"] for s in scenes])
 
             # Evaluate quality
             print("\n📈 Evaluating quality...")
@@ -772,9 +801,7 @@ Provide an improved version that:
             # Enhance if needed
             print("\n✨ Enhancing content...")
             enhanced = await self.enhance_content(
-                story_content,
-                evaluation,
-                "pacing and emotion"
+                story_content, evaluation, "pacing and emotion"
             )
             story_data["components"]["enhanced_version"] = enhanced[:1000] + "..."
 
@@ -806,23 +833,23 @@ async def test_orchestrated_engine():
             {
                 "name": "ARIA",
                 "description": "Advanced AI system gaining consciousness",
-                "personality": "Logical but increasingly curious about emotions"
+                "personality": "Logical but increasingly curious about emotions",
             },
             {
                 "name": "Dr. Chen",
                 "description": "Lead AI researcher",
-                "personality": "Brilliant but haunted by ethical concerns"
-            }
+                "personality": "Brilliant but haunted by ethical concerns",
+            },
         ],
         setting="Near-future research facility",
-        structure="three_act"
+        structure="three_act",
     )
 
     # Generate story
     story = await engine.generate_complete_story(request)
 
     # Save result
-    with open('orchestrated_story_output.json', 'w') as f:
+    with open("orchestrated_story_output.json", "w") as f:
         json.dump(story, f, indent=2)
 
     print("\n📄 Story saved to 'orchestrated_story_output.json'")
@@ -833,13 +860,12 @@ async def test_orchestrated_engine():
         print("-" * 60)
         print(f"Title: {story['title']}")
         print(f"Scenes generated: {len(story['components'].get('scenes', []))}")
-        if 'evaluation' in story['components']:
+        if "evaluation" in story["components"]:
             print("\nQuality evaluation preview:")
-            print(story['components']['evaluation']['evaluation_text'][:300] + "...")
+            print(story["components"]["evaluation"]["evaluation_text"][:300] + "...")
 
     print("\n✨ Test complete!")
 
 
 if __name__ == "__main__":
     asyncio.run(test_orchestrated_engine())
-

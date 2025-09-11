@@ -55,7 +55,9 @@ def test_inmemory_bus_normalizes_type_to_topic():
 
 
 def test_testutils_correlation_and_causation():
-    parent = Message(type="plot.request", payload={"job_id": "j3", "prompt": "p", "constraints": {}})
+    parent = Message(
+        type="plot.request", payload={"job_id": "j3", "prompt": "p", "constraints": {}}
+    )
     child = Message(
         type="plot.done",
         payload={"job_id": "j3", "outline_id": "o1", "outline_ref": "r1"},
@@ -64,4 +66,3 @@ def test_testutils_correlation_and_causation():
     )
     assert_correlation_and_causation(parent, child)
     assert_type_matches_topic("plot.done", child)
-

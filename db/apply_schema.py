@@ -28,7 +28,9 @@ def read_statements(path: str):
     statements: list[str] = []
     for block in blocks:
         # Drop pure comment lines
-        lines_no_comments = [line for line in block.splitlines() if not line.strip().startswith("--")]
+        lines_no_comments = [
+            line for line in block.splitlines() if not line.strip().startswith("--")
+        ]
         cleaned_block = "\n".join(lines_no_comments)
         upper = cleaned_block.upper()
 
@@ -93,7 +95,10 @@ def main():
     try:
         import oracledb  # type: ignore
     except Exception:
-        print("oracledb is required. Install with: uv add oracledb (or pip)", file=sys.stderr)
+        print(
+            "oracledb is required. Install with: uv add oracledb (or pip)",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     dsn = os.environ.get("ORACLE_DSN")
@@ -104,27 +109,65 @@ def main():
         sys.exit(2)
 
     schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
+
     # Optional: clean existing objects to avoid mismatched legacy definitions
     def _cleanup(cur):
         tables = [
-            'METRICS_EVENTS','CACHE_ENTRIES','WORLD_RELATIONS','WORLD_FACTS','WORLD_ENTITIES',
-            'DIALOGUE','SCENES','EVALUATIONS','GENERATIONS','PROMPTS','PROMPT_SETS','TEMPLATES',
-            'PERSONAS','MODELS','PROVIDERS'
+            "METRICS_EVENTS",
+            "CACHE_ENTRIES",
+            "WORLD_RELATIONS",
+            "WORLD_FACTS",
+            "WORLD_ENTITIES",
+            "DIALOGUE",
+            "SCENES",
+            "EVALUATIONS",
+            "GENERATIONS",
+            "PROMPTS",
+            "PROMPT_SETS",
+            "TEMPLATES",
+            "PERSONAS",
+            "MODELS",
+            "PROVIDERS",
         ]
         sequences = [
-            'METRICS_EVENTS_SEQ','WORLD_RELATIONS_SEQ','WORLD_FACTS_SEQ','WORLD_ENTITIES_SEQ',
-            'DIALOGUE_SEQ','SCENES_SEQ','EVALUATIONS_SEQ','GENERATIONS_SEQ','PROMPTS_SEQ',
-            'PROMPT_SETS_SEQ','TEMPLATES_SEQ','PERSONAS_SEQ','MODELS_SEQ','PROVIDERS_SEQ'
+            "METRICS_EVENTS_SEQ",
+            "WORLD_RELATIONS_SEQ",
+            "WORLD_FACTS_SEQ",
+            "WORLD_ENTITIES_SEQ",
+            "DIALOGUE_SEQ",
+            "SCENES_SEQ",
+            "EVALUATIONS_SEQ",
+            "GENERATIONS_SEQ",
+            "PROMPTS_SEQ",
+            "PROMPT_SETS_SEQ",
+            "TEMPLATES_SEQ",
+            "PERSONAS_SEQ",
+            "MODELS_SEQ",
+            "PROVIDERS_SEQ",
         ]
         triggers = [
-            'METRICS_EVENTS_BI','WORLD_RELATIONS_BI','WORLD_FACTS_BI','WORLD_ENTITIES_BI',
-            'DIALOGUE_BI','SCENES_BI','EVALUATIONS_BI','GENERATIONS_BI','PROMPTS_BI',
-            'PROMPT_SETS_BI','TEMPLATES_BI','PERSONAS_BI','MODELS_BI','PROVIDERS_BI',
-            'TRG_ENTITIES_UPD','TRG_RELATIONS_UPD'
+            "METRICS_EVENTS_BI",
+            "WORLD_RELATIONS_BI",
+            "WORLD_FACTS_BI",
+            "WORLD_ENTITIES_BI",
+            "DIALOGUE_BI",
+            "SCENES_BI",
+            "EVALUATIONS_BI",
+            "GENERATIONS_BI",
+            "PROMPTS_BI",
+            "PROMPT_SETS_BI",
+            "TEMPLATES_BI",
+            "PERSONAS_BI",
+            "MODELS_BI",
+            "PROVIDERS_BI",
+            "TRG_ENTITIES_UPD",
+            "TRG_RELATIONS_UPD",
         ]
 
         # Drop indexes by querying USER_INDEXES for our known prefixes
-        cur.execute("SELECT index_name FROM user_indexes WHERE index_name LIKE 'UX_%' OR index_name LIKE 'IX_%'")
+        cur.execute(
+            "SELECT index_name FROM user_indexes WHERE index_name LIKE 'UX_%' OR index_name LIKE 'IX_%'"
+        )
         idxs = [r[0] for r in cur]
         for idx in idxs:
             try:

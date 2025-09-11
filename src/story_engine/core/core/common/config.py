@@ -22,7 +22,9 @@ DEFAULT_CONFIG: Dict[str, Any] = {
             {
                 "name": "lmstudio",
                 "provider": "lmstudio",
-                "endpoint": os.environ.get("LMSTUDIO_ENDPOINT", "http://localhost:1234"),
+                "endpoint": os.environ.get(
+                    "LMSTUDIO_ENDPOINT", "http://localhost:1234"
+                ),
                 "model": os.environ.get("LMSTUDIO_MODEL", "gemma-2-27b"),
                 "defaults": {"temperature": 0.8, "max_tokens": 600},
             }

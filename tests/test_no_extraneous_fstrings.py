@@ -6,12 +6,22 @@ import tokenize
 import io
 
 
-EXCLUDE_DIRS = {".git", ".venv", "dist", "build", "__pycache__", "node_modules", "bench/.venv"}
+EXCLUDE_DIRS = {
+    ".git",
+    ".venv",
+    "dist",
+    "build",
+    "__pycache__",
+    "node_modules",
+    "bench/.venv",
+}
 
 
 def iter_py_files(root: Path):
     for dirpath, dirnames, filenames in os.walk(Path.cwd()):
-        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS and not d.endswith(".egg-info")]
+        dirnames[:] = [
+            d for d in dirnames if d not in EXCLUDE_DIRS and not d.endswith(".egg-info")
+        ]
         for fn in filenames:
             if fn.endswith(".py"):
                 yield Path(dirpath) / fn
@@ -33,7 +43,7 @@ def has_extraneous_fstrings(path: Path) -> bool:
                     i += 1
                 if i < len(s) and s[i] in ('"', "'"):
                     # naive: just check for braces anywhere in token text
-                    if ('f' in s[:i].lower()) and ('{' not in s) and ('}' not in s):
+                    if ("f" in s[:i].lower()) and ("{" not in s) and ("}" not in s):
                         return True
     except Exception:
         return False

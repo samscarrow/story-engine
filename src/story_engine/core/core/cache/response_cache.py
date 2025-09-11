@@ -64,4 +64,3 @@ class ResponseCache:
 
     def clear(self) -> None:
         self._store.clear()
-

@@ -57,8 +57,7 @@ def store_workflow_output(workflow_name: str, output: Dict[str, Any]) -> None:
         pass
     finally:
         try:
-            if 'db' in locals() and getattr(db, 'conn', None):
+            if "db" in locals() and getattr(db, "conn", None):
                 db.disconnect()
         except Exception:
             pass
-

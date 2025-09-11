@@ -3,7 +3,10 @@ Ensure OrchestratedStoryEngine loads narrative profiles from config.yaml.
 This test does not perform LLM calls.
 """
 
-from story_engine.core.story_engine.story_engine_orchestrated import OrchestratedStoryEngine, StoryComponent
+from story_engine.core.story_engine.story_engine_orchestrated import (
+    OrchestratedStoryEngine,
+    StoryComponent,
+)
 
 
 def test_profiles_loaded_from_config_yaml():
@@ -16,5 +19,3 @@ def test_profiles_loaded_from_config_yaml():
     # Assert values reflect default config.yaml (dialogue temp 0.9, max_tokens 500)
     assert abs(profiles[StoryComponent.CHARACTER_DIALOGUE]["temperature"] - 0.9) < 1e-6
     assert profiles[StoryComponent.CHARACTER_DIALOGUE]["max_tokens"] == 500
-
-

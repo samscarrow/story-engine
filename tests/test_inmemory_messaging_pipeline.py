@@ -29,7 +29,10 @@ def test_plot_request_to_done_inmemory_bus():
     bus.subscribe("plot.request", handle_plot_request)
     bus.subscribe("plot.done", handle_plot_done)
 
-    req = Message(type="plot.request", payload={"job_id": "j1", "prompt": "hello", "constraints": {}})
+    req = Message(
+        type="plot.request",
+        payload={"job_id": "j1", "prompt": "hello", "constraints": {}},
+    )
     bus.publish("plot.request", req)
 
     assert len(done_messages) == 1

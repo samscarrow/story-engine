@@ -40,6 +40,7 @@ sys.path.insert(0, str(ROOT))
 try:
     # Load CLOUDSQL_* from .env if available
     from story_engine.core.common.dotenv_loader import load_dotenv_keys  # type: ignore
+
     load_dotenv_keys(keys_prefixes=("CLOUDSQL_",))
 except Exception:
     # Best-effort only
@@ -79,7 +80,9 @@ def find_proxy_binary(explicit: str | None = None) -> str | None:
     return None
 
 
-def build_command(proxy_bin: str, connection_name: str, port: int, address: str, iam: bool) -> list[str]:
+def build_command(
+    proxy_bin: str, connection_name: str, port: int, address: str, iam: bool
+) -> list[str]:
     cmd = [proxy_bin, "--port", str(port), "--address", address]
     if iam:
         cmd.append("--auto-iam-authn")
@@ -88,26 +91,52 @@ def build_command(proxy_bin: str, connection_name: str, port: int, address: str,
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Start Cloud SQL Auth Proxy (cross-platform)")
-    p.add_argument("--connection-name", dest="connection_name", default=os.getenv("CLOUDSQL_INSTANCE"),
-                   help="Cloud SQL instance connection name (project:region:instance)")
-    p.add_argument("--port", type=int, default=int(os.getenv("CLOUDSQL_PORT", "5433")),
-                   help="Local port to listen on (default: 5433)")
-    p.add_argument("--address", default=os.getenv("CLOUDSQL_ADDRESS", "127.0.0.1"),
-                   help="Local address to bind (default: 127.0.0.1)")
-    p.add_argument("--iam", action="store_true", help="Enable automatic IAM authentication")
-    p.add_argument("--proxy-bin", default=None, help="Explicit path to cloud-sql-proxy binary")
+    p = argparse.ArgumentParser(
+        description="Start Cloud SQL Auth Proxy (cross-platform)"
+    )
+    p.add_argument(
+        "--connection-name",
+        dest="connection_name",
+        default=os.getenv("CLOUDSQL_INSTANCE"),
+        help="Cloud SQL instance connection name (project:region:instance)",
+    )
+    p.add_argument(
+        "--port",
+        type=int,
+        default=int(os.getenv("CLOUDSQL_PORT", "5433")),
+        help="Local port to listen on (default: 5433)",
+    )
+    p.add_argument(
+        "--address",
+        default=os.getenv("CLOUDSQL_ADDRESS", "127.0.0.1"),
+        help="Local address to bind (default: 127.0.0.1)",
+    )
+    p.add_argument(
+        "--iam", action="store_true", help="Enable automatic IAM authentication"
+    )
+    p.add_argument(
+        "--proxy-bin", default=None, help="Explicit path to cloud-sql-proxy binary"
+    )
     p.add_argument("--dry-run", action="store_true", help="Print the command and exit")
     args = p.parse_args()
 
     if not args.connection_name:
-        print("Error: --connection-name not provided and CLOUDSQL_INSTANCE not set.", file=sys.stderr)
+        print(
+            "Error: --connection-name not provided and CLOUDSQL_INSTANCE not set.",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     proxy = find_proxy_binary(args.proxy_bin)
     if not proxy:
-        print("cloud-sql-proxy not found. Install it and/or set CLOUDSQL_PROXY_BIN.", file=sys.stderr)
-        print("Download: https://cloud.google.com/sql/docs/postgres/sql-proxy", file=sys.stderr)
+        print(
+            "cloud-sql-proxy not found. Install it and/or set CLOUDSQL_PROXY_BIN.",
+            file=sys.stderr,
+        )
+        print(
+            "Download: https://cloud.google.com/sql/docs/postgres/sql-proxy",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     cmd = build_command(proxy, args.connection_name, args.port, args.address, args.iam)
@@ -115,7 +144,9 @@ def main() -> None:
         print("Command:", " ".join(cmd))
         return
 
-    print(f"Starting Cloud SQL Auth Proxy on {args.address}:{args.port} for {args.connection_name}...")
+    print(
+        f"Starting Cloud SQL Auth Proxy on {args.address}:{args.port} for {args.connection_name}..."
+    )
     try:
         # Inherit stdio; user stops with Ctrl-C
         subprocess.run(cmd, check=True)
@@ -126,5 +157,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

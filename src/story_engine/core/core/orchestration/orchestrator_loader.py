@@ -52,7 +52,11 @@ def create_orchestrator_from_yaml(path: str = "config.yaml") -> LLMOrchestrator:
     else:
         env_val = os.environ.get("LM_PREFER_SMALL")
         if env_val is not None:
-            orch.prefer_small_models = str(env_val).strip().lower() in {"1", "true", "yes", "on"}
+            orch.prefer_small_models = str(env_val).strip().lower() in {
+                "1",
+                "true",
+                "yes",
+                "on",
+            }
 
     return orch
-

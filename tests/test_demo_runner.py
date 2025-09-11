@@ -20,6 +20,7 @@ def resolve_python_exec(env: dict[str, str]) -> str:
     # 3) Fall back to the current interpreter (sys.executable)
     return sys.executable
 
+
 def run_demo_and_get_outdir(env: dict[str, str]) -> Path:
     python_exec = resolve_python_exec(env)
     cmd = [
@@ -67,7 +68,9 @@ def test_demo_runner_smoke(tmp_path: Path):
         path = outdir / name
         assert path.exists(), f"Missing artifact: {path}"
     # Config snapshot may be YAML or JSON depending on optional PyYAML
-    assert (outdir / "config.snapshot.yaml").exists() or (outdir / "config.snapshot.json").exists()
+    assert (outdir / "config.snapshot.yaml").exists() or (
+        outdir / "config.snapshot.json"
+    ).exists()
 
     # Basic JSON structure checks
     story = json.loads((outdir / "story.json").read_text())

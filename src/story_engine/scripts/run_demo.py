@@ -26,7 +26,7 @@ def load_config(path: Path | None) -> Dict[str, Any]:
     cfg: Dict[str, Any] = {}
     if path and path.exists() and yaml is not None:
         with path.open("r") as f:
-            cfg = (yaml.safe_load(f) or {})  # type: ignore[attr-defined]
+            cfg = yaml.safe_load(f) or {}  # type: ignore[attr-defined]
     # Merge env toggles
     prefer_small = os.getenv("LM_PREFER_SMALL") in ("1", "true", "True")
     if prefer_small:
@@ -76,7 +76,9 @@ def make_character(profile: str | None) -> CharacterState:
             values=["order", "duty", "Roman law"],
             fears=["rebellion", "imperial disfavor"],
             desires=["peace", "advancement"],
-            emotional_state=EmotionalState(anger=0.3, doubt=0.7, fear=0.6, compassion=0.3, confidence=0.6),
+            emotional_state=EmotionalState(
+                anger=0.3, doubt=0.7, fear=0.6, compassion=0.3, confidence=0.6
+            ),
             memory=CharacterMemory(recent_events=["Tense crowd", "Dream warning"]),
             current_goal="Maintain order without inciting revolt",
             internal_conflict="Duty vs. justice",
@@ -114,7 +116,9 @@ async def run(args: argparse.Namespace) -> int:
 
     # Engine
     retry = RetryHandler(
-        max_retries=config.get("simulation", {}).get("retry", {}).get("max_attempts", 2),
+        max_retries=config.get("simulation", {})
+        .get("retry", {})
+        .get("max_attempts", 2),
         base_delay=config.get("simulation", {}).get("retry", {}).get("base_delay", 0.6),
     )
     engine = SimulationEngine(
@@ -140,14 +144,27 @@ async def run(args: argparse.Namespace) -> int:
     # Optional planning + continuity check if the engine provides it
     beats = default_beats()
     plan: Dict[str, Any] = {}
-    continuity: Dict[str, Any] = {"ok": True, "violations": [], "summary": "skipped (POML disabled)"}
+    continuity: Dict[str, Any] = {
+        "ok": True,
+        "violations": [],
+        "summary": "skipped (POML disabled)",
+    }
     graph_dict: Dict[str, Any] = {}
-    if getattr(engine, 'use_poml', False) and getattr(engine, 'poml_adapter', None) is not None:
+    if (
+        getattr(engine, "use_poml", False)
+        and getattr(engine, "poml_adapter", None) is not None
+    ):
         try:
-            plan = await engine.plan_scene(beats, objective="Resolve the conflict publicly", style="historical drama")
-            continuity = await engine.continuity_check_scene(plan, world_state={"locale": "Judaea", "era": "1st century"})
+            plan = await engine.plan_scene(
+                beats,
+                objective="Resolve the conflict publicly",
+                style="historical drama",
+            )
+            continuity = await engine.continuity_check_scene(
+                plan, world_state={"locale": "Judaea", "era": "1st century"}
+            )
             graph = engine.graph_from(beats, plan)
-            graph_dict = graph.to_dict() if hasattr(graph, 'to_dict') else {}
+            graph_dict = graph.to_dict() if hasattr(graph, "to_dict") else {}
         except Exception:
             continuity = {"ok": False, "violations": [], "summary": "planning failed"}
             graph_dict = {}
@@ -186,7 +203,7 @@ async def run(args: argparse.Namespace) -> int:
 
     dialogues = []
     for r in results:
-        resp = (r.get("response") or {})
+        resp = r.get("response") or {}
         s = resp.get("dialogue") or ""
         if s:
             dialogues.append(s)
@@ -194,7 +211,9 @@ async def run(args: argparse.Namespace) -> int:
         "runs": len(results),
         "schema_valid": all(
             isinstance(r.get("response"), dict)
-            and {"dialogue", "thought", "action", "emotional_shift"}.issubset(r["response"].keys())
+            and {"dialogue", "thought", "action", "emotional_shift"}.issubset(
+                r["response"].keys()
+            )
             for r in results
         ),
         "continuity_ok": bool(continuity.get("ok")),
@@ -229,13 +248,30 @@ async def run(args: argparse.Namespace) -> int:
 def main() -> None:
     p = argparse.ArgumentParser(description="Run Story Engine demo")
     p.add_argument("--config", help="Path to config.yaml", default=None)
-    p.add_argument("--use-poml", action="store_true", help="Enable POML adapter prompts")
-    p.add_argument("--live", action="store_true", help="Use live orchestrator if configured")
-    p.add_argument("--strict-persona", action="store_true", help="Enable strict persona mode")
-    p.add_argument("--persona-threshold", type=int, default=None, help="Persona adherence threshold (0-100)")
-    p.add_argument("--profile", default="pilate", help="Character profile id (default: pilate)")
+    p.add_argument(
+        "--use-poml", action="store_true", help="Enable POML adapter prompts"
+    )
+    p.add_argument(
+        "--live", action="store_true", help="Use live orchestrator if configured"
+    )
+    p.add_argument(
+        "--strict-persona", action="store_true", help="Enable strict persona mode"
+    )
+    p.add_argument(
+        "--persona-threshold",
+        type=int,
+        default=None,
+        help="Persona adherence threshold (0-100)",
+    )
+    p.add_argument(
+        "--profile", default="pilate", help="Character profile id (default: pilate)"
+    )
     p.add_argument("--situation", default=None, help="Situation to simulate")
-    p.add_argument("--emphasis", default="neutral", help="Emphasis: power|doubt|fear|compassion|duty|neutral")
+    p.add_argument(
+        "--emphasis",
+        default="neutral",
+        help="Emphasis: power|doubt|fear|compassion|duty|neutral",
+    )
     p.add_argument("--runs", type=int, default=3, help="Number of simulation runs")
     args = p.parse_args()
 

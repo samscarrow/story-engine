@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 import random
 import traceback
+
 try:
     import yaml  # type: ignore
 except Exception:
@@ -31,8 +32,7 @@ except ImportError:
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -40,94 +40,104 @@ logger = logging.getLogger(__name__)
 # HIGH PRIORITY: LLM Interface Abstraction
 # ============================================================================
 
+
 class LLMResponse:
     """Standardized LLM response format"""
+
     def __init__(self, content: str, metadata: Optional[Dict] = None):
         self.content = content
         self.metadata = metadata or {}
         self.timestamp = datetime.now().isoformat()
 
+
 class LLMInterface(ABC):
     """Abstract base class for LLM providers"""
-    
+
     @abstractmethod
-    async def generate_response(self, 
-                               prompt: str, 
-                               temperature: float = 0.7,
-                               max_tokens: int = 500) -> LLMResponse:
+    async def generate_response(
+        self, prompt: str, temperature: float = 0.7, max_tokens: int = 500
+    ) -> LLMResponse:
         """Generate a response from the LLM"""
         pass
-    
+
     @abstractmethod
     async def health_check(self) -> bool:
         """Check if the LLM service is available"""
         pass
 
+
 class MockLLM(LLMInterface):
     """Mock LLM for testing and development"""
-    
+
     def __init__(self):
         self.call_count = 0
-        
-    async def generate_response(self, 
-                               prompt: str, 
-                               temperature: float = 0.7,
-                               max_tokens: int = 500) -> LLMResponse:
+
+    async def generate_response(
+        self, prompt: str, temperature: float = 0.7, max_tokens: int = 500
+    ) -> LLMResponse:
         """Generate mock response based on prompt content"""
         self.call_count += 1
         await asyncio.sleep(0.1)  # Simulate API latency
-        
+
         # Parse emphasis from prompt if present
         if "power" in prompt.lower() and temperature > 0.9:
-            content = json.dumps({
-                "dialogue": "The empire demands order! This chaos ends now!",
-                "thought": "They test my authority. I must demonstrate strength.",
-                "action": "Strikes table with fist, rises to full height",
-                "emotional_shift": {"anger": 0.1, "confidence": 0.15}
-            })
+            content = json.dumps(
+                {
+                    "dialogue": "The empire demands order! This chaos ends now!",
+                    "thought": "They test my authority. I must demonstrate strength.",
+                    "action": "Strikes table with fist, rises to full height",
+                    "emotional_shift": {"anger": 0.1, "confidence": 0.15},
+                }
+            )
         elif "doubt" in prompt.lower():
-            content = json.dumps({
-                "dialogue": "What is truth? You speak in riddles I cannot decipher...",
-                "thought": "This man disturbs me. His certainty in the face of death...",
-                "action": "Turns away, unable to maintain eye contact",
-                "emotional_shift": {"doubt": 0.2, "fear": 0.1}
-            })
+            content = json.dumps(
+                {
+                    "dialogue": "What is truth? You speak in riddles I cannot decipher...",
+                    "thought": "This man disturbs me. His certainty in the face of death...",
+                    "action": "Turns away, unable to maintain eye contact",
+                    "emotional_shift": {"doubt": 0.2, "fear": 0.1},
+                }
+            )
         else:
-            content = json.dumps({
-                "dialogue": "The law is clear. I find no fault, yet the law must be upheld.",
-                "thought": "I am trapped between justice and survival.",
-                "action": "Paces deliberately, weighing each option",
-                "emotional_shift": {"doubt": 0.05, "fear": 0.05}
-            })
-            
+            content = json.dumps(
+                {
+                    "dialogue": "The law is clear. I find no fault, yet the law must be upheld.",
+                    "thought": "I am trapped between justice and survival.",
+                    "action": "Paces deliberately, weighing each option",
+                    "emotional_shift": {"doubt": 0.05, "fear": 0.05},
+                }
+            )
+
         return LLMResponse(content, {"model": "mock", "temperature": temperature})
-    
+
     async def health_check(self) -> bool:
         """Mock health check always returns True"""
         return True
 
+
 class OpenAILLM(LLMInterface):
     """OpenAI API implementation"""
-    
+
     def __init__(self, api_key: str, model: str = "gpt-4"):
         self.api_key = api_key
         self.model = model
         # In production, initialize OpenAI client here
-        
-    async def generate_response(self, 
-                               prompt: str, 
-                               temperature: float = 0.7,
-                               max_tokens: int = 500) -> LLMResponse:
+
+    async def generate_response(
+        self, prompt: str, temperature: float = 0.7, max_tokens: int = 500
+    ) -> LLMResponse:
         """Generate response via OpenAI API"""
         try:
             # Production implementation would call OpenAI API
             # response = await openai_client.create_completion(...)
             logger.info(f"OpenAI API call: model={self.model}, temp={temperature}")
-            
+
             # Placeholder for actual API call
             content = "OpenAI response would go here"
-            return LLMResponse(content, {"model": self.model, "temperature": temperature})
-            
+            return LLMResponse(
+                content, {"model": self.model, "temperature": temperature}
+            )
+
         except Exception as e:
             logger.error(f"OpenAI API error: {e}")
             raise
@@ -138,20 +148,21 @@ class OpenAILLM(LLMInterface):
             # Would ping OpenAI API endpoint
             return True
         except (aiohttp.ClientError, asyncio.TimeoutError, ConnectionError) as e:
-            logger.warning(f'Connection error: {e}')
+            logger.warning(f"Connection error: {e}")
             return False
 
         except Exception as e:
-            logger.error(f'Unexpected error: {e}')
+            logger.error(f"Unexpected error: {e}")
             return False
+
 
 class LMStudioLLM(LLMInterface):
     """LMStudio local model implementation with structured output support"""
-    
+
     def __init__(self, endpoint: str = "http://localhost:1234/v1", model: str = None):
         self.endpoint = endpoint
         self.model = model  # Specific model to use
-        
+
         # JSON Schema for character responses
         self.response_schema = {
             "type": "json_schema",
@@ -164,170 +175,202 @@ class LMStudioLLM(LLMInterface):
                     "properties": {
                         "dialogue": {
                             "type": "string",
-                            "description": "What the character says"
+                            "description": "What the character says",
                         },
                         "thought": {
                             "type": "string",
-                            "description": "Internal monologue"
+                            "description": "Internal monologue",
                         },
                         "action": {
                             "type": "string",
-                            "description": "Physical actions taken"
+                            "description": "Physical actions taken",
                         },
                         "emotional_shift": {
                             "type": "object",
                             "properties": {
-                                "anger": {"type": "number", "minimum": -1, "maximum": 1},
-                                "doubt": {"type": "number", "minimum": -1, "maximum": 1},
+                                "anger": {
+                                    "type": "number",
+                                    "minimum": -1,
+                                    "maximum": 1,
+                                },
+                                "doubt": {
+                                    "type": "number",
+                                    "minimum": -1,
+                                    "maximum": 1,
+                                },
                                 "fear": {"type": "number", "minimum": -1, "maximum": 1},
-                                "compassion": {"type": "number", "minimum": -1, "maximum": 1}
+                                "compassion": {
+                                    "type": "number",
+                                    "minimum": -1,
+                                    "maximum": 1,
+                                },
                             },
-                            "required": ["anger", "doubt", "fear", "compassion"]
-                        }
+                            "required": ["anger", "doubt", "fear", "compassion"],
+                        },
                     },
-                    "required": ["dialogue", "thought", "action", "emotional_shift"]
-                }
-            }
+                    "required": ["dialogue", "thought", "action", "emotional_shift"],
+                },
+            },
         }
-        
-    async def generate_response(self, 
-                               prompt: str, 
-                               temperature: float = 0.7,
-                               max_tokens: int = 500) -> LLMResponse:
+
+    async def generate_response(
+        self, prompt: str, temperature: float = 0.7, max_tokens: int = 500
+    ) -> LLMResponse:
         """Generate response via LMStudio API with structured output"""
         import aiohttp
-        
+
         try:
             logger.info(f"LMStudio call: endpoint={self.endpoint}, temp={temperature}")
-            
+
             # Prepare the request with structured output
             headers = {"Content-Type": "application/json"}
-            
-            system_content = "You are simulating a character. Respond based on the given scenario."
-            
+
+            system_content = (
+                "You are simulating a character. Respond based on the given scenario."
+            )
+
             data = {
                 "messages": [
                     {"role": "system", "content": system_content},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 "response_format": self.response_schema,  # Use JSON Schema for structured output
                 "temperature": temperature,
                 "max_tokens": max_tokens,
-                "stream": False
+                "stream": False,
             }
-            
+
             # Add model if specified
             if self.model:
                 data["model"] = self.model
-            
+
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{self.endpoint}/chat/completions",
                     headers=headers,
                     json=data,
-                    timeout=aiohttp.ClientTimeout(total=120)
+                    timeout=aiohttp.ClientTimeout(total=120),
                 ) as response:
                     if response.status == 200:
                         result = await response.json()
-                        
+
                         # Extract content from response
-                        content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-                        
+                        content = (
+                            result.get("choices", [{}])[0]
+                            .get("message", {})
+                            .get("content", "")
+                        )
+
                         # With structured output, content is already a valid JSON string
                         # No need for complex parsing or fixing
-                        
-                        return LLMResponse(content, {
-                            "endpoint": self.endpoint, 
-                            "temperature": temperature,
-                            "model": result.get("model", "unknown")
-                        })
+
+                        return LLMResponse(
+                            content,
+                            {
+                                "endpoint": self.endpoint,
+                                "temperature": temperature,
+                                "model": result.get("model", "unknown"),
+                            },
+                        )
                     else:
                         error_text = await response.text()
-                        logger.error(f"LMStudio API error: {response.status} - {error_text}")
+                        logger.error(
+                            f"LMStudio API error: {response.status} - {error_text}"
+                        )
                         raise Exception(f"LMStudio API error: {response.status}")
-            
+
         except Exception as e:
             logger.error(f"LMStudio API error: {e}")
             raise
-    
+
     async def health_check(self) -> bool:
         """Check LMStudio availability"""
         import aiohttp
-        
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"{self.endpoint}/models",
-                    timeout=aiohttp.ClientTimeout(total=5)
+                    f"{self.endpoint}/models", timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     return response.status == 200
         except (aiohttp.ClientError, asyncio.TimeoutError, ConnectionError) as e:
-            logger.warning(f'Connection error: {e}')
+            logger.warning(f"Connection error: {e}")
             return False
 
         except Exception as e:
-            logger.error(f'Unexpected error: {e}')
+            logger.error(f"Unexpected error: {e}")
             return False
+
 
 # ============================================================================
 # HIGH PRIORITY: Error Handling and Retry Logic
 # ============================================================================
 
+
 class SimulationError(Exception):
     """Base exception for simulation errors"""
+
     pass
+
 
 class LLMError(SimulationError):
     """LLM-specific errors"""
+
     pass
+
 
 class RetryHandler:
     """Handles retry logic with exponential backoff"""
-    
+
     def __init__(self, max_retries: int = 3, base_delay: float = 1.0):
         self.max_retries = max_retries
         self.base_delay = base_delay
-        
+
     async def execute_with_retry(self, func, *args, **kwargs):
         """Execute function with retry logic"""
         last_exception = None
-        
+
         for attempt in range(self.max_retries):
             try:
                 return await func(*args, **kwargs)
             except Exception as e:
                 last_exception = e
-                delay = self.base_delay * (2 ** attempt)
-                logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
+                delay = self.base_delay * (2**attempt)
+                logger.warning(
+                    f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s..."
+                )
                 await asyncio.sleep(delay)
-                
+
         logger.error(f"All {self.max_retries} attempts failed")
         raise LLMError(f"Failed after {self.max_retries} retries") from last_exception
+
 
 # ============================================================================
 # ENHANCED CHARACTER SYSTEM WITH ERROR HANDLING
 # ============================================================================
 
+
 @dataclass
 class EmotionalState:
     """Tracks character's emotional state with validation"""
+
     anger: float = 0.0
     doubt: float = 0.0
     fear: float = 0.0
     compassion: float = 0.0
     confidence: float = 0.5
-    
+
     def __post_init__(self):
         """Validate emotional values are in range"""
-        for field_name in ['anger', 'doubt', 'fear', 'compassion', 'confidence']:
+        for field_name in ["anger", "doubt", "fear", "compassion", "confidence"]:
             value = getattr(self, field_name)
             if not 0 <= value <= 1:
                 logger.warning(f"Clamping {field_name} from {value} to range [0,1]")
                 setattr(self, field_name, max(0, min(1, value)))
-    
+
     def to_dict(self):
         return asdict(self)
-    
+
     def modulate_temperature(self) -> float:
         """Calculate dialogue temperature based on emotional state"""
         try:
@@ -338,14 +381,16 @@ class EmotionalState:
             logger.error(f"Error calculating temperature: {e}")
             return 0.7  # Safe default
 
+
 @dataclass
 class CharacterMemory:
     """Character's working memory with thread-safe operations"""
+
     recent_events: List[str] = field(default_factory=list)
     key_observations: List[str] = field(default_factory=list)
     unresolved_tensions: List[str] = field(default_factory=list)
     _lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=False, repr=False)
-    
+
     async def add_event(self, event: str):
         """Thread-safe event addition"""
         async with self._lock:
@@ -354,9 +399,11 @@ class CharacterMemory:
                 self.recent_events.pop(0)
             logger.debug(f"Added event to memory: {event}")
 
+
 @dataclass
 class CharacterState:
     """Complete character state with validation"""
+
     id: str
     name: str
     backstory: Dict[str, Any]
@@ -369,7 +416,7 @@ class CharacterState:
     current_goal: str
     internal_conflict: Optional[str] = None
     relationship_map: Dict[str, Dict] = field(default_factory=dict)
-    
+
     def validate(self) -> bool:
         """Validate character state integrity"""
         try:
@@ -381,13 +428,13 @@ class CharacterState:
         except AssertionError as e:
             logger.error(f"Character validation failed: {e}")
             return False
-    
+
     def get_simulation_prompt(self, situation: str, emphasis: str = "neutral") -> str:
         """Generate prompt with error handling"""
         try:
             if not self.validate():
                 raise ValueError("Invalid character state")
-                
+
             context = f"""You are {self.name}.
             
 Background: {self.backstory.get('origin', 'Unknown')}
@@ -416,26 +463,30 @@ Respond with a JSON object containing:
 - emotional_shift: Changes to emotional state (as dictionary)
 """
             return context
-            
+
         except Exception as e:
             logger.error(f"Error generating prompt: {e}")
             raise SimulationError(f"Failed to generate prompt: {e}")
+
 
 # ============================================================================
 # ENHANCED SIMULATION ENGINE WITH CONCURRENCY CONTROL
 # ============================================================================
 
+
 class SimulationEngine:
     """Production-ready simulation engine with orchestrator/POML integration and caching"""
-    
-    def __init__(self, 
-                 llm_provider: Optional[LLMInterface] = None,
-                 max_concurrent: int = 10,
-                 retry_handler: Optional[RetryHandler] = None,
-                 cache: Optional[SimulationCache] = None,
-                 config: Optional[Dict] = None,
-                 orchestrator: Optional[Any] = None,
-                 use_poml: Optional[bool] = None):
+
+    def __init__(
+        self,
+        llm_provider: Optional[LLMInterface] = None,
+        max_concurrent: int = 10,
+        retry_handler: Optional[RetryHandler] = None,
+        cache: Optional[SimulationCache] = None,
+        config: Optional[Dict] = None,
+        orchestrator: Optional[Any] = None,
+        use_poml: Optional[bool] = None,
+    ):
         self.llm = llm_provider
         self.orchestrator = orchestrator
         self.simulation_results = []
@@ -447,93 +498,136 @@ class SimulationEngine:
         # POML adapter (optional)
         try:
             from story_engine.poml.lib.poml_integration import StoryEnginePOMLAdapter
+
             self.poml_adapter = StoryEnginePOMLAdapter()
         except Exception:
             self.poml_adapter = None
-        self.use_poml = bool(use_poml if use_poml is not None else self.config.get('simulation', {}).get('use_poml', False))
-        self.validate_schema = bool(self.config.get('simulation', {}).get('validate_schema', True))
+        self.use_poml = bool(
+            use_poml
+            if use_poml is not None
+            else self.config.get("simulation", {}).get("use_poml", False)
+        )
+        self.validate_schema = bool(
+            self.config.get("simulation", {}).get("validate_schema", True)
+        )
         # Persona strict mode settings
-        self.strict_persona = bool(self.config.get('features', {}).get('strict_persona_mode', False))
-        self.persona_threshold = int(self.config.get('features', {}).get('persona_adherence_threshold', 80))
-        
+        self.strict_persona = bool(
+            self.config.get("features", {}).get("strict_persona_mode", False)
+        )
+        self.persona_threshold = int(
+            self.config.get("features", {}).get("persona_adherence_threshold", 80)
+        )
+
         # Initialize cache if not provided but enabled in config
         if self.cache is None and create_cache and config:
             self.cache = create_cache(config)
-        
+
         backend_name = (
-            orchestrator.__class__.__name__ if orchestrator is not None else (
-                llm_provider.__class__.__name__ if llm_provider is not None else 'None'
+            orchestrator.__class__.__name__
+            if orchestrator is not None
+            else (
+                llm_provider.__class__.__name__ if llm_provider is not None else "None"
             )
         )
-        logger.info(f"Initialized SimulationEngine backend={backend_name} use_poml={self.use_poml}")
-        
-    async def run_simulation(self, 
-                            character: CharacterState,
-                            situation: str,
-                            emphasis: str = "neutral",
-                            temperature: Optional[float] = None,
-                            max_tokens: Optional[int] = None,
-                            world_pov: Optional[str] = None) -> Dict:
+        logger.info(
+            f"Initialized SimulationEngine backend={backend_name} use_poml={self.use_poml}"
+        )
+
+    async def run_simulation(
+        self,
+        character: CharacterState,
+        situation: str,
+        emphasis: str = "neutral",
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        world_pov: Optional[str] = None,
+    ) -> Dict:
         """Run single simulation with error handling, caching, and concurrency control"""
-        
+
         async with self.semaphore:  # Limit concurrent simulations
             try:
                 # Validate inputs
                 if not character.validate():
                     raise SimulationError("Invalid character state")
-                    
+
                 if temperature is None:
                     temperature = character.emotional_state.modulate_temperature()
-                
+
                 # Check cache first
                 if self.cache:
                     cached_result = await self.cache.get_simulation(
-                        character.id,
-                        situation,
-                        emphasis,
-                        temperature
+                        character.id, situation, emphasis, temperature
                     )
-                    
+
                     if cached_result:
-                        logger.info(f"Using cached simulation for {character.name}/{emphasis}")
+                        logger.info(
+                            f"Using cached simulation for {character.name}/{emphasis}"
+                        )
                         return cached_result
-                    
+
                 # Generate prompt (POML when enabled) using role-aware splits
                 if self.use_poml and self.poml_adapter:
                     roles = self.poml_adapter.get_character_prompt_roles(
                         character=asdict(character),
                         situation=situation,
                         emphasis=emphasis,
-                        world_pov=world_pov or ""
+                        world_pov=world_pov or "",
                     )
                 else:
-                    roles = {"system": "", "user": character.get_simulation_prompt(situation, emphasis)}
+                    roles = {
+                        "system": "",
+                        "user": character.get_simulation_prompt(situation, emphasis),
+                    }
 
                 # Prepare backend call
                 if self.orchestrator is not None:
+
                     async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
-                        kwargs = {"allow_fallback": True, "temperature": t, "session_id": character.id}
+                        kwargs = {
+                            "allow_fallback": True,
+                            "temperature": t,
+                            "session_id": character.id,
+                        }
                         if mt is not None:
                             kwargs["max_tokens"] = mt
                         # Avoid provider-specific response_format toggles; rely on strict prompting + parser
-                        return await self.orchestrator.generate(p.get('user',''), system=p.get('system',''), **kwargs)
+                        return await self.orchestrator.generate(
+                            p.get("user", ""), system=p.get("system", ""), **kwargs
+                        )
+
                 else:
+
                     async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
                         text = f"{p.get('system','')}\n\n{p.get('user','')}".strip()
-                        return await self.llm.generate_response(text, temperature=t, max_tokens=mt or 500)
+                        return await self.llm.generate_response(
+                            text, temperature=t, max_tokens=mt or 500
+                        )
 
                 # Call backend with retry logic
-                response = await self.retry_handler.execute_with_retry(_call, roles, temperature, max_tokens)
-                
+                response = await self.retry_handler.execute_with_retry(
+                    _call, roles, temperature, max_tokens
+                )
+
                 # Parse and validate structured response with robust fallbacks
-                raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
+                raw_text = (
+                    getattr(response, "content", None)
+                    or getattr(response, "text", "")
+                    or ""
+                )
+
                 def _default_payload():
                     return {
                         "dialogue": "",
                         "thought": "",
                         "action": "",
-                        "emotional_shift": {"anger": 0, "doubt": 0, "fear": 0, "compassion": 0}
+                        "emotional_shift": {
+                            "anger": 0,
+                            "doubt": 0,
+                            "fear": 0,
+                            "compassion": 0,
+                        },
                     }
+
                 def _coerce_payload(d: Dict[str, Any]) -> Dict[str, Any]:
                     out = _default_payload()
                     if isinstance(d, dict):
@@ -542,8 +636,14 @@ class SimulationEngine:
                         es = d.get("emotional_shift")
                         if not isinstance(es, dict):
                             es = {}
-                        out["emotional_shift"].update({k: es.get(k, 0) for k in ["anger", "doubt", "fear", "compassion"]})
+                        out["emotional_shift"].update(
+                            {
+                                k: es.get(k, 0)
+                                for k in ["anger", "doubt", "fear", "compassion"]
+                            }
+                        )
                     return out
+
                 try:
                     response_data = json.loads(raw_text)
                     if not isinstance(response_data, dict):
@@ -555,6 +655,7 @@ class SimulationEngine:
                     logger.error(f"Failed to parse/validate structured response: {e}")
                     # Try to extract JSON object from within the text
                     import re
+
                     text = raw_text.strip()
                     # Strip common code fences
                     if text.startswith("```"):
@@ -571,27 +672,48 @@ class SimulationEngine:
                     if not response_data.get("dialogue"):
                         response_data["dialogue"] = (raw_text or "").strip()[:800]
                     # No schema raise at this point; we proceed best-effort
-                
+
                 # Optionally enforce persona adherence with a single strict retry
                 if self.strict_persona:
                     try:
-                        meta = response_data.get('metadata') if isinstance(response_data, dict) else None
-                        adherence = int(meta.get('persona_adherence')) if isinstance(meta, dict) and meta.get('persona_adherence') is not None else None
-                        violations = meta.get('violations') if isinstance(meta, dict) else []
-                        needs_retry = (adherence is not None and adherence < self.persona_threshold) or (isinstance(violations, list) and len(violations) > 0)
+                        meta = (
+                            response_data.get("metadata")
+                            if isinstance(response_data, dict)
+                            else None
+                        )
+                        adherence = (
+                            int(meta.get("persona_adherence"))
+                            if isinstance(meta, dict)
+                            and meta.get("persona_adherence") is not None
+                            else None
+                        )
+                        violations = (
+                            meta.get("violations") if isinstance(meta, dict) else []
+                        )
+                        needs_retry = (
+                            adherence is not None and adherence < self.persona_threshold
+                        ) or (isinstance(violations, list) and len(violations) > 0)
                     except Exception:
                         needs_retry = False
                     if needs_retry:
-                        logger.warning(f"Persona adherence low (score={adherence}, violations={violations}). Retrying with strict persona instructions.")
+                        logger.warning(
+                            f"Persona adherence low (score={adherence}, violations={violations}). Retrying with strict persona instructions."
+                        )
                         strict_suffix = "\n\nSTRICT PERSONA MODE:\n- Obey guardrails precisely.\n- Do NOT use any forbidden lexicon; replace with period-appropriate alternatives.\n- Include a metadata.persona_adherence (0-100) and metadata.violations[].\n"
                         # Append strict instructions to the existing user role content
                         strict_roles = {
-                            'system': roles.get('system', ''),
-                            'user': (roles.get('user', '') + strict_suffix),
+                            "system": roles.get("system", ""),
+                            "user": (roles.get("user", "") + strict_suffix),
                         }
                         try:
-                            strict_resp = await _call(strict_roles, temperature, max_tokens)
-                            strict_text = getattr(strict_resp, 'content', None) or getattr(strict_resp, 'text', '') or ''
+                            strict_resp = await _call(
+                                strict_roles, temperature, max_tokens
+                            )
+                            strict_text = (
+                                getattr(strict_resp, "content", None)
+                                or getattr(strict_resp, "text", "")
+                                or ""
+                            )
                             parsed = json.loads(strict_text)
                             if isinstance(parsed, dict):
                                 response_data = parsed
@@ -605,52 +727,62 @@ class SimulationEngine:
                     "temperature": temperature,
                     "response": response_data,
                     "metadata": {
-                        **(getattr(response, 'metadata', {}) or {}),
+                        **(getattr(response, "metadata", {}) or {}),
                         "used_poml": self.use_poml,
-                        "template": "character_response.poml" if self.use_poml else "string_based",
+                        "template": (
+                            "character_response.poml"
+                            if self.use_poml
+                            else "string_based"
+                        ),
                     },
-                    "timestamp": getattr(response, 'timestamp', datetime.now().isoformat())
+                    "timestamp": getattr(
+                        response, "timestamp", datetime.now().isoformat()
+                    ),
                 }
-                
+
                 # Update character state if emotional shift provided
                 if "emotional_shift" in response_data:
-                    await self._apply_emotional_shift(character, response_data["emotional_shift"])
-                
+                    await self._apply_emotional_shift(
+                        character, response_data["emotional_shift"]
+                    )
+
                 # Cache the result
                 if self.cache:
                     await self.cache.set_simulation(
-                        character.id,
-                        situation,
-                        emphasis,
-                        temperature,
-                        result
+                        character.id, situation, emphasis, temperature, result
                     )
-                
-                logger.info(f"Simulation completed for {character.name} with emphasis '{emphasis}'")
+
+                logger.info(
+                    f"Simulation completed for {character.name} with emphasis '{emphasis}'"
+                )
                 return result
-                
+
             except Exception as e:
                 logger.error(f"Simulation failed: {e}\n{traceback.format_exc()}")
                 raise SimulationError(f"Simulation failed for {character.name}: {e}")
-    
-    async def _apply_emotional_shift(self, character: CharacterState, shifts: Dict[str, Any]):
+
+    async def _apply_emotional_shift(
+        self, character: CharacterState, shifts: Dict[str, Any]
+    ):
         """Apply emotional changes to character"""
         try:
             for emotion, delta in shifts.items():
                 # Normalize emotion key to lowercase
                 emotion = emotion.lower()
-                
+
                 if hasattr(character.emotional_state, emotion):
                     current = getattr(character.emotional_state, emotion)
-                    
+
                     # Parse delta value - handle strings, floats, etc.
                     if isinstance(delta, str):
                         # Remove + sign if present, convert to float
-                        delta = float(delta.replace('+', ''))
+                        delta = float(delta.replace("+", ""))
                     elif not isinstance(delta, (int, float)):
-                        logger.warning(f"Unexpected delta type for {emotion}: {type(delta)}")
+                        logger.warning(
+                            f"Unexpected delta type for {emotion}: {type(delta)}"
+                        )
                         continue
-                    
+
                     # If value is > 1, assume it's absolute not delta
                     if abs(delta) > 1:
                         new_value = max(0, min(1, delta))
@@ -659,52 +791,65 @@ class SimulationEngine:
 
                     # Apply trait-based modifiers from config (gentle nudge)
                     try:
-                        mods_cfg = (self.config.get('character') or {}).get('trait_modifiers') or {}
+                        mods_cfg = (self.config.get("character") or {}).get(
+                            "trait_modifiers"
+                        ) or {}
                         for trait in character.traits:
                             trait_mods = mods_cfg.get(trait)
                             if isinstance(trait_mods, dict) and emotion in trait_mods:
-                                new_value = max(0, min(1, new_value + float(trait_mods[emotion])))
+                                new_value = max(
+                                    0, min(1, new_value + float(trait_mods[emotion]))
+                                )
                     except Exception:
                         pass
-                    
+
                     setattr(character.emotional_state, emotion, new_value)
                     logger.debug(f"Updated {emotion}: {current:.2f} -> {new_value:.2f}")
         except Exception as e:
             logger.error(f"Failed to apply emotional shift: {e}")
-    
-    async def run_multiple_simulations(self,
-                                      character: CharacterState,
-                                      situation: str,
-                                      num_runs: int = 10,
-                                      emphases: Optional[List[str]] = None,
-                                      fixed_temperature: Optional[float] = None,
-                                      max_tokens: Optional[int] = None) -> List[Dict]:
+
+    async def run_multiple_simulations(
+        self,
+        character: CharacterState,
+        situation: str,
+        num_runs: int = 10,
+        emphases: Optional[List[str]] = None,
+        fixed_temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+    ) -> List[Dict]:
         """Run multiple simulations with varied parameters"""
-        
+
         if emphases is None:
             emphases = ["power", "doubt", "fear", "duty", "compassion", "pragmatic"]
-            
+
         temperatures = [0.7, 0.8, 0.9, 1.0, 1.1]
-        
+
         tasks = []
         for i in range(num_runs):
             emphasis = random.choice(emphases)
-            temp = fixed_temperature if fixed_temperature is not None else random.choice(temperatures)
-            
+            temp = (
+                fixed_temperature
+                if fixed_temperature is not None
+                else random.choice(temperatures)
+            )
+
             # Create variation in emotional state for diversity
             if i > 0:
                 # Make a copy to avoid modifying original
                 import copy
+
                 char_copy = copy.deepcopy(character)
                 char_copy.emotional_state.doubt += random.uniform(-0.1, 0.1)
                 char_copy.emotional_state.fear += random.uniform(-0.1, 0.1)
                 char_copy.emotional_state.__post_init__()  # Re-validate
             else:
                 char_copy = character
-            
-            task = self.run_simulation(char_copy, situation, emphasis, temp, max_tokens=max_tokens)
+
+            task = self.run_simulation(
+                char_copy, situation, emphasis, temp, max_tokens=max_tokens
+            )
             tasks.append(task)
-        
+
         # Gather results with error handling
         results = []
         for task in asyncio.as_completed(tasks):
@@ -714,7 +859,7 @@ class SimulationEngine:
             except Exception as e:
                 logger.error(f"Individual simulation failed: {e}")
                 # Continue with other simulations
-                
+
         self.simulation_results.extend(results)
         logger.info(f"Completed {len(results)}/{num_runs} simulations successfully")
         return results
@@ -749,7 +894,9 @@ class SimulationEngine:
                     character=asdict(character),
                     situation=situation,
                     emphasis=emphasis,
-                    previous_responses=[p.get('response', {}) for p in previous][-window:],
+                    previous_responses=[p.get("response", {}) for p in previous][
+                        -window:
+                    ],
                     world_pov=world_pov or "",
                 )
             elif self.use_poml and self.poml_adapter:
@@ -760,23 +907,43 @@ class SimulationEngine:
                     world_pov=world_pov or "",
                 )
             else:
-                roles = {"system": "", "user": character.get_simulation_prompt(situation, emphasis)}
+                roles = {
+                    "system": "",
+                    "user": character.get_simulation_prompt(situation, emphasis),
+                }
 
             # Call backend
             if self.orchestrator is not None:
+
                 async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
-                    kwargs = {"allow_fallback": True, "temperature": character.emotional_state.modulate_temperature(), "session_id": character.id}
+                    kwargs = {
+                        "allow_fallback": True,
+                        "temperature": character.emotional_state.modulate_temperature(),
+                        "session_id": character.id,
+                    }
                     if mt is not None:
                         kwargs["max_tokens"] = mt
-                    return await self.orchestrator.generate(p.get('user',''), system=p.get('system',''), **kwargs)
+                    return await self.orchestrator.generate(
+                        p.get("user", ""), system=p.get("system", ""), **kwargs
+                    )
+
             else:
+
                 async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
                     text = f"{p.get('system','')}\n\n{p.get('user','')}".strip()
-                    return await self.llm.generate_response(text, temperature=t, max_tokens=mt or 500)
+                    return await self.llm.generate_response(
+                        text, temperature=t, max_tokens=mt or 500
+                    )
 
             temp = character.emotional_state.modulate_temperature()
-            response = await self.retry_handler.execute_with_retry(_call, roles, temp, max_tokens)
-            raw_text = getattr(response, 'content', None) or getattr(response, 'text', '') or ''
+            response = await self.retry_handler.execute_with_retry(
+                _call, roles, temp, max_tokens
+            )
+            raw_text = (
+                getattr(response, "content", None)
+                or getattr(response, "text", "")
+                or ""
+            )
 
             # Parse best-effort
             try:
@@ -786,12 +953,15 @@ class SimulationEngine:
             except Exception:
                 # Fallback: try to find first JSON object
                 import re
+
                 m = re.search(r"\{[\s\S]*\}", raw_text)
                 payload = _as_dict(m.group(0)) if m else {"dialogue": raw_text[:800]}
 
             # Apply emotional shifts
             if isinstance(payload, dict) and payload.get("emotional_shift"):
-                await self._apply_emotional_shift(character, payload.get("emotional_shift", {}))
+                await self._apply_emotional_shift(
+                    character, payload.get("emotional_shift", {})
+                )
 
             result = {
                 "character_id": character.id,
@@ -804,16 +974,24 @@ class SimulationEngine:
                     "used_poml": self.use_poml,
                     "template": "character_response_iterative.poml",
                 },
-                "timestamp": getattr(response, 'timestamp', datetime.now().isoformat())
+                "timestamp": getattr(response, "timestamp", datetime.now().isoformat()),
             }
             previous.append(result)
 
             # Persona check review
             try:
                 if self.use_poml and self.poml_adapter:
-                    persona_check_prompt = self.poml_adapter.get_persona_check_prompt(asdict(character), payload)
-                    review_resp = await self.retry_handler.execute_with_retry(_call, persona_check_prompt, 0.2, 300)
-                    review_text = getattr(review_resp, 'content', None) or getattr(review_resp, 'text', '') or ''
+                    persona_check_prompt = self.poml_adapter.get_persona_check_prompt(
+                        asdict(character), payload
+                    )
+                    review_resp = await self.retry_handler.execute_with_retry(
+                        _call, persona_check_prompt, 0.2, 300
+                    )
+                    review_text = (
+                        getattr(review_resp, "content", None)
+                        or getattr(review_resp, "text", "")
+                        or ""
+                    )
                     review_json = _as_dict(review_text)
                     reviews.append({"iteration": i + 1, "persona_check": review_json})
             except Exception:
@@ -822,24 +1000,48 @@ class SimulationEngine:
             # Iterative comparative review (previous up to window)
             try:
                 if self.use_poml and self.poml_adapter and len(previous) > 1:
-                    iter_rev_prompt = self.poml_adapter.get_persona_iterative_review_prompt(
-                        asdict(character), payload, [p.get('response', {}) for p in previous[:-1]][-window:], self.persona_threshold
+                    iter_rev_prompt = (
+                        self.poml_adapter.get_persona_iterative_review_prompt(
+                            asdict(character),
+                            payload,
+                            [p.get("response", {}) for p in previous[:-1]][-window:],
+                            self.persona_threshold,
+                        )
                     )
-                    iter_rev_resp = await self.retry_handler.execute_with_retry(_call, iter_rev_prompt, 0.2, 400)
-                    iter_rev_text = getattr(iter_rev_resp, 'content', None) or getattr(iter_rev_resp, 'text', '') or ''
+                    iter_rev_resp = await self.retry_handler.execute_with_retry(
+                        _call, iter_rev_prompt, 0.2, 400
+                    )
+                    iter_rev_text = (
+                        getattr(iter_rev_resp, "content", None)
+                        or getattr(iter_rev_resp, "text", "")
+                        or ""
+                    )
                     iter_rev_json = _as_dict(iter_rev_text)
                     # Decide early stop if no regression and adherence >= threshold
                     adherence = (
-                        (payload.get('metadata') or {}).get('persona_adherence')
-                        if isinstance(payload.get('metadata'), dict) else None
+                        (payload.get("metadata") or {}).get("persona_adherence")
+                        if isinstance(payload.get("metadata"), dict)
+                        else None
                     )
                     if adherence is None:
                         # Try reviewer’s measure
-                        adherence = iter_rev_json.get('current_persona_adherence')
-                    if iter_rev_json.get('regression_detected') is False and isinstance(adherence, (int, float)) and adherence >= self.persona_threshold:
-                        reviews.append({"iteration": i + 1, "iterative_review": iter_rev_json, "early_stop": True})
+                        adherence = iter_rev_json.get("current_persona_adherence")
+                    if (
+                        iter_rev_json.get("regression_detected") is False
+                        and isinstance(adherence, (int, float))
+                        and adherence >= self.persona_threshold
+                    ):
+                        reviews.append(
+                            {
+                                "iteration": i + 1,
+                                "iterative_review": iter_rev_json,
+                                "early_stop": True,
+                            }
+                        )
                         break
-                    reviews.append({"iteration": i + 1, "iterative_review": iter_rev_json})
+                    reviews.append(
+                        {"iteration": i + 1, "iterative_review": iter_rev_json}
+                    )
             except Exception:
                 pass
 
@@ -849,7 +1051,9 @@ class SimulationEngine:
             "reviews": reviews,
         }
 
-    async def extract_beats(self, simulations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def extract_beats(
+        self, simulations: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Extract beat atoms from simulation results using POML reviewer."""
         if not self.poml_adapter or not self.use_poml:
             raise SimulationError("POML adapter not available for beat extraction")
@@ -858,16 +1062,21 @@ class SimulationEngine:
 
         async def _call_backend(prompt: str) -> Dict[str, Any]:
             if self.orchestrator is not None:
-                resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.2, max_tokens=500)
-                text = getattr(resp, 'text', '') or getattr(resp, 'content', '') or ''
+                resp = await self.orchestrator.generate(
+                    prompt, allow_fallback=True, temperature=0.2, max_tokens=500
+                )
+                text = getattr(resp, "text", "") or getattr(resp, "content", "") or ""
             else:
-                resp = await self.llm.generate_response(prompt, temperature=0.2, max_tokens=500)
-                text = getattr(resp, 'content', '')
+                resp = await self.llm.generate_response(
+                    prompt, temperature=0.2, max_tokens=500
+                )
+                text = getattr(resp, "content", "")
             # Best-effort JSON parse
             try:
                 return json.loads(text)
             except Exception:
                 import re
+
                 m = re.search(r"\{[\s\S]*\}", text)
                 return json.loads(m.group(0)) if m else {}
 
@@ -882,83 +1091,117 @@ class SimulationEngine:
 
         return beats
 
-    async def plan_scene(self, beats: List[Dict[str, Any]], objective: str = '', style: str = '') -> Dict[str, Any]:
+    async def plan_scene(
+        self, beats: List[Dict[str, Any]], objective: str = "", style: str = ""
+    ) -> Dict[str, Any]:
         """Create a compact scene plan from a list of beat atoms."""
         if not self.poml_adapter or not self.use_poml:
             raise SimulationError("POML adapter not available for scene planning")
 
-        prompt = self.poml_adapter.get_scene_plan_prompt(beats, objective=objective, style=style)
+        prompt = self.poml_adapter.get_scene_plan_prompt(
+            beats, objective=objective, style=style
+        )
 
         if self.orchestrator is not None:
-            resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.4, max_tokens=700)
-            text = getattr(resp, 'text', '') or getattr(resp, 'content', '') or ''
+            resp = await self.orchestrator.generate(
+                prompt, allow_fallback=True, temperature=0.4, max_tokens=700
+            )
+            text = getattr(resp, "text", "") or getattr(resp, "content", "") or ""
         else:
-            resp = await self.llm.generate_response(prompt, temperature=0.4, max_tokens=700)
-            text = getattr(resp, 'content', '')
+            resp = await self.llm.generate_response(
+                prompt, temperature=0.4, max_tokens=700
+            )
+            text = getattr(resp, "content", "")
 
         try:
             plan = json.loads(text)
         except Exception:
             import re
+
             m = re.search(r"\{[\s\S]*\}", text)
             plan = json.loads(m.group(0)) if m else {}
 
         return plan
 
-    async def continuity_check_scene(self, plan: Dict[str, Any], world_state: Dict[str, Any]) -> Dict[str, Any]:
+    async def continuity_check_scene(
+        self, plan: Dict[str, Any], world_state: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Run continuity check on a scene plan vs. world state."""
         if not self.poml_adapter or not self.use_poml:
             raise SimulationError("POML adapter not available for continuity check")
 
         prompt = self.poml_adapter.get_continuity_check_prompt(plan, world_state)
         if self.orchestrator is not None:
-            resp = await self.orchestrator.generate(prompt, allow_fallback=True, temperature=0.2, max_tokens=600)
-            text = getattr(resp, 'text', '') or getattr(resp, 'content', '') or ''
+            resp = await self.orchestrator.generate(
+                prompt, allow_fallback=True, temperature=0.2, max_tokens=600
+            )
+            text = getattr(resp, "text", "") or getattr(resp, "content", "") or ""
         else:
-            resp = await self.llm.generate_response(prompt, temperature=0.2, max_tokens=600)
-            text = getattr(resp, 'content', '')
+            resp = await self.llm.generate_response(
+                prompt, temperature=0.2, max_tokens=600
+            )
+            text = getattr(resp, "content", "")
         try:
             return json.loads(text)
         except Exception:
             import re
+
             m = re.search(r"\{[\s\S]*\}", text)
-            return json.loads(m.group(0)) if m else {"ok": False, "violations": [], "summary": "unparsed"}
+            return (
+                json.loads(m.group(0))
+                if m
+                else {"ok": False, "violations": [], "summary": "unparsed"}
+            )
 
     async def plan_scene_with_continuity(
         self,
         beats: List[Dict[str, Any]],
         world_state: Dict[str, Any],
-        objective: str = '',
-        style: str = '',
+        objective: str = "",
+        style: str = "",
         tolerance: int = 0,
         max_attempts: int = 2,
     ) -> Dict[str, Any]:
         """Plan a scene and enforce continuity with up to one guided retry."""
         attempt = 0
-        continuity_fix = ''
+        continuity_fix = ""
         last_report: Dict[str, Any] = {}
         while attempt < max_attempts:
-            plan = await self.plan_scene(beats, objective=objective, style=style if not continuity_fix else f"{style} (respect continuity)")
+            plan = await self.plan_scene(
+                beats,
+                objective=objective,
+                style=style if not continuity_fix else f"{style} (respect continuity)",
+            )
             report = await self.continuity_check_scene(plan, world_state)
             last_report = report
-            vcount = len(report.get('violations') or [])
-            if report.get('ok') or vcount <= tolerance:
-                plan.setdefault('continuity_report', report)
+            vcount = len(report.get("violations") or [])
+            if report.get("ok") or vcount <= tolerance:
+                plan.setdefault("continuity_report", report)
                 return plan
             # Prepare fix guidance for retry
-            guidance_list = report.get('fix_guidance') or []
+            guidance_list = report.get("fix_guidance") or []
             # Fall back to concatenated suggested_fix strings
-            if not guidance_list and report.get('violations'):
-                guidance_list = [v.get('suggested_fix') for v in report['violations'] if v.get('suggested_fix')]
-            continuity_fix = '\n'.join([g for g in guidance_list if g])[:800]
+            if not guidance_list and report.get("violations"):
+                guidance_list = [
+                    v.get("suggested_fix")
+                    for v in report["violations"]
+                    if v.get("suggested_fix")
+                ]
+            continuity_fix = "\n".join([g for g in guidance_list if g])[:800]
             attempt += 1
             # Re-plan with continuity_fix injected
-            plan = await self.plan_scene(beats, objective=objective, style=style,)
+            plan = await self.plan_scene(
+                beats,
+                objective=objective,
+                style=style,
+            )
         # Return last plan attempt plus report if could not fix
-        plan.setdefault('continuity_report', last_report)
+        plan.setdefault("continuity_report", last_report)
         return plan
 
-    def graph_from(self, beats: List[Dict[str, Any]], plan: Dict[str, Any]) -> NarrativeGraph:
+    def graph_from(
+        self, beats: List[Dict[str, Any]], plan: Dict[str, Any]
+    ) -> NarrativeGraph:
         """Build a small NarrativeGraph from beats and a plan."""
         g = NarrativeGraph()
         beat_nodes: List[str] = []
@@ -968,14 +1211,20 @@ class SimulationEngine:
         scene_id = g.add_scene(plan)
         # Chronological edges between beats, and to scene
         for i in range(len(beat_nodes) - 1):
-            g.link(beat_nodes[i], beat_nodes[i+1], edge_type='chronology', weight=1.0)
+            g.link(beat_nodes[i], beat_nodes[i + 1], edge_type="chronology", weight=1.0)
         for bn in beat_nodes:
-            g.link(bn, scene_id, edge_type='cause', weight=1.0)
+            g.link(bn, scene_id, edge_type="cause", weight=1.0)
         # Value shift edge if present in plan.exit_state
         try:
-            vs = (plan.get('exit_state') or {}).get('value_shift') or {}
+            vs = (plan.get("exit_state") or {}).get("value_shift") or {}
             if isinstance(vs, dict) and vs:
-                g.link(scene_id, scene_id, edge_type='value_shift', weight=1.0, data={'value_shift': vs})
+                g.link(
+                    scene_id,
+                    scene_id,
+                    edge_type="value_shift",
+                    weight=1.0,
+                    data={"value_shift": vs},
+                )
         except Exception:
             pass
         return g
@@ -991,107 +1240,97 @@ class SimulationEngine:
         if not isinstance(payload.get("emotional_shift", {}), dict):
             raise ValueError("emotional_shift must be an object")
 
+
 # ============================================================================
 # USAGE EXAMPLE
 # ============================================================================
 
+
 async def main():
     """Demonstrate production-ready character simulation with caching"""
-    
+
     # Load configuration
     config = {}
     config_path = Path("simulation_config.yaml")
     if config_path.exists() and yaml is not None:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f)
         logger.info("Loaded configuration from simulation_config.yaml")
-    
+
     # Initialize LLM provider based on config
-    llm_config = config.get('llm', {})
-    provider = llm_config.get('provider', 'mock')
-    
-    if provider == 'mock':
+    llm_config = config.get("llm", {})
+    provider = llm_config.get("provider", "mock")
+
+    if provider == "mock":
         llm = MockLLM()
-    elif provider == 'openai':
+    elif provider == "openai":
         llm = OpenAILLM(
-            api_key=llm_config['openai']['api_key'],
-            model=llm_config['openai']['model']
+            api_key=llm_config["openai"]["api_key"], model=llm_config["openai"]["model"]
         )
-    elif provider == 'lmstudio':
-        llm = LMStudioLLM(
-            endpoint=llm_config['lmstudio']['endpoint']
-        )
+    elif provider == "lmstudio":
+        llm = LMStudioLLM(endpoint=llm_config["lmstudio"]["endpoint"])
     else:
         llm = MockLLM()
-    
+
     # Check LLM health
     if not await llm.health_check():
         logger.error("LLM provider is not available")
         return
-    
+
     # Create cache
     cache = None
     if create_cache:
         cache = create_cache(config)
-    
+
     # Create simulation engine with configuration
-    sim_config = config.get('simulation', {})
+    sim_config = config.get("simulation", {})
     engine = SimulationEngine(
         llm_provider=llm,
-        max_concurrent=sim_config.get('max_concurrent', 10),
+        max_concurrent=sim_config.get("max_concurrent", 10),
         retry_handler=RetryHandler(
-            max_retries=sim_config.get('retry', {}).get('max_attempts', 3),
-            base_delay=sim_config.get('retry', {}).get('base_delay', 1.0)
+            max_retries=sim_config.get("retry", {}).get("max_attempts", 3),
+            base_delay=sim_config.get("retry", {}).get("base_delay", 1.0),
         ),
         cache=cache,
-        config=config
+        config=config,
     )
-    
+
     # Create character
     pilate = CharacterState(
         id="pontius_pilate",
         name="Pontius Pilate",
         backstory={
             "origin": "Roman equestrian from Samnium",
-            "career": "Prefect of Judaea (26-36 CE)"
+            "career": "Prefect of Judaea (26-36 CE)",
         },
         traits=["pragmatic", "ambitious", "anxious"],
         values=["order", "duty", "Roman law"],
         fears=["rebellion", "imperial disfavor"],
         desires=["peace", "advancement"],
-        emotional_state=EmotionalState(
-            anger=0.4,
-            doubt=0.7,
-            fear=0.6,
-            compassion=0.3
-        ),
+        emotional_state=EmotionalState(anger=0.4, doubt=0.7, fear=0.6, compassion=0.3),
         memory=CharacterMemory(
             recent_events=["Crowd demanding justice", "Wife's warning dream"]
         ),
         current_goal="Maintain order without rebellion",
-        internal_conflict="Duty to Rome vs. sense of justice"
+        internal_conflict="Duty to Rome vs. sense of justice",
     )
-    
+
     # Run simulations
     situation = "You face Jesus of Nazareth. The crowd demands action. You must decide."
-    
+
     try:
-        results = await engine.run_multiple_simulations(
-            pilate, 
-            situation, 
-            num_runs=3
-        )
-        
+        results = await engine.run_multiple_simulations(pilate, situation, num_runs=3)
+
         logger.info(f"Successfully generated {len(results)} simulations")
-        
+
         # Save results
         with open("simulation_results_v2.json", "w") as f:
             json.dump(results, f, indent=2)
-            
+
     except Exception as e:
         logger.error(f"Simulation failed: {e}")
         raise
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-

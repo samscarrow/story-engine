@@ -45,13 +45,17 @@ async def run(args: argparse.Namespace) -> int:
     chars: List[Dict[str, Any]] = _default_characters()
     if args.characters and Path(args.characters).exists():
         import yaml
+
         raw = yaml.safe_load(Path(args.characters).read_text()) or []
         if isinstance(raw, dict) and raw.get("characters"):
             chars = list(raw.get("characters") or [])
         elif isinstance(raw, list):
             chars = list(raw)
 
-    situation = args.situation or "A charged public confrontation where a verdict must be decided."
+    situation = (
+        args.situation
+        or "A charged public confrontation where a verdict must be decided."
+    )
     emphasis = args.emphasis or "neutral"
 
     # Concurrency
@@ -77,15 +81,22 @@ async def run(args: argparse.Namespace) -> int:
             text = getattr(resp, "text", None) or getattr(resp, "content", "") or ""
             return {"character": ch, "response": text}
 
-    results = await asyncio.gather(*[_simulate(c) for c in chars], return_exceptions=False)
+    results = await asyncio.gather(
+        *[_simulate(c) for c in chars], return_exceptions=False
+    )
 
     # Write outputs
     outdir = _ensure_outdir()
-    (outdir / "scene_multi.json").write_text(json.dumps({
-        "situation": situation,
-        "emphasis": emphasis,
-        "results": results,
-    }, indent=2))
+    (outdir / "scene_multi.json").write_text(
+        json.dumps(
+            {
+                "situation": situation,
+                "emphasis": emphasis,
+                "results": results,
+            },
+            indent=2,
+        )
+    )
 
     # Console sample
     lines: List[str] = []
@@ -103,8 +114,12 @@ async def run(args: argparse.Namespace) -> int:
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Run a simple multi-character scene via ai-lb + POML personas")
-    p.add_argument("--characters", help="Path to YAML with a list at 'characters:'", default=None)
+    p = argparse.ArgumentParser(
+        description="Run a simple multi-character scene via ai-lb + POML personas"
+    )
+    p.add_argument(
+        "--characters", help="Path to YAML with a list at 'characters:'", default=None
+    )
     p.add_argument("--situation", help="Situation prompt", default=None)
     p.add_argument("--emphasis", help="Emphasis tag", default="neutral")
     p.add_argument("--temperature", type=float, default=0.8)
@@ -120,4 +135,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,4 +1,3 @@
-
 import sqlite3
 import json
 from abc import ABC, abstractmethod
@@ -68,14 +67,16 @@ class SQLiteConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS workflow_outputs (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         workflow_name TEXT NOT NULL,
                         output_data TEXT NOT NULL,
                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
-                """)
+                """
+                )
                 self.conn.commit()
             except sqlite3.Error as e:
                 print(f"Error creating table: {e}")
@@ -86,10 +87,13 @@ class SQLiteConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO workflow_outputs (workflow_name, output_data)
                     VALUES (?, ?)
-                """, (workflow_name, json.dumps(output_data)))
+                """,
+                    (workflow_name, json.dumps(output_data)),
+                )
                 self.conn.commit()
             except sqlite3.Error as e:
                 print(f"Error storing output: {e}")
@@ -100,9 +104,12 @@ class SQLiteConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT output_data FROM workflow_outputs WHERE workflow_name = ?
-                """, (workflow_name,))
+                """,
+                    (workflow_name,),
+                )
                 rows = cursor.fetchall()
                 return [json.loads(row[0]) for row in rows]
             except sqlite3.Error as e:
@@ -127,7 +134,9 @@ class PostgreSQLConnection(DatabaseConnection):
         sslkey: str | None = None,
     ):
         if not psycopg2:
-            raise ImportError("psycopg2-binary is not installed. Please run 'pip install psycopg2-binary'")
+            raise ImportError(
+                "psycopg2-binary is not installed. Please run 'pip install psycopg2-binary'"
+            )
         self.db_name = db_name
         self.user = user
         self.password = password
@@ -179,14 +188,16 @@ class PostgreSQLConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS workflow_outputs (
                         id SERIAL PRIMARY KEY,
                         workflow_name VARCHAR(255) NOT NULL,
                         output_data JSONB NOT NULL,
                         timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                     )
-                """)
+                """
+                )
                 self.conn.commit()
                 cursor.close()
             except psycopg2.Error as e:
@@ -198,10 +209,13 @@ class PostgreSQLConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO workflow_outputs (workflow_name, output_data)
                     VALUES (%s, %s)
-                """, (workflow_name, json.dumps(output_data)))
+                """,
+                    (workflow_name, json.dumps(output_data)),
+                )
                 self.conn.commit()
                 cursor.close()
             except psycopg2.Error as e:
@@ -213,9 +227,12 @@ class PostgreSQLConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT output_data FROM workflow_outputs WHERE workflow_name = %s
-                """, (workflow_name,))
+                """,
+                    (workflow_name,),
+                )
                 rows = cursor.fetchall()
                 cursor.close()
                 return [row[0] for row in rows]
@@ -237,7 +254,9 @@ class OracleConnection(DatabaseConnection):
         wallet_password: str | None = None,
     ):
         if not oracledb:
-            raise ImportError("oracledb is not installed. Please run 'pip install oracledb'")
+            raise ImportError(
+                "oracledb is not installed. Please run 'pip install oracledb'"
+            )
         self.user = user
         self.password = password
         self.dsn = dsn
@@ -258,20 +277,23 @@ class OracleConnection(DatabaseConnection):
             if self.wallet_location:
                 import os
                 from pathlib import Path
+
                 # Ensure TNS_ADMIN is absolute path
                 wallet_path = Path(self.wallet_location).resolve()
-                os.environ['TNS_ADMIN'] = str(wallet_path)
+                os.environ["TNS_ADMIN"] = str(wallet_path)
                 print(f"Set TNS_ADMIN to: {wallet_path}")
-            
+
             # For Oracle Autonomous Database, use connection with config_dir
             # The wallet files handle SSL/TLS automatically
-            wallet_path = Path(self.wallet_location).resolve() if self.wallet_location else None
-            
+            wallet_path = (
+                Path(self.wallet_location).resolve() if self.wallet_location else None
+            )
+
             self.conn = oracledb.connect(
                 user=self.user,
                 password=self.password,
                 dsn=self.dsn,
-                config_dir=str(wallet_path) if wallet_path else None
+                config_dir=str(wallet_path) if wallet_path else None,
             )
             self._create_table()
         except oracledb.Error as e:
@@ -289,7 +311,8 @@ class OracleConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     BEGIN
                         EXECUTE IMMEDIATE 'CREATE TABLE workflow_outputs (
                             id NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
@@ -303,7 +326,8 @@ class OracleConnection(DatabaseConnection):
                                 RAISE;
                             END IF;
                     END;
-                """)
+                """
+                )
                 self.conn.commit()
                 cursor.close()
             except oracledb.Error as e:
@@ -315,13 +339,16 @@ class OracleConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO workflow_outputs (workflow_name, output_data)
                     VALUES (:workflow_name, :output_data)
-                """, {
-                    'workflow_name': workflow_name,
-                    'output_data': json.dumps(output_data)
-                })
+                """,
+                    {
+                        "workflow_name": workflow_name,
+                        "output_data": json.dumps(output_data),
+                    },
+                )
                 self.conn.commit()
                 cursor.close()
             except oracledb.Error as e:
@@ -333,11 +360,14 @@ class OracleConnection(DatabaseConnection):
         if self.conn:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT output_data FROM workflow_outputs 
                     WHERE workflow_name = :workflow_name
                     ORDER BY timestamp DESC
-                """, {'workflow_name': workflow_name})
+                """,
+                    {"workflow_name": workflow_name},
+                )
                 rows = cursor.fetchall()
                 cursor.close()
                 results: List[Dict[str, Any]] = []

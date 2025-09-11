@@ -6,7 +6,12 @@ import uuid
 
 from story_engine.core.core.common.config import load_config
 from story_engine.core.core.common.logging import configure_json_logging
-from story_engine.core.core.messaging.interface import InMemoryBus, Message, Consumer, Publisher
+from story_engine.core.core.messaging.interface import (
+    InMemoryBus,
+    Message,
+    Consumer,
+    Publisher,
+)
 from story_engine.core.core.messaging.rabbitmq import RabbitMQBus
 from story_engine.core.core.contracts.plot import PlotRequest
 from story_engine.core.core.contracts.topics import PLOT_REQUEST

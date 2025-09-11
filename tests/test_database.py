@@ -1,9 +1,9 @@
-﻿
-import unittest
+﻿import unittest
 import os
 import tempfile
 import shutil
 from story_engine.core.storage.database import SQLiteConnection
+
 
 class TestDatabase(unittest.TestCase):
 
@@ -59,6 +59,6 @@ class TestDatabase(unittest.TestCase):
         self.assertIn(output_data1, retrieved_outputs)
         self.assertIn(output_data2, retrieved_outputs)
 
-if __name__ == '__main__':
-    unittest.main()
 
+if __name__ == "__main__":
+    unittest.main()

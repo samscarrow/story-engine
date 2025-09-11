@@ -52,7 +52,9 @@ def _parse_eval(text: str) -> Dict[str, float]:
     return scores
 
 
-@pytest.mark.parametrize("spec", PROMPTS, ids=[p.get("id", str(i)) for i, p in enumerate(PROMPTS)])
+@pytest.mark.parametrize(
+    "spec", PROMPTS, ids=[p.get("id", str(i)) for i, p in enumerate(PROMPTS)]
+)
 def test_golden_parallel_minimal(spec: Dict[str, Any]) -> None:
     engine = OrchestratedStoryEngine(use_poml=True)
 
@@ -101,11 +103,16 @@ def test_golden_parallel_minimal(spec: Dict[str, Any]) -> None:
 
         # Scene from first beat
         scene = await engine.generate_scene(beats[0], req.characters)
-        assert isinstance(scene.get("scene_description", ""), str) and len(scene["scene_description"]) > 0
+        assert (
+            isinstance(scene.get("scene_description", ""), str)
+            and len(scene["scene_description"]) > 0
+        )
 
         # Dialogue for the first character when available
         if req.characters:
-            dlg = await engine.generate_dialogue(scene, req.characters[0], "Opening line")
+            dlg = await engine.generate_dialogue(
+                scene, req.characters[0], "Opening line"
+            )
             assert isinstance(dlg, dict)
             assert "dialogue" in dlg and len(dlg["dialogue"]) > 0
             assert isinstance(dlg["dialogue"][0]["line"], str)

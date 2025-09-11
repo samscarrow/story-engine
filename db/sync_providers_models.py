@@ -6,6 +6,7 @@ import json
 import argparse
 from typing import Any, Dict
 
+
 # Ensure required DB environment is present even outside direnv
 def _ensure_oracle_env() -> None:
     """Load .env/.env.oracle and normalize to ORACLE_* variables only.
@@ -44,7 +45,10 @@ def _connect_oracle():
     try:
         import oracledb  # type: ignore
     except Exception:
-        print("oracledb is required. Install with: uv add oracledb (or pip)", file=sys.stderr)
+        print(
+            "oracledb is required. Install with: uv add oracledb (or pip)",
+            file=sys.stderr,
+        )
         raise
 
     dsn = os.environ.get("ORACLE_DSN")
@@ -57,11 +61,16 @@ def _connect_oracle():
 
 def _load_orchestrator(config_path: str):
     sys.path.append("src")
-    from story_engine.core.orchestration.orchestrator_loader import create_orchestrator_from_yaml
+    from story_engine.core.orchestration.orchestrator_loader import (
+        create_orchestrator_from_yaml,
+    )
+
     return create_orchestrator_from_yaml(config_path)
 
 
-def _upsert_provider(cur, name: str, ptype: str, endpoint: str, meta: Dict[str, Any]) -> int:
+def _upsert_provider(
+    cur, name: str, ptype: str, endpoint: str, meta: Dict[str, Any]
+) -> int:
     pid_var = cur.var(int)
     cur.execute(
         """
@@ -88,10 +97,7 @@ def _upsert_provider(cur, name: str, ptype: str, endpoint: str, meta: Dict[str, 
 
 def _upsert_model(cur, provider_id: int, model: Dict[str, Any]) -> int:
     model_key = (
-        model.get("id")
-        or model.get("name")
-        or model.get("model")
-        or model.get("slug")
+        model.get("id") or model.get("name") or model.get("model") or model.get("slug")
     )
     if not model_key:
         return -1
@@ -120,8 +126,12 @@ def _upsert_model(cur, provider_id: int, model: Dict[str, Any]) -> int:
         display_name=model.get("id") or model.get("name") or model.get("model"),
         family=None,
         size_b=None,
-        capabilities=json.dumps(model.get("capabilities")) if model.get("capabilities") else None,
-        modalities=json.dumps(model.get("modalities")) if model.get("modalities") else None,
+        capabilities=(
+            json.dumps(model.get("capabilities")) if model.get("capabilities") else None
+        ),
+        modalities=(
+            json.dumps(model.get("modalities")) if model.get("modalities") else None
+        ),
         defaults=None,
         mid=mid_var,
     )
@@ -132,8 +142,12 @@ def _upsert_model(cur, provider_id: int, model: Dict[str, Any]) -> int:
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Sync providers/models from orchestrator into DB")
-    ap.add_argument("--config", default="config.yaml", help="Orchestrator YAML config path")
+    ap = argparse.ArgumentParser(
+        description="Sync providers/models from orchestrator into DB"
+    )
+    ap.add_argument(
+        "--config", default="config.yaml", help="Orchestrator YAML config path"
+    )
     args = ap.parse_args()
 
     orch = _load_orchestrator(args.config)
@@ -153,7 +167,9 @@ def main():
         for name, info in health.items():
             endpoint = info.get("endpoint") or ""
             meta = {k: v for k, v in info.items() if k not in ("models",)}
-            pid = _upsert_provider(cur, name=name, ptype="custom", endpoint=str(endpoint), meta=meta)
+            pid = _upsert_provider(
+                cur, name=name, ptype="custom", endpoint=str(endpoint), meta=meta
+            )
             ms = info.get("models") or []
             for m in ms:
                 if isinstance(m, dict):

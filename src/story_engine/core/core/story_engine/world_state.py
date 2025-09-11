@@ -27,17 +27,17 @@ class WorldState:
         return asdict(self)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'WorldState':
+    def from_dict(d: Dict[str, Any]) -> "WorldState":
         return WorldState(
-            facts=d.get('facts', {}),
-            relationships=d.get('relationships', {}),
-            timeline=d.get('timeline', []),
-            availability=d.get('availability', {}),
-            locations=d.get('locations', {}),
-            props=d.get('props', {}),
+            facts=d.get("facts", {}),
+            relationships=d.get("relationships", {}),
+            timeline=d.get("timeline", []),
+            availability=d.get("availability", {}),
+            locations=d.get("locations", {}),
+            props=d.get("props", {}),
         )
 
-    def merge(self, other: 'WorldState') -> 'WorldState':
+    def merge(self, other: "WorldState") -> "WorldState":
         base = self.to_dict()
         od = other.to_dict()
         for k in base.keys():
@@ -58,4 +58,3 @@ class WorldState:
         rel = self.relationships.get(key, {})
         rel.update(kwargs)
         self.relationships[key] = rel
-

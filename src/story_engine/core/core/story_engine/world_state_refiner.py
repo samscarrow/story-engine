@@ -13,7 +13,12 @@ class WorldStateRefiner:
     Produces a patch that is applied conservatively (upserts-first) to avoid destructive edits.
     """
 
-    def __init__(self, orchestrator: Any, poml_adapter: Any, manager: Optional[WorldStateManager] = None):
+    def __init__(
+        self,
+        orchestrator: Any,
+        poml_adapter: Any,
+        manager: Optional[WorldStateManager] = None,
+    ):
         self.orchestrator = orchestrator
         self.poml = poml_adapter
         self.manager = manager or WorldStateManager()
@@ -45,11 +50,11 @@ class WorldStateRefiner:
                 temperature=0.2,
                 max_tokens=2000,
             )
-            enhanced = getattr(resp, 'text', '') or ''
+            enhanced = getattr(resp, "text", "") or ""
             # Optionally save the enhanced POML to a file
             if output_poml_path:
                 try:
-                    with open(output_poml_path, 'w', encoding='utf-8') as f:
+                    with open(output_poml_path, "w", encoding="utf-8") as f:
                         f.write(enhanced)
                 except Exception:
                     pass
@@ -82,12 +87,13 @@ class WorldStateRefiner:
                 temperature=0.3,
                 max_tokens=1200,
             )
-            text = getattr(resp, 'text', '') or ''
+            text = getattr(resp, "text", "") or ""
             patch: Dict[str, Any] = {}
             try:
                 patch = json.loads(text)
             except Exception:
                 import re
+
                 m = re.search(r"\{[\s\S]*\}", text)
                 if m:
                     try:
@@ -99,7 +105,9 @@ class WorldStateRefiner:
                 old = self.manager.workflow_name
                 try:
                     self.manager.workflow_name = workflow_name
-                    self.manager.save(refined, meta={"refined": True, "mode": "json_patch"})
+                    self.manager.save(
+                        refined, meta={"refined": True, "mode": "json_patch"}
+                    )
                 finally:
                     self.manager.workflow_name = old
             else:
@@ -126,39 +134,39 @@ class WorldStateRefiner:
         if not isinstance(patch, dict):
             return world
         base = world.to_dict()
-        up = patch.get('upserts') or {}
-        de = patch.get('deletes') or {}
+        up = patch.get("upserts") or {}
+        de = patch.get("deletes") or {}
 
         # Facts
-        facts = base.get('facts') or {}
-        for k, v in (up.get('facts') or {}).items():
+        facts = base.get("facts") or {}
+        for k, v in (up.get("facts") or {}).items():
             facts[str(k)] = v
-        for k in (de.get('facts') or []):
+        for k in de.get("facts") or []:
             facts.pop(str(k), None)
-        base['facts'] = facts
+        base["facts"] = facts
 
         # Relationships
-        rels = base.get('relationships') or {}
-        for k, v in (up.get('relationships') or {}).items():
+        rels = base.get("relationships") or {}
+        for k, v in (up.get("relationships") or {}).items():
             rels[str(k)] = v
-        for k in (de.get('relationships') or []):
+        for k in de.get("relationships") or []:
             rels.pop(str(k), None)
-        base['relationships'] = rels
+        base["relationships"] = rels
 
         # Availability/locations/props (overwrite keys)
-        for section in ['availability', 'locations', 'props']:
+        for section in ["availability", "locations", "props"]:
             src = base.get(section) or {}
             for k, v in (up.get(section) or {}).items():
                 src[str(k)] = v
             base[section] = src
 
         # Timeline: append-only (safe). If items include an "id" matching an existing, replace it.
-        tl: List[Dict[str, Any]] = list(base.get('timeline') or [])
-        for ev in (up.get('timeline') or []):
-            if isinstance(ev, dict) and 'id' in ev:
+        tl: List[Dict[str, Any]] = list(base.get("timeline") or [])
+        for ev in up.get("timeline") or []:
+            if isinstance(ev, dict) and "id" in ev:
                 replaced = False
                 for i, cur in enumerate(tl):
-                    if isinstance(cur, dict) and cur.get('id') == ev.get('id'):
+                    if isinstance(cur, dict) and cur.get("id") == ev.get("id"):
                         tl[i] = ev
                         replaced = True
                         break
@@ -166,7 +174,6 @@ class WorldStateRefiner:
                     tl.append(ev)
             else:
                 tl.append(ev)
-        base['timeline'] = tl
+        base["timeline"] = tl
 
         return WorldState.from_dict(base)
-

@@ -6,7 +6,12 @@ import uuid
 
 from story_engine.core.core.common.config import load_config
 from story_engine.core.core.common.logging import configure_json_logging
-from story_engine.core.core.messaging.interface import InMemoryBus, Message, Consumer, Publisher
+from story_engine.core.core.messaging.interface import (
+    InMemoryBus,
+    Message,
+    Consumer,
+    Publisher,
+)
 from story_engine.core.core.messaging.rabbitmq import RabbitMQBus
 from story_engine.core.core.contracts.scene import SceneRequest
 from story_engine.core.core.contracts.topics import SCENE_REQUEST, SCENE_DONE
@@ -30,9 +35,7 @@ def _handle_scene_request(msg: Message, pub: Publisher) -> None:
     log = logging.getLogger("scene_worker")
     req = SceneRequest.validate(msg.payload)
     scene_id = str(uuid.uuid4())
-    scene_description = (
-        f"Scene for beat '{req.beat_name or 'unknown'}': placeholder description based on prompt '{req.prompt[:40]}'."
-    )
+    scene_description = f"Scene for beat '{req.beat_name or 'unknown'}': placeholder description based on prompt '{req.prompt[:40]}'."
     done = Message(
         type=SCENE_DONE,
         payload={

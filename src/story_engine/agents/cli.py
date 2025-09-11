@@ -3,7 +3,9 @@ from .loader import list_agents, get_agent_prompt
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="story-engine-agents", description="Agent prompt utilities")
+    parser = argparse.ArgumentParser(
+        prog="story-engine-agents", description="Agent prompt utilities"
+    )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("list")
@@ -23,4 +25,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

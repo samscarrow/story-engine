@@ -1,11 +1,8 @@
-
 import asyncio
 import aiohttp
 
-ENDPOINTS = [
-    "http://localhost:1234",
-    "http://sams-macbook-pro:1234"
-]
+ENDPOINTS = ["http://localhost:1234", "http://sams-macbook-pro:1234"]
+
 
 async def discover_models():
     """Queries the /v1/models endpoint on all specified hosts."""
@@ -18,7 +15,7 @@ async def discover_models():
                 async with session.get(url, timeout=10) as response:
                     if response.status == 200:
                         data = await response.json()
-                        models = data.get('data', [])
+                        models = data.get("data", [])
                         if models:
                             print(f"  ✅ Success! Found {len(models)} model(s):")
                             for model in models:
@@ -29,6 +26,7 @@ async def discover_models():
                         print(f"  ❌ Failed with status: {response.status}")
             except Exception as e:
                 print(f"  ❌ Failed to connect: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(discover_models())
