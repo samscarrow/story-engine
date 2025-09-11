@@ -11,7 +11,7 @@ def run_demo_and_get_outdir(env: dict[str, str]) -> Path:
     # 1) Respect explicit PYTHON in env
     # 2) If VENV_PATH is provided (direnv-managed), use its python if present
     # 3) Fall back to the current interpreter (sys.executable)
-    python_exec = env.get("PYTHON") or os.environ.get("PYTHON")
+    python_exec = env.get("PYTHON", os.environ.get("PYTHON"))
     if not python_exec:
         venv_path = env.get("VENV_PATH") or os.environ.get("VENV_PATH")
         if venv_path:
