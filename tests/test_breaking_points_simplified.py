@@ -168,7 +168,6 @@ class SimplifiedBreakingPointTester:
                 
                 # Check results
                 exceptions = [r for r in results if isinstance(r, Exception)]
-                successful = [r for r in results if not isinstance(r, Exception)]
                 
                 total_time = end_time - start_time
                 

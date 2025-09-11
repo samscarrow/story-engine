@@ -587,7 +587,9 @@ class OutputAuthenticityAuditor:
                         )
                     
                     # Check for mock error responses
-                    if 'return' in except_content and any(mock in except_content for mock in ['mock', 'fake', 'placeholder']):
+                    if 'return' in except_content and any(
+                        mock in except_content for mock in ['mock', 'fake', 'placeholder']
+                    ):
                         self.add_evidence(
                             location=f"{file_path}:{self.get_line_number(content, match.start())}",
                             evidence_type="mock_error_response",
