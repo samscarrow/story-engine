@@ -6,15 +6,29 @@ import uuid
 
 from story_engine.core.core.common.config import load_config
 from story_engine.core.core.common.logging import configure_json_logging
-from story_engine.core.core.messaging.interface import (
-    InMemoryBus,
-    Message,
-    Consumer,
-    Publisher,
-)
+
+try:
+    from story_engine.core.core.messaging.interface import (
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
+except Exception:  # fallback to legacy alias path
+    from story_engine.core.messaging.interface import (  # type: ignore
+        InMemoryBus,
+        Message,
+        Consumer,
+        Publisher,
+    )
 from story_engine.core.core.messaging.rabbitmq import RabbitMQBus
 from story_engine.core.core.contracts.scene import SceneRequest
-from story_engine.core.core.contracts.topics import SCENE_REQUEST, SCENE_DONE
+
+try:
+    from story_engine.core.core.contracts.topics import SCENE_REQUEST, SCENE_DONE
+except Exception:  # fallback definitions if aliasing fails in constrained envs
+    SCENE_REQUEST = "scene.request"  # type: ignore
+    SCENE_DONE = "scene.done"  # type: ignore
 from story_engine.core.core.messaging.helpers import register_dlq_logger
 
 
