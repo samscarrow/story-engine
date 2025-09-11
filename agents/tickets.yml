@@ -66,3 +66,43 @@ tickets:
     assignees: []
     body_from_agent: true
 
+  # Lint/CI refactor tasks
+  - key: LINT-01
+    title: "LINT-01: Orchestrator import ordering (E402) cleanup"
+    agent: orchestrator_refactorer
+    milestone: "M8 CI & Docs"
+    labels: ["agent:orchestrator_refactorer", "area:orchestrator", "type:chore", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: false
+
+  - key: LINT-02
+    title: "LINT-02: Character engine long-line fixes (E501)"
+    agent: tooling_engineer
+    milestone: "M8 CI & Docs"
+    labels: ["agent:tooling_engineer", "area:engine", "type:chore", "priority:p2", "size:M"]
+    assignees: []
+    body_from_agent: false
+
+  - key: LINT-03
+    title: "LINT-03: Messaging RabbitMQ module syntax/structure fix"
+    agent: engine_integrator
+    milestone: "M8 CI & Docs"
+    labels: ["agent:engine_integrator", "area:engine", "type:chore", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: false
+
+  - key: LINT-04
+    title: "LINT-04: Narrative modules cleanup (E402/E501)"
+    agent: docs_ci_writer
+    milestone: "M8 CI & Docs"
+    labels: ["agent:docs_ci_writer", "area:engine", "type:chore", "priority:p2", "size:M"]
+    assignees: []
+    body_from_agent: false
+
+  - key: CI-02
+    title: "CI-02: Re-enable lint gating after cleanup"
+    agent: docs_ci_writer
+    milestone: "M8 CI & Docs"
+    labels: ["agent:docs_ci_writer", "area:ci", "type:chore", "priority:p1", "size:S"]
+    assignees: []
+    body_from_agent: false
