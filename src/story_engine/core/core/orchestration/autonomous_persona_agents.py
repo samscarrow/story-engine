@@ -138,7 +138,6 @@ class TemplateRepository:
         similarity_threshold: float = 0.7
     ) -> List[str]:
         """Find templates similar to the given context"""
-        context_hash = self.generate_template_id(context)
         similar_templates = []
         
         # Simple similarity based on context requirements overlap

@@ -1,18 +1,17 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
 """
 Complex Group Dynamics Simulation
 Advanced multi-character scenarios with faction dynamics, alliances, and betrayals
 """
 
+import logging
 import asyncio
 import json
 import aiohttp
 from typing import Dict, List, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 class Faction(Enum):
     """Character factions"""

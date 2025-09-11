@@ -1,12 +1,9 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
 """
 Multi-Character Interaction System
 Complex character interactions and group dynamics simulation
 """
 
+import logging
 import asyncio
 import json
 import aiohttp
@@ -14,6 +11,8 @@ import time
 from typing import Dict, List
 from dataclasses import dataclass, field
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 class RelationshipType(Enum):
     """Types of character relationships"""
@@ -383,7 +382,7 @@ async def run_trial_simulation():
     print(f"📍 {len(scenes)} scenes with multiple perspectives\n")
     
     for scene in scenes:
-        results = await engine.run_interaction(scene)
+        await engine.run_interaction(scene)
         await asyncio.sleep(1)  # Pause between scenes
     
     # Display final states

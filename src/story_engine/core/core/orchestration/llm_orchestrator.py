@@ -17,6 +17,7 @@ import traceback
 
 from .model_filters import filter_models
 from .db_logging import GenerationDBLogger
+from .response_normalizer import normalize_openai_chat
 
 # Configure detailed logging
 logging.basicConfig(
@@ -24,8 +25,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-from .response_normalizer import normalize_openai_chat
 
 
 class ModelProvider(Enum):
@@ -486,7 +485,6 @@ class LLMOrchestrator:
         start = asyncio.get_event_loop().time()
         try:
             response = await provider.generate(prompt, system=system, **kwargs)
-            status = "ok"
         except Exception as e:
             # Log failure path to DB if enabled, then re-raise
             latency_ms = (asyncio.get_event_loop().time() - start) * 1000

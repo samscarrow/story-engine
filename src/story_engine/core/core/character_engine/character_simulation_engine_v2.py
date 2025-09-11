@@ -6,6 +6,7 @@ Production-ready implementation with LLM abstraction and error handling
 import json
 import asyncio
 import logging
+import aiohttp
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Any
@@ -583,9 +584,13 @@ class SimulationEngine:
                     if needs_retry:
                         logger.warning(f"Persona adherence low (score={adherence}, violations={violations}). Retrying with strict persona instructions.")
                         strict_suffix = "\n\nSTRICT PERSONA MODE:\n- Obey guardrails precisely.\n- Do NOT use any forbidden lexicon; replace with period-appropriate alternatives.\n- Include a metadata.persona_adherence (0-100) and metadata.violations[].\n"
-                        strict_prompt = f"{prompt}{strict_suffix}"
+                        # Append strict instructions to the existing user role content
+                        strict_roles = {
+                            'system': roles.get('system', ''),
+                            'user': (roles.get('user', '') + strict_suffix),
+                        }
                         try:
-                            strict_resp = await _call(strict_prompt, temperature, max_tokens)
+                            strict_resp = await _call(strict_roles, temperature, max_tokens)
                             strict_text = getattr(strict_resp, 'content', None) or getattr(strict_resp, 'text', '') or ''
                             parsed = json.loads(strict_text)
                             if isinstance(parsed, dict):
