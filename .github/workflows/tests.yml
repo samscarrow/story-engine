@@ -38,6 +38,14 @@ jobs:
       STORY_ENGINE_LIVE: '1'
       LLM_TEST_TIMEOUT: '20'
     steps:
+      - name: Join Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      - name: Verify Tailscale session
+        run: tailscale status
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -47,6 +55,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
           pip install pytest
+      - name: Point config to ai-lb over Tailscale
+        run: |
+          sed -i 's#http://localhost:8000#http://pc-sam.dory-phrygian\.ts\.net:8000#' config.yaml
+      - name: Quick connectivity check (optional)
+        run: |
+          curl -sSf http://pc-sam.dory-phrygian.ts.net:8000/v1/models | head -c 200 || true
       - name: Run slow-marked tests
         env:
           PYTHONPATH: src
