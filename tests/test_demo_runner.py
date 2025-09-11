@@ -2,12 +2,27 @@ import json
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 
 def run_demo_and_get_outdir(env: dict[str, str]) -> Path:
+    # Resolve Python interpreter:
+    # 1) Respect explicit PYTHON in env
+    # 2) If VENV_PATH is provided (direnv-managed), use its python if present
+    # 3) Fall back to the current interpreter (sys.executable)
+    python_exec = env.get("PYTHON") or os.environ.get("PYTHON")
+    if not python_exec:
+        venv_path = env.get("VENV_PATH") or os.environ.get("VENV_PATH")
+        if venv_path:
+            candidate = Path(venv_path) / "bin" / "python"
+            if candidate.exists():
+                python_exec = str(candidate)
+    if not python_exec:
+        python_exec = sys.executable
+
     cmd = [
-        env.get("PYTHON") or os.environ.get("PYTHON") or str((Path(__file__).resolve().parents[1] / ".venv" / "bin" / "python")),
+        python_exec,
         "-m",
         "story_engine.scripts.run_demo",
         "--runs",
