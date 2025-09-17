@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "story-engine"
-version = "0.0.1"
+version = "0.0.2"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.12.15",
@@ -13,8 +13,18 @@ dependencies = [
     "pyyaml>=6.0.2",
 ]
 
+[project.scripts]
+# CLI to render POML templates
+story-engine-poml = "story_engine.poml.cli:main"
+# Demo runner (mock or live orchestrator)
+story-engine-demo = "story_engine.scripts.run_demo:main"
+# HPQ pipeline demo
+story-engine-hpq = "story_engine.scripts.run_hpq:main"
+# Story Engine primary CLI
+story = "story_engine.cli:main"
+
 [dependency-groups]
-dev = ["uv","pytest","black","ruff","setuptools>=67","wheel"]
+dev = ["uv","pytest","pytest-asyncio>=0.23","black","ruff","setuptools>=67","wheel"]
 
 [tool.uv]
 default-groups = ["dev"]
@@ -51,3 +61,19 @@ select = ["E", "F"]
 
 #[tool.ruff.lint.per-file-ignores]
 # (No per-file ignores; demo_prompt.py refactored to avoid E402.)
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+# Ship POML templates, configs, and ancillary docs
+"story_engine" = [
+  "poml/poml/templates/**/*.poml",
+  "poml/poml/config/*.yaml",
+  "poml/poml/**/*.md",
+  "**/*.json",
+]
