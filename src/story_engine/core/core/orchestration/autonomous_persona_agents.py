@@ -4,6 +4,7 @@ Each persona is an autonomous agent that can create, modify, and optimize its ow
 """
 
 import logging
+from story_engine.core.core.common.observability import log_exception, ErrorCodes, get_logger
 import json
 import hashlib
 from typing import Dict, Any, Optional, List
@@ -523,7 +524,10 @@ class AutonomousPersonaAgent(ABC):
                 recursive_results.append(recursive_result)
 
             except Exception as e:
-                logger.error(f"Recursive simulation failed: {e}")
+                try:
+                    log_exception(get_logger("persona_agents"), code=ErrorCodes.AI_LB_UNAVAILABLE, component="persona_agents", exc=e)
+                except Exception:
+                    logger.error(f"Recursive simulation failed: {e}")
 
         return recursive_results
 
@@ -752,6 +756,9 @@ class PersonaAgentFactory:
                 )
                 logger.info(f"Created agent for {persona.value}")
             except Exception as e:
-                logger.error(f"Failed to create agent for {persona.value}: {e}")
+                try:
+                    log_exception(get_logger("persona_agents"), code=ErrorCodes.CONFIG_INVALID, component="persona_agents", exc=e)
+                except Exception:
+                    logger.error(f"Failed to create agent for {persona.value}: {e}")
 
         return agents

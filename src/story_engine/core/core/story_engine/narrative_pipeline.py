@@ -16,7 +16,10 @@ from story_engine.core.cache.response_cache import ResponseCache
 from story_engine.core.common.config import load_config
 from story_engine.core.domain.models import NarrativeArc, SceneDescriptor
 
+from story_engine.core.core.common.observability import get_logger, log_exception, ErrorCodes
+
 logger = logging.getLogger(__name__)
+_obs = get_logger("pipeline")
 
 
 class NarrativePipeline:
@@ -27,6 +30,7 @@ class NarrativePipeline:
         model: str = "google/gemma-2-27b",
         orchestrator: Optional[Any] = None,
         use_poml: Optional[bool] = None,
+        job_id: Optional[str] = None,
     ):
         """Initialize pipeline.
 
@@ -44,6 +48,7 @@ class NarrativePipeline:
 
         # Orchestrator (preferred) and POML adapter (optional)
         self.orchestrator = orchestrator
+        self.job_id = job_id
 
         # Load unified configuration early so we can honor feature flags
         try:
@@ -79,7 +84,11 @@ class NarrativePipeline:
         }
 
     async def generate_with_llm(
-        self, prompt: str, context: str = "", temperature: float = 0.8
+        self,
+        prompt: str,
+        context: str = "",
+        temperature: float = 0.8,
+        context_extra: Optional[Dict[str, Any]] = None,
     ) -> str:
         """LLM call via orchestrator if available, else legacy HTTP path."""
         provider_name = "active" if self.orchestrator is not None else "legacy-http"
@@ -97,15 +106,57 @@ class NarrativePipeline:
             try:
                 # Combine system content and user prompt if context provided
                 full_prompt = f"{context}\n\n{prompt}" if context else prompt
+                # Prompt hygiene: unresolved placeholders and max length
+                import re
+                max_len = int((self._config or {}).get("limits", {}).get("max_prompt_chars", 12000))
+                truncated = False
+                if len(full_prompt) > max_len:
+                    full_prompt = full_prompt[:max_len]
+                    truncated = True
+                unresolved = bool(re.search(r"\{\{[^}]+\}\}", full_prompt))
+                _obs.info(
+                    "pipeline.llm.request",
+                    extra={
+                        "temperature": temperature,
+                        "ctx_len": len(context or ""),
+                        "prompt_len": len(prompt),
+                        "job_id": self.job_id,
+                        "truncated": truncated,
+                        "unresolved_placeholders": unresolved,
+                        **(context_extra or {}),
+                    },
+                )
+                t0 = asyncio.get_event_loop().time()
                 resp = await self.orchestrator.generate(
-                    full_prompt, allow_fallback=True, temperature=temperature
+                    full_prompt,
+                    allow_fallback=True,
+                    temperature=temperature,
+                    budget_ms=int((self._config or {}).get("limits", {}).get("per_call_budget_ms", 0)),
                 )
                 text = getattr(resp, "text", "") or ""
                 if text:
                     self.response_cache.set(cache_key, text)
+                elapsed_ms = int((asyncio.get_event_loop().time() - t0) * 1000)
+                _obs.info(
+                    "pipeline.llm.response",
+                    extra={
+                        "ok": bool(text),
+                        "len": len(text),
+                        "job_id": self.job_id,
+                        "elapsed_ms": elapsed_ms,
+                        **(context_extra or {}),
+                    },
+                )
                 return text
             except Exception as e:  # fallback to legacy
-                logger.warning(f"Orchestrator generation failed, falling back: {e}")
+                log_exception(
+                    _obs,
+                    code=ErrorCodes.GEN_TIMEOUT if "timeout" in str(e).lower() else ErrorCodes.AI_LB_UNAVAILABLE,
+                    component="pipeline",
+                    exc=e,
+                    job_id=self.job_id,
+                    **(context_extra or {}),
+                )
 
         # Legacy path (direct HTTP)
         payload = {
@@ -132,7 +183,14 @@ class NarrativePipeline:
                         self.response_cache.set(cache_key, text)
                     return text
         except Exception as e:
-            logger.error(f"LLM error: {e}")
+            log_exception(
+                _obs,
+                code=ErrorCodes.AI_LB_UNAVAILABLE,
+                component="legacy-http",
+                exc=e,
+                job_id=self.job_id,
+                **(context_extra or {}),
+            )
             return ""
 
     def build_arc(self, title: str, premise: str, num_beats: int = 5) -> NarrativeArc:
@@ -193,6 +251,7 @@ Scene situation:"""
         situation = await self.generate_with_llm(
             prompt,
             temperature=scene_profile.get("temperature", 0.8),
+            context_extra={"job_id": self.job_id, "beat": beat.get("name")},
         )
 
         if not situation:
@@ -206,7 +265,11 @@ Scene situation:"""
             f"For this scene: {situation[:100]}... Provide ONE sensory detail each: "
             "sight, sound, atmosphere. Brief, evocative."
         )
-        sensory_response = await self.generate_with_llm(sensory_prompt, temperature=0.9)
+        sensory_response = await self.generate_with_llm(
+            sensory_prompt,
+            temperature=0.9,
+            context_extra={"job_id": self.job_id, "beat": beat.get("name"), "phase": "sensory"},
+        )
 
         sensory = self._parse_sensory(sensory_response)
 
@@ -318,6 +381,11 @@ Scene situation:"""
             response = await self.generate_with_llm(
                 prompt=dialogue_prompt,
                 temperature=dlg_profile.get("temperature", 0.9),
+                context_extra={
+                    "job_id": self.job_id,
+                    "beat": scene.name,
+                    "character_id": character.get("id"),
+                },
             )
         else:
             # Legacy inline prompt
@@ -337,6 +405,11 @@ Respond with JSON only:
                 prompt=f"Scene: {scene.situation}\n\nHow do you respond?",
                 context=char_context,
                 temperature=dlg_profile.get("temperature", 0.9),
+                context_extra={
+                    "job_id": self.job_id,
+                    "beat": scene.name,
+                    "character_id": character.get("id"),
+                },
             )
 
         # Parse JSON from response
@@ -362,6 +435,7 @@ Respond with JSON only:
     ):
         """Run the complete narrative pipeline"""
 
+        _obs.info("pipeline.step", extra={"step": "start", "job_id": self.job_id, "title": title})
         print(f"\n{'='*80}")
         print(f"📚 NARRATIVE PIPELINE: {title}")
         print(f"{'='*80}")
@@ -379,6 +453,14 @@ Respond with JSON only:
         previous_context = ""
 
         for beat in arc.beats:
+            _obs.info(
+                "pipeline.step",
+                extra={
+                    "step": "craft_scene",
+                    "job_id": self.job_id,
+                    "beat": beat.get("name"),
+                },
+            )
             print(f"\n  Beat {beat['id']+1}: {beat['name']}")
             scene = await self.craft_scene(beat, characters, previous_context)
             print(f"    📍 Location: {scene.location}")
@@ -408,12 +490,31 @@ Respond with JSON only:
             for char_dict in characters:
                 char_id = char_dict["id"]
                 if char_id in scene.characters:
+                    _obs.info(
+                        "pipeline.step",
+                        extra={
+                            "step": "simulate_character",
+                            "job_id": self.job_id,
+                            "beat": scene.name,
+                            "character_id": char_id,
+                        },
+                    )
                     print(
                         f"\n💭 {char_dict['name']} ({scene.emphasis.get(char_id, 'neutral')} emphasis):"
                     )
 
                     start = time.time()
                     response = await self.simulate_character_response(scene, char_dict)
+                    _obs.info(
+                        "pipeline.step",
+                        extra={
+                            "step": "simulate_character_done",
+                            "job_id": self.job_id,
+                            "beat": scene.name,
+                            "character_id": char_id,
+                            "elapsed_ms": int(elapsed * 1000),
+                        },
+                    )
                     elapsed = time.time() - start
 
                     print(f"  💬 \"{response.get('dialogue', 'N/A')[:100]}\"")

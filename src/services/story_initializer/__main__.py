@@ -6,7 +6,7 @@ import time
 import uuid
 
 from story_engine.core.core.common.config import load_config
-from story_engine.core.core.common.logging import configure_json_logging
+from story_engine.core.core.common.observability import init_logging_from_env
 from story_engine.core.core.messaging.interface import InMemoryBus, Message, Publisher
 from story_engine.core.core.contracts.topics import (
     PLOT_REQUEST,
@@ -53,7 +53,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    configure_json_logging()
+    init_logging_from_env()
     log = logging.getLogger("story_initializer")
     cfg = load_config()
     bus = _select_bus(cfg)

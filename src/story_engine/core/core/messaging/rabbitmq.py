@@ -22,6 +22,7 @@ import threading
 import time
 from dataclasses import asdict
 from typing import Dict, Optional
+from ..common.observability import set_correlation_id
 
 from .interface import Consumer, Handler, Message, Publisher
 
@@ -250,6 +251,10 @@ class RabbitMQBus(Publisher, Consumer):
                         attempts = 0
                         while True:
                             try:
+                                try:
+                                    set_correlation_id(msg.correlation_id or msg.id)
+                                except Exception:
+                                    pass
                                 self._handlers[topic](msg, self)
                                 ch.basic_ack(delivery_tag=method.delivery_tag)
                                 break

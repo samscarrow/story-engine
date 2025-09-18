@@ -29,3 +29,14 @@ jobs:
           PREFERRED_MODELS: 'llama-3.2-3b-instruct,qwen2.5-3b-instruct,phi-3.5-mini'
         run: pytest -n auto --dist=loadfile -m silver -q
 
+      - name: Aggregate generation errors (ndjson ledger)
+        if: ${{ always() }}
+        run: |
+          python scripts/aggregate_generation_errors.py || true
+      - name: Upload lb_metrics.ndjson artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lb-metrics-ndjson
+          path: lb_metrics.ndjson
+          if-no-files-found: ignore

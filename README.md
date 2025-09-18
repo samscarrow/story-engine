@@ -1,5 +1,7 @@
 # Character Simulation Engine - Story Engine
 
+[![Orchestrator Suite](https://github.com/samscarrow/story-engine/actions/workflows/orchestrator.yml/badge.svg?branch=main)](https://github.com/samscarrow/story-engine/actions/workflows/orchestrator.yml)
+
 [![CI](https://github.com/samscarrow/story-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/samscarrow/story-engine/actions/workflows/ci.yml)
 [![Tests](https://github.com/samscarrow/story-engine/actions/workflows/tests.yml/badge.svg)](https://github.com/samscarrow/story-engine/actions/workflows/tests.yml)
 
@@ -94,6 +96,34 @@ python dramatic_emotional_journey.py
 python interactive_experiment.py
 ```
 
+### Environment & direnv (recommended)
+
+- This repo uses direnv to manage an isolated virtualenv per project under `~/.venvs`.
+- The `.envrc` provided will auto-create a venv at `~/.venvs/<slug>-py<major.minor>` and activate it on `direnv allow`.
+- To set up:
+  - Install direnv (https://direnv.net/), hook your shell, then run:
+    - `direnv allow`
+  - The venv path is exported as `VENV_PATH`; `PATH` is updated so `python`/`pip` use that venv.
+  - The helper `scripts/venv-create.sh` is invoked automatically by `.envrc` if needed.
+
+Using uv with direnv
+- `.envrc` aliases uv to use the active venv: `uv -> uv --active`, `uv-sync`, and `uv-pip` are provided.
+- Avoid creating a project-local `.venv` (which confuses tools). If you see a warning, remove it: `rm -rf .venv`.
+- Common flows:
+  - Full dev sync: `uv-sync --group dev`
+  - Install a single package into the active venv: `uv-pip install pytest-asyncio`
+  - Upgrade pytest stack: `uv-pip install -U pytest pytest-asyncio`
+
+Deprecation note
+- Using a local `.venv` directory is deprecated in this repo. Prefer direnv + `~/.venvs`.
+- CI does not rely on `.venv`; it uses the runner’s Python and installs into an ephemeral environment.
+
+Quick venv commands (without direnv)
+- Create/activate the standard venv: `bash scripts/venv-create.sh && source "$VENV_PATH/bin/activate"`
+- Install dev deps: `pip install -e . pytest pytest-asyncio`
+- Run focused tests: `pytest -k lmstudio -q`
+
+
 ### Real LLM Integration
 ```bash
 # Setup guide and test
@@ -106,12 +136,52 @@ python real_llm_emotional_sequence.py
 ### ai-lb Integration
 - See `docs/ai-lb-integration.md` for a concise setup and verification guide.
 
+### Observability & Metrics
+- Orchestrator metrics and logging guidance: `docs/observability.md`.
+
+### E2E (Live LM Studio)
+- Use your running LM Studio instance for end‑to‑end checks:
+  - Ensure LM Studio API is running (default `http://127.0.0.1:1234`).
+  - `export LM_ENDPOINT=http://127.0.0.1:1234` (or your URL)
+  - `make e2e` (tests will skip if LM Studio isn’t reachable)
+  - CI: trigger the “E2E (LMStudio Live)” workflow manually and pass `lm_endpoint`.
+
+### Database Health
+- Oracle connectivity check:
+  - Env: set `DB_TYPE=oracle` and provide `DB_USER`, `DB_PASSWORD`, `DB_DSN`, `DB_WALLET_LOCATION` (or `ORACLE_*` equivalents)
+  - Health check: `python scripts/db_health.py --verbose` (use `--json` for machine output)
+  - Minimal fast healthcheck: `python scripts/oracle_healthcheck.py --pool`
+- Quick smoke test (insert/fetch): `python scripts/db_smoke_test.py --workflow oracle_smoke`
+- Optional pooling/tuning via env:
+  - `ORACLE_USE_POOL=1`, `ORACLE_POOL_MIN=1`, `ORACLE_POOL_MAX=4`, `ORACLE_POOL_INC=1`, `ORACLE_POOL_TIMEOUT=60`
+  - Retries: `ORACLE_RETRY_ATTEMPTS=3`, `ORACLE_RETRY_BACKOFF=1.0`
+
+#### Local Oracle XE (Docker)
+- Start a local Oracle XE for development with:
+  - `docker compose -f docker-compose.oracle.yml up -d`
+- Configure env (no wallet needed):
+  - `DB_TYPE=oracle`, `DB_USER=STORY_DB`, `DB_PASSWORD=story_pwd`, `DB_DSN=localhost/XEPDB1`
+- Verify:
+  - `python diagnose_oracle_connection.py` or `pytest -q test_simple_oracle.py`
+- See `docs/oracle/local_dev.md` for details and troubleshooting.
+
+#### Logging Configuration
+- Configure logging via env (applies to CLI and workers):
+  - `LOG_FORMAT=json|text`, `LOG_LEVEL=DEBUG|INFO|WARNING|ERROR`, `LOG_DEST=stdout|stderr|file`, `LOG_FILE_PATH=story_engine.log`, `LOG_SERVICE_NAME=story-engine`
+  - Optional sampling: `LOG_SAMPLING_RATE=0.1` (10% info sampling)
+  - Entry points call `init_logging_from_env()` from `core.common.observability`.
+  - Context is automatic: after init, all logs include `service`, `trace_id`, and (when available) `correlation_id`. Message bus consumers propagate `correlation_id` for each handled message.
+
 ### Model Selection
-- The engine can auto-select a viable text model when `LM_MODEL` and provider model are unset.
+- The engine can auto-select a viable text model when `LM_MODEL` and provider model are unset (LB routing). Use `model="auto"` for flexible routing (default).
 - Prefer small models via:
   - Env: `LM_PREFER_SMALL=1`
   - YAML: `llm.prefer_small_models: true`
-- One-off selection helper:
+- Pinning (optional):
+  - Use `LM_MODEL` to pin a specific model id (e.g., `LM_MODEL=qwen/qwen3-8b`).
+  - `LMSTUDIO_MODEL` is deprecated; if set and `LM_MODEL` is not, it will be mapped to `LM_MODEL` for backward compatibility.
+
+One-off selection helper:
   - Print chosen model: `python scripts/choose_model.py`
   - Prefer small: `python scripts/choose_model.py --prefer-small`
   - Export for current shell: `eval "$(python scripts/choose_model.py --prefer-small --export)"`

@@ -4,7 +4,7 @@ import logging
 import time
 
 from story_engine.core.core.common.config import load_config
-from story_engine.core.core.common.logging import configure_json_logging
+from story_engine.core.core.common.observability import init_logging_from_env, timing
 
 try:
     from story_engine.core.core.messaging.interface import (
@@ -46,24 +46,25 @@ def _select_bus(cfg) -> Publisher | Consumer:
 
 def _handle_dialogue_request(msg: Message, pub: Publisher) -> None:
     log = logging.getLogger("dialogue_worker")
-    req = DialogueRequest.validate(msg.payload)
-    text = f"[{req.character_id}] says: placeholder dialogue."
-    done = Message(
-        type=DIALOGUE_DONE,
-        payload={
-            "job_id": req.job_id,
-            "scene_id": req.scene_id,
-            "text": text,
-        },
-        correlation_id=msg.correlation_id or req.job_id,
-        causation_id=msg.id,
-    )
-    log.info("dialogue.done", extra={"job_id": req.job_id, "message_id": done.id})
-    pub.publish(DIALOGUE_DONE, done)
+    with timing("worker.dialogue.handle_ms", component="dialogue_worker"):
+        req = DialogueRequest.validate(msg.payload)
+        text = f"[{req.character_id}] says: placeholder dialogue."
+        done = Message(
+            type=DIALOGUE_DONE,
+            payload={
+                "job_id": req.job_id,
+                "scene_id": req.scene_id,
+                "text": text,
+            },
+            correlation_id=msg.correlation_id or req.job_id,
+            causation_id=msg.id,
+        )
+        log.info("dialogue.done", extra={"job_id": req.job_id, "message_id": done.id})
+        pub.publish(DIALOGUE_DONE, done)
 
 
 def main() -> None:
-    configure_json_logging()
+    init_logging_from_env()
     cfg = load_config()
     bus = _select_bus(cfg)
 

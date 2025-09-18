@@ -1,0 +1,86 @@
+name: Oracle Tests (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_pytest_quiet:
+        description: "Run pytest with -q"
+        required: false
+        default: "true"
+
+jobs:
+  oracle-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      oracle:
+        image: gvenzl/oracle-xe:21-slim
+        ports:
+          - 1521:1521
+        env:
+          ORACLE_PASSWORD: oracle
+          APP_USER: STORY_DB
+          APP_USER_PASSWORD: story_pwd
+          ORACLE_DATABASE: XEPDB1
+        options: >-
+          --health-cmd "bash -c 'echo exit | sqlplus -L / as sysdba || exit 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 60
+
+    env:
+      DB_TYPE: oracle
+      DB_USER: STORY_DB
+      DB_PASSWORD: story_pwd
+      DB_DSN: localhost/XEPDB1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          pip install -e .
+          pip install pytest pytest-asyncio
+
+      - name: Wait for Oracle XE to accept connections
+        run: |
+          python - << 'PY'
+          import os, time
+          import sys
+          import oracledb
+
+          user = os.getenv('DB_USER')
+          pwd = os.getenv('DB_PASSWORD')
+          dsn = os.getenv('DB_DSN')
+          deadline = time.time() + 600
+          attempt = 0
+          while time.time() < deadline:
+            attempt += 1
+            try:
+              conn = oracledb.connect(user=user, password=pwd, dsn=dsn)
+              cur = conn.cursor()
+              cur.execute("SELECT 1 FROM DUAL")
+              print("Oracle XE is ready (attempt", attempt, ")")
+              sys.exit(0)
+            except Exception as e:
+              print("Waiting for Oracle XE...", str(e))
+              time.sleep(5)
+          print("Oracle XE did not become ready in time", file=sys.stderr)
+          sys.exit(1)
+          PY
+
+      - name: Run Oracle-marked tests
+        run: |
+          if [ "${{ inputs.run_pytest_quiet }}" = "true" ]; then
+            pytest -q -m oracle
+          else
+            pytest -m oracle -vv
+          fi
+

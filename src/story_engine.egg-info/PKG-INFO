@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: story-engine
-Version: 0.0.1
+Version: 0.0.2
 Requires-Python: >=3.12
 Requires-Dist: aiohttp>=3.12.15
 Requires-Dist: dotenv>=0.9.9

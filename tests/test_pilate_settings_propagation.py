@@ -83,10 +83,14 @@ def test_pilate_profiles_and_prompts_propagate_with_poml():
             "Courtyard before the praetorium; the crowd murmurs as Pilate listens."
         )
         scene = await engine.generate_scene(beat, req.characters)
-        assert spy.all_kwargs[-1].get("temperature") == 0.8
-        assert spy.all_kwargs[-1].get("max_tokens") == 1000
-        assert "Characters Present" in spy.prompts[-1]
-        assert "Pontius Pilate" in spy.prompts[-1]
+        # Stage 1 (Creative)
+        assert spy.all_kwargs[-2].get("temperature") == 0.8
+        assert spy.all_kwargs[-2].get("max_tokens") == 1000
+        assert "Characters Present" in spy.prompts[-2]
+        assert "Pontius Pilate" in spy.prompts[-2]
+        # Stage 2 (Structuring)
+        assert spy.all_kwargs[-1].get("temperature") == 0.1
+        assert "json" in spy.all_kwargs[-1].get("system", "").lower()
         assert "scene_description" in scene
 
         # Dialogue → Two-stage call

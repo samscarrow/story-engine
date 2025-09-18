@@ -22,6 +22,7 @@ class GenerationDBLogger:
     def __init__(self) -> None:
         self.enabled = _env_truthy(os.environ.get("DB_LOG_GENERATIONS"))
         self._oracledb = None
+        self._pool = None
         if not self.enabled:
             return
         # Basic env configuration
@@ -40,11 +41,37 @@ class GenerationDBLogger:
             # Library unavailable → disable silently
             self.enabled = False
 
+    def _ensure_pool(self):
+        assert self._oracledb is not None
+        if self._pool is not None:
+            return
+        try:
+            # Optional pool sizing via env
+            pool_min = int(os.environ.get("ORACLE_POOL_MIN", "1"))
+            pool_max = int(os.environ.get("ORACLE_POOL_MAX", "4"))
+            pool_inc = int(os.environ.get("ORACLE_POOL_INC", "1"))
+            pool_timeout = int(os.environ.get("ORACLE_POOL_TIMEOUT", "60"))
+            self._pool = self._oracledb.create_pool(
+                user=self._user,
+                password=self._password,
+                dsn=self._dsn,
+                min=pool_min,
+                max=pool_max,
+                increment=pool_inc,
+                timeout=pool_timeout,
+                homogeneous=True,
+            )
+        except Exception:
+            # Pool creation may fail on some platforms; fall back to direct connects.
+            self._pool = None
+
     def _connect(self):
         assert self._oracledb is not None
-        return self._oracledb.connect(
-            user=self._user, password=self._password, dsn=self._dsn
-        )
+        # Prefer pooled connections when available
+        self._ensure_pool()
+        if self._pool is not None:
+            return self._pool.acquire()
+        return self._oracledb.connect(user=self._user, password=self._password, dsn=self._dsn)
 
     def _ensure_provider(self, cur, name: str, ptype: str, endpoint: str) -> int:
         pid = cur.var(int)

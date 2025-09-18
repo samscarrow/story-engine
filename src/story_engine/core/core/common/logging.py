@@ -23,10 +23,55 @@ class JsonLogFormatter(logging.Formatter):
             "message": record.getMessage(),
             "time": self.formatTime(record, "%Y-%m-%dT%H:%M:%S%z"),
         }
-        # Attach common context fields if present in extra
-        for key in ("correlation_id", "trace_id", "message_id", "job_id", "step"):
+
+        # Attach common structured context fields if present
+        base_keys = (
+            "correlation_id",
+            "trace_id",
+            "message_id",
+            "job_id",
+            "step",
+            "service",
+            "endpoint",
+            "model",
+            "provider",
+            "beat",
+            "character_id",
+            "elapsed_ms",
+            "ok",
+            "len",
+            "event",
+            "attempt",
+            "retry_in_s",
+            "error",
+            "error_code",
+        )
+        # Basic redaction of sensitive keys
+        redact = {"api_key", "authorization", "password", "db_password", "oracle_password"}
+        for key in base_keys:
             if hasattr(record, key):
-                payload[key] = getattr(record, key)
+                val = getattr(record, key)
+                payload[key] = "[REDACTED]" if key in redact else val
+
+        # Include any additional extras provided via LoggerAdapter/extra
+        std_attrs = {
+            "name", "msg", "args", "levelname", "levelno", "pathname", "filename",
+            "module", "exc_info", "exc_text", "stack_info", "lineno", "funcName",
+            "created", "msecs", "relativeCreated", "thread", "threadName", "processName",
+            "process", "asctime",
+        }
+        for k, v in record.__dict__.items():
+            if k in payload or k in std_attrs or k.startswith("_"):
+                continue
+            if callable(v):
+                continue
+            try:
+                payload[k] = "[REDACTED]" if k in redact else v
+                # Ensure JSON-serializable
+                json.dumps(payload[k])
+            except Exception:
+                payload[k] = str(v)
+
         return json.dumps(payload, ensure_ascii=False)
 
 

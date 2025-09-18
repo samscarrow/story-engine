@@ -1,0 +1,24 @@
+services:
+  oracle-xe:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: story_engine_oracle_xe
+    restart: unless-stopped
+    env_file:
+      - .env.oracle
+    environment:
+      # SYS/SYSTEM password for the container database (fallback if not set in .env.oracle)
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-oracle}
+      # Create an application user based on DB_* variables from .env.oracle
+      APP_USER: ${DB_USER}
+      APP_USER_PASSWORD: ${DB_PASSWORD}
+      # Pluggable database name (default for XE)
+      ORACLE_DATABASE: ${ORACLE_DATABASE:-XEPDB1}
+    ports:
+      - "1521:1521"   # SQL*Net
+      - "5500:5500"   # EM Express (optional)
+    volumes:
+      - oracle_xe_data:/opt/oracle/oradata
+
+volumes:
+  oracle_xe_data:
+    driver: local

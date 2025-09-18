@@ -5,6 +5,7 @@ Now supports YAML-based orchestrator loader and simple response caching.
 """
 
 import asyncio
+import os
 import json
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
@@ -350,6 +351,9 @@ class OrchestratedStoryEngine:
         Returns the chosen id, or None if no action was necessary.
         """
         import os as _os
+        # Optional client-side auto-pick (disabled by default)
+        if str(_os.environ.get("LM_CLIENT_MODEL_AUTOPICK", "")).strip().lower() not in {"1","true","yes","on"}:
+            return None
 
         # If env already set, respect it
         existing = _os.environ.get("LM_MODEL")
@@ -705,7 +709,12 @@ Format: Metric: Score/10 - Brief reason"""
                 focus=enhancement_focus,
                 orchestrator=self.orchestrator,
             )
-            return enhancement_data.get("enhanced_content", content)
+            enhanced_text = str(enhancement_data.get("enhanced_content", "")).strip()
+            if not enhanced_text:
+                # Fallback to original content, or a minimal placeholder if empty
+                fallback_text = (content or "").strip() or "Enhanced content unavailable."
+                return fallback_text
+            return enhanced_text
         else:
             # Fallback to original single-stage method
             prompt = f"""Enhance this story content:
@@ -754,6 +763,22 @@ Provide an improved version that:
         }
 
         try:
+            # Optional: build initial world state (LM persona)
+            initial_world: Dict[str, Any] = {}
+            if self.use_poml and getattr(self, "poml_adapter", None) is not None:
+                try:
+                    params = {
+                        "era": getattr(request, "tone", "") or "",
+                        "locale": getattr(request, "setting", "") or "",
+                        "genre": getattr(request, "genre", "") or "",
+                        "notes": request.premise[:200],
+                    }
+                    initial_world = await self.poml_adapter.get_world_state_initial(
+                        params=params, orchestrator=self.orchestrator
+                    )
+                except Exception:
+                    initial_world = {}
+
             # Generate plot structure
             print("\n📊 Generating plot structure...")
             plot = await self.generate_plot_structure(request)
@@ -761,32 +786,69 @@ Provide an improved version that:
 
             # Generate key scenes
             print("\n🎬 Generating scenes...")
-            scenes = []
+            scenes: list[Dict] = []
             beats = plot.get("beats") or []
             plot_points = beats if beats else plot["raw_text"].split("\n\n")[:3]
 
-            for i, point in enumerate(plot_points):
-                print(f"  Scene {i+1}...")
-                previous_context = scenes[-1]["scene_description"] if scenes else ""
-                scene = await self.generate_scene(
-                    point, request.characters, previous_context
+            iterative_world = bool(
+                (self._config.get("simulation", {}) or {}).get(
+                    "iterative_world_state", False
                 )
+            )
 
-                # Add dialogue for main character
-                if request.characters:
-                    dialogue = await self.generate_dialogue(
-                        scene, request.characters[0], "Opening dialogue"
-                    )
-                    # Normalize dialogue to string for story summaries
-                    if isinstance(dialogue, dict):
+            # Bounded concurrent scene generation (two-stage inside generate_scene)
+            scene_limit = int(
+                os.environ.get(
+                    "SCENE_MAX_CONCURRENT",
+                    (self._config.get("simulation", {}).get("scene_max_concurrent")
+                     if isinstance(self._config, dict) else 3)
+                )
+                or 3
+            )
+
+            sem = asyncio.Semaphore(max(1, scene_limit))
+
+            async def gen_scene_indexed(idx: int, point: Dict | str):
+                async with sem:
+                    try:
+                        prev_ctx = ""
                         try:
-                            if dialogue.get("dialogue"):
-                                dialogue = dialogue["dialogue"][0].get("line", "")
+                            if request and getattr(request, "setting", None):
+                                prev_ctx = f"World Context: {request.setting}"
                         except Exception:
-                            dialogue = str(dialogue)
-                    scene["sample_dialogue"] = dialogue
+                            prev_ctx = ""
+                        scene = await self.generate_scene(point, request.characters, prev_ctx)
+                        return idx, scene
+                    except Exception as e:
+                        return idx, {"scene_description": f"Scene {idx+1} unavailable ({e})"}
 
-                scenes.append(scene)
+            if iterative_world and initial_world:
+                # Sequential path with world updates
+                world_state = dict(initial_world)
+                for i, point in enumerate(plot_points):
+                    idx, scene = await gen_scene_indexed(i, point)
+                    scenes.append(scene)
+                    try:
+                        changes = {
+                            "summary": scene.get("scene_description", "")[:160],
+                            "characters_present": scene.get("characters_present", []),
+                            "setting_details": scene.get("setting_details", {}),
+                            "key_actions": scene.get("key_actions", []),
+                        }
+                        world_state = await self.poml_adapter.get_world_state_update(
+                            world_state=world_state,
+                            changes=changes,
+                            orchestrator=self.orchestrator,
+                        )
+                    except Exception:
+                        pass
+                story_data["components"]["world_state_initial"] = initial_world
+                story_data["components"]["world_state_final"] = world_state
+            else:
+                tasks = [gen_scene_indexed(i, point) for i, point in enumerate(plot_points)]
+                scene_results: list[tuple[int, Dict]] = await asyncio.gather(*tasks)
+                for _, scene in sorted(scene_results, key=lambda x: x[0]):
+                    scenes.append(scene)
 
             story_data["components"]["scenes"] = scenes
 
@@ -797,6 +859,46 @@ Provide an improved version that:
             print("\n📈 Evaluating quality...")
             evaluation = await self.evaluate_quality(story_content)
             story_data["components"]["evaluation"] = evaluation
+
+            # Generate dialogue in parallel for all scenes (main character only)
+            if request.characters:
+                print("\n💬 Generating dialogues...")
+                main_char = request.characters[0]
+                dlg_limit = int(
+                    os.environ.get(
+                        "DIALOGUE_MAX_CONCURRENT",
+                        (self._config.get("simulation", {}).get("dialogue_max_concurrent")
+                         if isinstance(self._config, dict) else 3)
+                    )
+                    or 3
+                )
+                dsem = asyncio.Semaphore(max(1, dlg_limit))
+
+                async def gen_dlg_indexed(idx: int, scene: Dict):
+                    async with dsem:
+                        try:
+                            dialogue = await self.generate_dialogue(
+                                scene, main_char, "Opening dialogue"
+                            )
+                            # Normalize dialogue to string for story summaries
+                            if isinstance(dialogue, dict):
+                                try:
+                                    if dialogue.get("dialogue"):
+                                        line = dialogue["dialogue"][0].get("line", "")
+                                    else:
+                                        line = ""
+                                except Exception:
+                                    line = str(dialogue)
+                            else:
+                                line = str(dialogue)
+                            return idx, line
+                        except Exception as e:
+                            return idx, f"Dialogue unavailable ({e})"
+
+                dlg_tasks = [gen_dlg_indexed(i, sc) for i, sc in enumerate(scenes)]
+                dlg_results = await asyncio.gather(*dlg_tasks)
+                for idx, line in dlg_results:
+                    scenes[idx]["sample_dialogue"] = line
 
             # Enhance if needed
             print("\n✨ Enhancing content...")

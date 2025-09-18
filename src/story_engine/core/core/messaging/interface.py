@@ -13,6 +13,7 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional
+from ..common.observability import set_correlation_id
 
 # Optional contract enforcement
 try:
@@ -101,11 +102,21 @@ class InMemoryBus(Publisher, Consumer):
         self._seen[topic] += 1
         handler = self._handlers.get(topic)
         if handler is not None:
+            # Propagate correlation context for downstream logging/metrics
+            try:
+                set_correlation_id(message.correlation_id or message.id)
+            except Exception:
+                pass
             handler(message, self)
 
     def subscribe(self, topic: str, handler: Handler, *, prefetch: int = 1) -> None:
         # Wrap handler with a validator if the topic has a known contract
         def _wrapped(msg: Message, pub: "Publisher") -> None:
+            # Ensure correlation_id context is set for the handling scope
+            try:
+                set_correlation_id(msg.correlation_id or msg.id)
+            except Exception:
+                pass
             # Enforce message.type consistency for consumers too
             if msg.type != topic:
                 # Treat as a type mismatch error and route to DLQ

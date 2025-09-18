@@ -26,6 +26,13 @@
     <import src="../characters/base_character.poml" data="{{character}}" />
   </character-context>
 
+  <if test="{{world_brief}}">
+    <world-context>
+      The world context below is authoritative. Your language, setting details, and references MUST align with it. Avoid anachronisms.
+      <context>{{world_brief}}</context>
+    </world-context>
+  </if>
+
   <final-instruction>
     Generate the character's stream of consciousness response to the situation provided in the user prompt.
   </final-instruction>

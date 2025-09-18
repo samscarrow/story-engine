@@ -16,6 +16,14 @@ server-ca.pem
 oracle_wallet/
 *wallet*/
 
+.codex-agent-profile.json
+.venv/
+engine.db
+tmp_engine.db
+artifacts/
+tmp_artifacts/
+tmp_artifacts2/
+
 # Generated artifacts
 feedback/
 generation_error_*.json

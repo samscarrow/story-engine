@@ -1,0 +1,4 @@
+[console_scripts]
+story-engine-demo = story_engine.scripts.run_demo:main
+story-engine-hpq = story_engine.scripts.run_hpq:main
+story-engine-poml = story_engine.poml.cli:main

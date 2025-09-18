@@ -5,7 +5,7 @@ import time
 import uuid
 
 from story_engine.core.core.common.config import load_config
-from story_engine.core.core.common.logging import configure_json_logging
+from story_engine.core.core.common.observability import init_logging_from_env, timing
 
 try:
     from story_engine.core.core.messaging.interface import (
@@ -45,31 +45,32 @@ def _select_bus(cfg) -> Publisher | Consumer:
 
 def _handle_scene_request(msg: Message, pub: Publisher) -> None:
     log = logging.getLogger("scene_worker")
-    req = SceneRequest.validate(msg.payload)
-    scene_id = str(uuid.uuid4())
-    # Build a short placeholder description without exceeding line length
-    beat = req.beat_name or "unknown"
-    prompt_snippet = (req.prompt or "")[:40]
-    scene_description = (
-        f"Scene for beat '{beat}': placeholder description "
-        f"based on prompt '{prompt_snippet}'."
-    )
-    done = Message(
-        type=SCENE_DONE,
-        payload={
-            "job_id": req.job_id,
-            "scene_id": scene_id,
-            "scene_description": scene_description,
-        },
-        correlation_id=msg.correlation_id or req.job_id,
-        causation_id=msg.id,
-    )
-    log.info("scene.done", extra={"job_id": req.job_id, "message_id": done.id})
-    pub.publish(SCENE_DONE, done)
+    with timing("worker.scene.handle_ms", component="scene_worker"):
+        req = SceneRequest.validate(msg.payload)
+        scene_id = str(uuid.uuid4())
+        # Build a short placeholder description without exceeding line length
+        beat = req.beat_name or "unknown"
+        prompt_snippet = (req.prompt or "")[:40]
+        scene_description = (
+            f"Scene for beat '{beat}': placeholder description "
+            f"based on prompt '{prompt_snippet}'."
+        )
+        done = Message(
+            type=SCENE_DONE,
+            payload={
+                "job_id": req.job_id,
+                "scene_id": scene_id,
+                "scene_description": scene_description,
+            },
+            correlation_id=msg.correlation_id or req.job_id,
+            causation_id=msg.id,
+        )
+        log.info("scene.done", extra={"job_id": req.job_id, "message_id": done.id})
+        pub.publish(SCENE_DONE, done)
 
 
 def main() -> None:
-    configure_json_logging()
+    init_logging_from_env()
     cfg = load_config()
     bus = _select_bus(cfg)
 

@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  story-engine-demo:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: story-engine:local
+    environment:
+      # Point to your ai-lb/LM Studio endpoint
+      LM_ENDPOINT: ${LM_ENDPOINT:-http://127.0.0.1:8000}
+      # Optional model id
+      LMSTUDIO_MODEL: ${LMSTUDIO_MODEL:-}
+      # Speed caps and preferences
+      LLM_TIMEOUT_SECS: ${LLM_TIMEOUT_SECS:-30}
+      LM_PREFER_SMALL: ${LM_PREFER_SMALL:-0}
+    volumes:
+      - ../dist:/app/dist
+    # By default runs: story-engine-demo --use-poml --live --runs 1
+    # Override with: docker compose run story-engine-demo <args>
+

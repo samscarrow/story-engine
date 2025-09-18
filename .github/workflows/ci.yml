@@ -38,6 +38,20 @@ jobs:
           PYTHONPATH: src
         run: pytest -n auto --dist=loadfile -m "not slow" -q
 
+      - name: Aggregate generation errors (ndjson ledger)
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/aggregate_generation_errors.py || true
+
+      - name: Upload lb_metrics.ndjson artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lb-metrics-ndjson
+          path: lb_metrics.ndjson
+          if-no-files-found: ignore
+
   lint-format:
     runs-on: ubuntu-latest
     continue-on-error: true

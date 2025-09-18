@@ -16,6 +16,11 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 import logging
+try:
+    from story_engine.core.core.common.observability import get_logger, init_logging_from_env  # type: ignore
+    _obs = get_logger("poml.integration")
+except Exception:  # pragma: no cover
+    _obs = logging.getLogger(__name__)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -359,6 +364,37 @@ class POMLEngine:
         sys_block = m.group(1) if m else ""
         user_content = re.sub(r"<system>.*?</system>", "", content, flags=re.DOTALL)
 
+        def _eval_path(d: Dict[str, Any], expr: str) -> Any:
+            parts = (expr or "").split(".")
+            cur: Any = d
+            for part in parts:
+                part = part.strip()
+                if "|" in part:
+                    part = part.split("|")[0].strip()
+                if isinstance(cur, dict) and part in cur:
+                    cur = cur[part]
+                else:
+                    return {}
+            return cur
+
+        def _resolve_imports(text: str) -> str:
+            import re as _re
+            pat = _re.compile(r'<import\s+src="([^"]+)"(?:\s+data=\"\{\{([^}]+)\}\}\")?\s*/?>')
+
+            def repl(m):
+                src = m.group(1)
+                data_expr = m.group(2)
+                try:
+                    tpath = self._find_template(src)
+                    if not tpath:
+                        return ""
+                    sub_data = processed_data if not data_expr else _eval_path(processed_data, data_expr)
+                    return self._render_native(tpath, sub_data if isinstance(sub_data, dict) else processed_data)
+                except Exception:
+                    return ""
+
+            return pat.sub(repl, text)
+
         def _subst(text: str) -> str:
             def replace_var(match):
                 var_path = match.group(1).strip()
@@ -374,9 +410,10 @@ class POMLEngine:
                 return str(value)
 
             text = re.sub(r"\{\{([^}]+)\}\}", replace_var, text)
+            # Inline imports if present
+            text = _resolve_imports(text)
             text = re.sub(r"<metadata>.*?</metadata>", "", text, flags=re.DOTALL)
             text = re.sub(r"<style>.*?</style>", "", text, flags=re.DOTALL)
-            text = re.sub(r"<import[^>]*>", "", text)
             text = re.sub(r"<[^>]+>", "", text)
             text = re.sub(r"\n\s*\n", "\n\n", text)
             return text.strip()
@@ -429,12 +466,40 @@ class POMLEngine:
         # Replace variables
         result = re.sub(r"\{\{([^}]+)\}\}", replace_var, result)
 
+        # Inline <import src="..." data="{{path}}" /> inclusions (simplified)
+        def eval_path(d: Dict[str, Any], expr: str) -> Any:
+            parts = (expr or "").split(".")
+            cur: Any = d
+            for part in parts:
+                part = part.strip()
+                if "|" in part:
+                    part = part.split("|")[0].strip()
+                if isinstance(cur, dict) and part in cur:
+                    cur = cur[part]
+                else:
+                    return {}
+            return cur
+
+        def import_repl(m):
+            src = m.group(1)
+            data_expr = m.group(2)
+            try:
+                tpath = self._find_template(src)
+                if not tpath:
+                    return ""
+                sub_data = data if not data_expr else eval_path(data, data_expr)
+                return self._render_native(tpath, sub_data if isinstance(sub_data, dict) else data)
+            except Exception:
+                return ""
+
+        result = re.sub(r'<import\s+src="([^"]+)"(?:\s+data=\"\{\{([^}]+)\}\}\")?\s*/?>', import_repl, result)
+
         # Remove POML-specific tags for text output
         result = re.sub(r"<document[^>]*>", "", result)
         result = re.sub(r"</document>", "", result)
         result = re.sub(r"<metadata>.*?</metadata>", "", result, flags=re.DOTALL)
         result = re.sub(r"<style>.*?</style>", "", result, flags=re.DOTALL)
-        result = re.sub(r"<import[^>]*>", "", result)
+        # imports already inlined above
 
         # Basic if statement processing
         def process_if(match):
@@ -1040,6 +1105,7 @@ class StoryEnginePOMLAdapter:
         objective: str = "",
         style: str = "",
         continuity_fix: str = "",
+        world_state: Optional[Dict[str, Any]] = None,
     ) -> str:
         import json as _json
 
@@ -1050,6 +1116,7 @@ class StoryEnginePOMLAdapter:
                 "objective": objective,
                 "style": style,
                 "continuity_fix": continuity_fix,
+                "world_json": _json.dumps(world_state or {}, ensure_ascii=False),
             },
         )
 
@@ -1065,6 +1132,80 @@ class StoryEnginePOMLAdapter:
                 "world_json": _json.dumps(world_state, ensure_ascii=False),
             },
         )
+
+    # ---- World state generation and updates ----
+    async def get_world_state_initial(
+        self, params: Dict[str, Any], orchestrator: Any, model_identifier: str = None
+    ) -> Dict[str, Any]:
+        import json as _json
+
+        system = self.engine.render_roles(
+            "personas/world_architect.poml", {"params_json": _json.dumps(params)}
+        )
+        resp = await orchestrator.generate(
+            prompt=system.get("user", ""),
+            system=system.get("system", ""),
+            model=model_identifier,
+            temperature=0.2,
+            max_tokens=1200,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "world_state",
+                    "strict": False,
+                    "schema": {"type": "object"},
+                },
+            },
+        )
+        try:
+            return json.loads(resp.text.strip())
+        except Exception:
+            # Fallback minimal
+            return {
+                "facts": params,
+                "timeline": [{"time": "t0", "desc": "world initialized"}],
+            }
+
+    async def get_world_state_update(
+        self,
+        world_state: Dict[str, Any],
+        changes: Dict[str, Any],
+        orchestrator: Any,
+        model_identifier: str = None,
+    ) -> Dict[str, Any]:
+        import json as _json
+
+        system = self.engine.render_roles(
+            "meta/world_state_update.poml",
+            {
+                "world_json": _json.dumps(world_state, ensure_ascii=False),
+                "changes_json": _json.dumps(changes, ensure_ascii=False),
+            },
+        )
+        resp = await orchestrator.generate(
+            prompt=system.get("user", ""),
+            system=system.get("system", ""),
+            model=model_identifier,
+            temperature=0.1,
+            max_tokens=1200,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "world_state",
+                    "strict": False,
+                    "schema": {"type": "object"},
+                },
+            },
+        )
+        try:
+            return json.loads(resp.text.strip())
+        except Exception:
+            # Fallback: append timeline entry only
+            ws = dict(world_state)
+            tl = list(ws.get("timeline") or [])
+            tl.append({"time": "t+1", "desc": changes.get("summary", "scene happened")})
+            ws["timeline"] = tl
+            return ws
 
     def get_scenario_prompt(self, world_brief_markdown: str) -> str:
         return self.engine.render(
@@ -1286,6 +1427,7 @@ class StoryEnginePOMLAdapter:
         characters: List[Dict],
         previous_context: str,
         orchestrator: Any,  # LLMOrchestrator instance
+        world_state: Optional[Dict[str, Any]] = None,
         model_identifier: str = None,
     ) -> Dict[str, Any]:
         """
@@ -1298,12 +1440,23 @@ class StoryEnginePOMLAdapter:
 
         # --- Stage 1: Generate Freeform Scene ---
         stage1_engine = self.engine
+        # Optional world brief to ground the scene
+        world_brief = ""
+        try:
+            if world_state:
+                world_brief = self.engine.render(
+                    "meta/world_state_brief.poml", {"world": world_state}
+                )
+        except Exception:
+            world_brief = ""
+
         freeform_system_prompt = stage1_engine.render_roles(
             "narrative/scene_crafting_freeform.poml",
             {
                 "beat": beat,
                 "characters": characters,
                 "previous_context": previous_context,
+                "world_brief": world_brief,
             },
         )
         _scene_user = freeform_system_prompt.get("user") or stage1_engine.render(
@@ -1312,6 +1465,7 @@ class StoryEnginePOMLAdapter:
                 "beat": beat,
                 "characters": characters,
                 "previous_context": previous_context,
+                "world_brief": world_brief,
             },
         )
         # Ensure prompt includes an explicit character section cue for tests
@@ -1327,6 +1481,8 @@ class StoryEnginePOMLAdapter:
             names = ""
         if "Characters Present" not in _scene_user and names:
             _scene_user = f"{_scene_user}\n\nCharacters Present: {names}"
+        if world_brief:
+            _scene_user = f"{_scene_user}\n\nWorld Context:\n{world_brief}"
         try:
             freeform_response = await orchestrator.generate(
                 prompt=_scene_user,
@@ -1336,12 +1492,6 @@ class StoryEnginePOMLAdapter:
                 max_tokens=1000,
             )
             freeform_scene_text = freeform_response.text
-            # If we have a reasonable freeform scene, return it directly to keep the last call at stage 1
-            if isinstance(freeform_scene_text, str) and freeform_scene_text.strip():
-                return {
-                    "scene_description": freeform_scene_text.strip(),
-                    "characters_present": [],
-                }
         except Exception:
             # Provider unavailable: synthesize a simple scene description
             names = ", ".join(
@@ -1361,6 +1511,58 @@ class StoryEnginePOMLAdapter:
                 system=structuring_system_prompt["system"],
                 model=model_identifier,
                 temperature=0.1,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "scene_structured",
+                        "strict": False,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "scene_description": {"type": "string"},
+                                "characters_present": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {"type": "string"},
+                                            "role": {"type": "string"}
+                                        }
+                                    }
+                                },
+                                "setting_details": {
+                                    "type": "object",
+                                    "properties": {
+                                        "location": {"type": "string"},
+                                        "atmosphere": {"type": "string"}
+                                    }
+                                },
+                                "key_actions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "character": {"type": "string"},
+                                            "action": {"type": "string"}
+                                        }
+                                    }
+                                },
+                                "dialogue_snippets": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "speaker": {"type": "string"},
+                                            "line": {"type": "string"}
+                                        }
+                                    }
+                                },
+                                "emotional_tone": {"type": "string"},
+                                "scene_objective": {"type": "string"}
+                            }
+                        }
+                    }
+                },
                 max_tokens=4000,
             )
 
@@ -1444,6 +1646,31 @@ class StoryEnginePOMLAdapter:
                 system=structuring_system_prompt["system"],
                 model=model_identifier,
                 temperature=0.1,  # Low temperature for precise structuring
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "dialogue_structured",
+                        "strict": False,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "dialogue": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "speaker": {"type": "string"},
+                                            "line": {"type": "string"},
+                                            "tone": {"type": "string"},
+                                            "recipient": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            },
+                            "required": ["dialogue"]
+                        }
+                    }
+                },
                 max_tokens=1000,
                 timeout=180,
             )
@@ -1526,6 +1753,21 @@ class StoryEnginePOMLAdapter:
                 system=structuring_system_prompt["system"],
                 model=model_identifier,
                 temperature=0.1,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "evaluation_structured",
+                        "strict": False,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "evaluation_text": {"type": "string"},
+                                "scores": {"type": "object"}
+                            },
+                            "required": ["evaluation_text"]
+                        }
+                    }
+                },
                 max_tokens=1000,
             )
             try:
@@ -1661,6 +1903,7 @@ class StoryEnginePOMLAdapter:
         emphasis: str = "neutral",
         orchestrator: Any = None,  # LLMOrchestrator instance
         model_identifier: str = None,
+        world_brief: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Executes the two-stage character simulation pipeline.
@@ -1675,20 +1918,59 @@ class StoryEnginePOMLAdapter:
         # --- Stage 1: Generate Stream of Consciousness ---
         # The persona template renders the SYSTEM prompt
         sim_system_prompt = self.engine.render_roles(
-            "personas/persona_stream_of_consciousness.poml", {"character": character}
+            "personas/persona_stream_of_consciousness.poml", {"character": character, "world_brief": world_brief or ""}
         )  # Use render_roles to get system/user split
 
         # The USER prompt is just the situation
         sim_user_prompt = situation
 
-        sim_response = await orchestrator.generate(
-            prompt=sim_user_prompt,
-            system=sim_system_prompt["system"],  # Pass system part of rendered roles
-            model=model_identifier,
-            temperature=0.75,  # Slightly higher for more creative prose
-            max_tokens=500,
-            timeout=180,  # Increased timeout for potentially slow remote models
-        )
+        # Flexible routing: prefer explicit LMSTUDIO_MODEL, else 'auto'
+        import os as _os
+        call_model = _os.environ.get("LM_MODEL") or _os.environ.get("LMSTUDIO_MODEL") or "auto"
+        # Stage 1 request with fallback: if a concrete model fails with 404/no-healthy, retry with 'auto'
+        try:
+            sim_response = await orchestrator.generate(
+                prompt=sim_user_prompt,
+                system=sim_system_prompt["system"],  # Pass system part of rendered roles
+                model=model_identifier or call_model,
+                temperature=0.75,  # Slightly higher for more creative prose
+                max_tokens=500,
+                timeout=180,  # Increased timeout for potentially slow remote models
+            )
+        except Exception as e:
+            msg = str(e)
+            if (model_identifier or call_model) != "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+                sim_response = await orchestrator.generate(
+                    prompt=sim_user_prompt,
+                    system=sim_system_prompt["system"],
+                    model="auto",
+                    temperature=0.75,
+                    max_tokens=500,
+                    timeout=180,
+                )
+            elif (model_identifier or call_model) == "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+                # Smart-pick: query models and retry with first viable id
+                try:
+                    models = await orchestrator.list_models_filtered(prefer_small=True)
+                    mid = None
+                    for m in models:
+                        mid = m.get("id") or m.get("name")
+                        if mid:
+                            break
+                    if not mid:
+                        raise RuntimeError("No viable model ids found")
+                    sim_response = await orchestrator.generate(
+                        prompt=sim_user_prompt,
+                        system=sim_system_prompt["system"],
+                        model=mid,
+                        temperature=0.75,
+                        max_tokens=500,
+                        timeout=180,
+                    )
+                except Exception as _:
+                    raise
+            else:
+                raise
         stream_of_consciousness_text = sim_response.text
 
         print("\n" + "-" * 25 + " STAGE 1 OUTPUT (Stream of Consciousness) " + "-" * 26)
@@ -1701,14 +1983,48 @@ class StoryEnginePOMLAdapter:
             "meta/structure_simulation_output.poml", {}
         )  # No raw_text here
 
-        structured_response = await orchestrator.generate(
-            prompt=stream_of_consciousness_text,  # raw_text is now the user prompt
-            system=structuring_system_prompt["system"],
-            model=model_identifier,
-            temperature=0.1,  # Low temperature for precise, deterministic structuring
-            max_tokens=3000,  # Increased for complex JSON
-            timeout=300,  # Increased timeout for potentially slow remote models
-        )
+        try:
+            structured_response = await orchestrator.generate(
+                prompt=stream_of_consciousness_text,  # raw_text is now the user prompt
+                system=structuring_system_prompt["system"],
+                model=model_identifier or call_model,
+                temperature=0.1,  # Low temperature for precise, deterministic structuring
+                max_tokens=3000,  # Increased for complex JSON
+                timeout=300,  # Increased timeout for potentially slow remote models
+            )
+        except Exception as e:
+            msg = str(e)
+            if (model_identifier or call_model) != "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+                structured_response = await orchestrator.generate(
+                    prompt=stream_of_consciousness_text,
+                    system=structuring_system_prompt["system"],
+                    model="auto",
+                    temperature=0.1,
+                    max_tokens=3000,
+                    timeout=300,
+                )
+            elif (model_identifier or call_model) == "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+                try:
+                    models = await orchestrator.list_models_filtered(prefer_small=True)
+                    mid = None
+                    for m in models:
+                        mid = m.get("id") or m.get("name")
+                        if mid:
+                            break
+                    if not mid:
+                        raise RuntimeError("No viable model ids found")
+                    structured_response = await orchestrator.generate(
+                        prompt=stream_of_consciousness_text,
+                        system=structuring_system_prompt["system"],
+                        model=mid,
+                        temperature=0.1,
+                        max_tokens=3000,
+                        timeout=300,
+                    )
+                except Exception as _:
+                    raise
+            else:
+                raise
 
         # Clean and parse the final JSON
         response_text = structured_response.text.strip()
@@ -1721,6 +2037,11 @@ class StoryEnginePOMLAdapter:
             parsed_response = json.loads(response_text)
             return parsed_response
         except json.JSONDecodeError as e:
+            try:
+                from story_engine.core.core.common.observability import log_exception  # type: ignore
+                log_exception(_obs, code="GEN_PARSE_ERROR", component="poml_integration", exc=e)
+            except Exception:
+                pass
             raise ValueError(
                 f"Structuring agent did not return valid JSON: {e}\nRaw output: {structured_response.text}"
             )
@@ -1729,7 +2050,10 @@ class StoryEnginePOMLAdapter:
 # Example usage
 if __name__ == "__main__":
     # Set up logging
-    logging.basicConfig(level=logging.INFO)
+    try:
+        init_logging_from_env()  # type: ignore[name-defined]
+    except Exception:
+        logging.basicConfig(level=logging.INFO)
 
     # Create engine
     engine = create_engine()

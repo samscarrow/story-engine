@@ -1,0 +1,73 @@
+anchors:
+  facts:
+    era: "1st century CE"
+    locale: "Judaea"
+    polity: "Roman prefecture"
+    calendar: "Roman provincial"
+    notes: "Governing context: Roman law; local religious sensitivities."
+  style:
+    genre: "Historical drama"
+    tone: "Grave"
+    cadence: "Measured, concrete, politically aware"
+  lexicon_policy:
+    narrative_language: "English"
+    transliteration_policy: "occasional+gloss"
+    forbidden:
+      - microphone
+      - podium
+      - town hall
+      - mayor
+      - office chair
+      - gun
+      - truck
+      - computer
+      - phone
+      - car
+      - airplane
+      - train
+      - electricity
+      - plastic
+      - stainless steel
+    allowed:
+      - praetorium
+      - temple precinct
+      - market
+      - Roman standard
+      - cohort
+      - wax tablet
+  characters:
+    pilate:
+      title: "Prefect"
+      register: "formal Roman administrator"
+      tics:
+        - measured pauses
+        - weary restraint
+    claudia:
+      title: "Pilate's wife"
+      register: "intuitive, concerned"
+      tics:
+        - prophetic dreams
+        - challenges Pilate's calculations
+    caiaphas:
+      title: "High Priest"
+      register: "politically sophisticated, calculating"
+      tics:
+        - strategic manipulation
+        - appeals to stability
+    jesus:
+      title: "Galilean preacher"
+      register: "calm, authoritative"
+      tics:
+        - speaks of truth and kingdoms not of this world
+        - answers questions with questions
+  locations:
+    praetorium:
+      type: "administrative compound"
+      notes: "flagstones, Roman standard, cohort nearby"
+    temple_mount:
+      type: "religious complex"
+      notes: "site of mass protests, location of the Temple"
+    golgotha:
+      type: "execution site"
+      notes: "three crosses, darkening sky"
+version: "1.0.0"

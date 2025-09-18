@@ -27,15 +27,17 @@ def _alias_pkg(subpkg: str) -> None:
 
 
 # Alias common subpackages used across tests and services
+# Import foundational subpackages first so dependent ones (like engine) resolve
 for _name in (
-    "messaging",
-    "storage",
-    "orchestration",
-    "story_engine",
-    "domain",
-    "cache",
-    "character_engine",
     "common",
     "contracts",
+    "domain",
+    "cache",
+    "storage",
+    "messaging",
+    "orchestration",
+    "story_engine",
+    "character_engine",
+    "engine",
 ):
     _alias_pkg(_name)

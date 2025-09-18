@@ -1,16 +1,33 @@
+"""Test session bootstrap.
+
+Loads DB-related environment variables from `.env.oracle` (and `.env` fallback)
+so tests don't rely on an interactive direnv session.
 """
-Ensure project root is on sys.path so tests can import `core` and `poml` modules
-without requiring installation.
-"""
+from __future__ import annotations
 
 import os
-import sys
+from pathlib import Path
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)
 
-# Ensure 'src' layout is importable for 'story_engine' package
-SRC = os.path.join(ROOT, "src")
-if os.path.isdir(SRC) and SRC not in sys.path:
-    sys.path.insert(0, SRC)
+def pytest_sessionstart(session) -> None:  # type: ignore[no-untyped-def]
+    try:
+        # Prefer project-local .env.oracle
+        env_oracle = Path(".env.oracle")
+        if env_oracle.exists():
+            from story_engine.core.core.common.dotenv_loader import load_dotenv_keys
+
+            load_dotenv_keys(path=str(env_oracle), keys_prefixes=("DB_", "ORACLE_"))
+        # Fallback: generic .env if present
+        env_generic = Path(".env")
+        if env_generic.exists():
+            from story_engine.core.core.common.dotenv_loader import load_dotenv_keys
+
+            load_dotenv_keys(path=str(env_generic), keys_prefixes=("DB_", "ORACLE_"))
+
+        # Normalize defaults for local XE if DSN missing
+        if not os.getenv("DB_DSN") and os.getenv("DB_TYPE", "").lower() == "oracle":
+            os.environ.setdefault("DB_DSN", "localhost/XEPDB1")
+    except Exception:
+        # Never fail test startup due to env loading
+        pass
+

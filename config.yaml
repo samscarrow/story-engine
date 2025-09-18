@@ -49,3 +49,11 @@ narrative:
     temperature: 0.3
     max_tokens: 400
     system: "You are a rigorous story analyst returning concise, actionable metrics for historical drama."
+
+hpq:
+  enabled: false
+  canary_pct: 0.0
+  structured_scoring: false
+  concurrency: 2
+  threshold_low: 7.5
+  threshold_high: 8.3
