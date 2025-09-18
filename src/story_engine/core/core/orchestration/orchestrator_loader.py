@@ -18,8 +18,8 @@ def create_orchestrator_from_yaml(path: str = "config.yaml") -> LLMOrchestrator:
 
     providers = cfg.get("llm", {}).get("providers", [])
     # Optional environment overrides for local development
-    env_endpoint = os.environ.get("LM_ENDPOINT")
-    env_model = os.environ.get("LMSTUDIO_MODEL")
+    env_endpoint = os.environ.get("LM_ENDPOINT") or os.environ.get("LMSTUDIO_ENDPOINT")
+    env_model = os.environ.get("LM_MODEL") or os.environ.get("LMSTUDIO_MODEL")
     for p in providers:
         name = p.get("name")
         provider_key = p.get("provider")

@@ -88,14 +88,14 @@ def load_config(path: str | Path = "config.yaml") -> Dict[str, Any]:
                 pass
 
     # Env overrides for common keys
-    lm_ep = os.environ.get("LM_ENDPOINT")
+    lm_ep = os.environ.get("LM_ENDPOINT") or os.environ.get("LMSTUDIO_ENDPOINT")
     if lm_ep:
         for p in cfg.get("llm", {}).get("providers", []):
             if p.get("provider") == "lmstudio":
                 p["endpoint"] = lm_ep
 
     # Env override for LM Studio model
-    lm_model = os.environ.get("LMSTUDIO_MODEL")
+    lm_model = os.environ.get("LM_MODEL") or os.environ.get("LMSTUDIO_MODEL")
     if lm_model:
         for p in cfg.get("llm", {}).get("providers", []):
             if p.get("provider") == "lmstudio":

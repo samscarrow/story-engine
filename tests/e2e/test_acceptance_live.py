@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.e2e, pytest.mark.acceptance]
 def _lmstudio_endpoint() -> str:
     ep = os.getenv("LM_ENDPOINT") or os.getenv("LMSTUDIO_URL")
     if not ep:
-        raise AssertionError("LM_ENDPOINT not set for acceptance run")
+        ep = "http://localhost:1234"
     return ep
 
 
