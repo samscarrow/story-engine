@@ -8,6 +8,7 @@ version = "0.0.2"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.12.15",
+    "click>=8.1.7",
     "dotenv>=0.9.9",
     "oracledb>=3.3.0",
     "pyyaml>=6.0.2",
@@ -22,6 +23,7 @@ story-engine-demo = "story_engine.scripts.run_demo:main"
 story-engine-hpq = "story_engine.scripts.run_hpq:main"
 # Story Engine primary CLI
 story = "story_engine.cli:main"
+storyctl = "story_engine.tooling.storyctl.cli:main"
 
 [dependency-groups]
 dev = ["uv","pytest","pytest-asyncio>=0.23","black","ruff","setuptools>=67","wheel"]
@@ -75,5 +77,6 @@ where = ["src"]
   "poml/poml/templates/**/*.poml",
   "poml/poml/config/*.yaml",
   "poml/poml/**/*.md",
+  "tooling/environments/*.yaml",
   "**/*.json",
 ]
