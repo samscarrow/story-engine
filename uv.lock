@@ -624,6 +624,7 @@ version = "0.0.2"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
+    { name = "click" },
     { name = "dotenv" },
     { name = "oracledb" },
     { name = "pyyaml" },
@@ -643,6 +644,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.12.15" },
+    { name = "click", specifier = ">=8.1.7" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "oracledb", specifier = ">=3.3.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },

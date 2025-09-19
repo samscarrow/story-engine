@@ -50,3 +50,8 @@ story db-export --workflow cli_run --output outputs.ndjson
 - Uses `get_db_settings()` which falls back to SQLite when Oracle/Postgres are not available.
 - To require Oracle explicitly, set `DB_REQUIRE_ORACLE=1`.
 - See `docs/oracle/test_gating.md` for Oracle-specific notes.
+
+## Environment-Aware Workflows
+For staging and production orchestration, prefer the `storyctl` CLI which wraps
+environment selection, preflight checks, and command execution. See
+`docs/storyctl.md` for details.

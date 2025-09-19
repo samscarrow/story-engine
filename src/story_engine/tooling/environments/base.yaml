@@ -1,0 +1,31 @@
+name: base
+description: Base defaults shared across Story Engine environments.
+tags:
+  - shared
+env:
+  LOG_FORMAT:
+    value: json
+    description: Structured logging for shared tooling
+  LOG_LEVEL:
+    value: INFO
+    description: Default log level for CLI actions
+  DB_TYPE:
+    value: postgresql
+    description: Default database adapter
+  LLM_TIMEOUT_SECS:
+    value: "120"
+    description: Default request timeout budget (seconds)
+  STORE_ALL:
+    value: "1"
+    description: Persist results when database credentials are present
+checks:
+  - name: database
+    type: db
+    description: Validate database connectivity using configured credentials
+  - name: llm-endpoint
+    type: http
+    description: Probe active LLM endpoint for readiness
+    params:
+      url: "${LM_ENDPOINT}/v1/models"
+      method: GET
+      timeout: 5

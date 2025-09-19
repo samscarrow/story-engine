@@ -1,6 +1,6 @@
 # tasks/todo.md
 
-_Exported: 2025-09-18 11:52:35_
+_Exported: 2025-09-19 18:05:12_
 
 ## Now
 - [ ] Stabilize Oracle DB connectivity P1 M due:2025-09-20 #infra  <!-- id:stabilize-oracle-db-connectivity -->
@@ -16,6 +16,8 @@ _Exported: 2025-09-18 11:52:35_
 - [x] Identify failure hotspots from logs  <!-- id:identify-failure-hotspots-from-logs --> P1 S #stability  <!-- id:identify-failure-hotspots-from-logs----ididentify-failure-hotsp -->
 - [x] Draft logging and error taxonomy  <!-- id:draft-logging-and-error-taxonomy --> P1 S #observability  <!-- id:draft-logging-and-error-taxonomy----iddraft-logging-and-error-t -->
 - [x] Add repro harness CLI P1 M due:2025-09-21 #observability #devex  <!-- id:add-repro-harness-cli -->
+- [x] Add repro harness CLI  <!-- id:add-repro-harness-cli --> P1 M due:2025-09-21 #observability #devex  <!-- id:add-repro-harness-cli----idadd-repro-harness-cli -->
+- [x] cli-staging-production: Build environment-aware CLI for staging/production (P1,,) P1 L #cli  <!-- id:cli-staging-production-build-environment-aware-cli-for-stagingpr -->
 
 ## Next
 - [ ] Set up project-specific configuration  <!-- id:set-up-project-specific-configuration -->
@@ -47,6 +49,10 @@ _Exported: 2025-09-18 11:52:35_
 - [x] Add CI job: repro harness tests P2 S #ci  <!-- id:add-ci-job-repro-harness-tests -->
 - [x] Add JSON report output to harness P2 XS #observability  <!-- id:add-json-report-output-to-harness -->
 - [x] Document seeding for reproducibility P2 XS #docs  <!-- id:document-seeding-for-reproducibility -->
+- [x] Add repro harness CLI  <!-- id:add-repro-harness-cli --> P1 M due:2025-09-21 #observability #devex  <!-- id:add-repro-harness-cli----idadd-repro-harness-cli -->
+- [x] Add CI job: repro harness tests  <!-- id:add-ci-job-repro-harness-tests --> P2 S #ci  <!-- id:add-ci-job-repro-harness-tests----idadd-ci-job-repro-harness-te -->
+- [x] Add JSON report output to harness  <!-- id:add-json-report-output-to-harness --> P2 XS #observability  <!-- id:add-json-report-output-to-harness----idadd-json-report-output-t -->
+- [x] Document seeding for reproducibility  <!-- id:document-seeding-for-reproducibility --> P2 XS #docs  <!-- id:document-seeding-for-reproducibility----iddocument-seeding-for -->
 
 ---
 Conventions: '- [ ] task P1 S #tag due:2025-09-30' | in-progress shown as [>]
