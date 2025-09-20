@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from ..common.observability import get_logger
+from llm_observability import get_logger
 from .interfaces import ArtifactRepo, JobRepo, StoryRepo
 from ..storage.database import SQLiteConnection, ensure_message_tables
 

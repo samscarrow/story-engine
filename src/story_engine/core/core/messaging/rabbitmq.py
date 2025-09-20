@@ -22,7 +22,7 @@ import threading
 import time
 from dataclasses import asdict
 from typing import Dict, Optional
-from ..common.observability import set_correlation_id
+
 
 from .interface import Consumer, Handler, Message, Publisher
 

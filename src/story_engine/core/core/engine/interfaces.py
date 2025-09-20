@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Mapping, Optional, Protocol, runtime_checkable
 
-from ..common.observability import get_logger
+from llm_observability import get_logger
 
 # Forward ref to avoid cyclic import during type checking
 try:

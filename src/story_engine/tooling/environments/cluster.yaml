@@ -1,0 +1,92 @@
+name: cluster
+extends: base
+description: Multi-node LM Studio cluster accessed via ai-lb on pc-sam.
+tags:
+  - cluster
+  - lmstudio
+env:
+  STORY_ENV:
+    value: cluster
+  AI_LB_ENDPOINT:
+    value: http://localhost:8000
+  LM_ENDPOINT:
+    value: ${AI_LB_ENDPOINT}
+  LM_MODEL:
+    value: auto
+  LM_NODE_LOCAL:
+    value: localhost:1234
+    description: LM Studio running on pc-sam
+  LM_NODE_SAMS_MAC:
+    value: sams-macbook-pro:1234
+    description: LM Studio running on sams-macbook-pro
+  LM_NODE_MACBOOK:
+    value: macbook:1234
+    description: LM Studio running on macbook
+  DB_TYPE:
+    value: postgresql
+  DB_HOST:
+    from_env: CLUSTER_DB_HOST
+    required: true
+    description: PostgreSQL host for cluster result storage
+  DB_PORT:
+    value: "5432"
+  DB_NAME:
+    from_env: CLUSTER_DB_NAME
+    required: true
+  DB_USER:
+    from_env: CLUSTER_DB_USER
+    required: true
+  DB_PASSWORD:
+    from_env: CLUSTER_DB_PASSWORD
+    required: true
+  DB_SSLMODE:
+    value: require
+  STORE_ALL:
+    value: "1"
+checks:
+  - name: lb-health
+    type: http
+    description: Ensure ai-lb gateway is reachable
+    params:
+      url: "${AI_LB_ENDPOINT}/health"
+      method: GET
+      timeout: 5
+  - name: lm-node-local
+    type: http
+    description: Probe local LM Studio node
+    params:
+      url: "http://${LM_NODE_LOCAL}/v1/models"
+      method: GET
+      timeout: 5
+  - name: lm-node-sams-mac
+    type: http
+    description: Probe sams-macbook-pro LM Studio node
+    params:
+      url: "http://${LM_NODE_SAMS_MAC}/v1/models"
+      method: GET
+      timeout: 5
+  - name: lm-node-macbook
+    type: http
+    description: Probe macbook LM Studio node
+    params:
+      url: "http://${LM_NODE_MACBOOK}/v1/models"
+      method: GET
+      timeout: 5
+  - name: db-smoke
+    type: command
+    optional: true
+    description: Run cluster database smoke test
+    params:
+      args:
+        - python
+        - scripts/db_smoke_test.py
+      returncode: 0
+  - name: lb-metrics
+    type: command
+    optional: true
+    description: Collect recent ai-lb metrics snapshot
+    params:
+      args:
+        - python
+        - scripts/aggregate_healthcheck.py
+      returncode: 0

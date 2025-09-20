@@ -9,6 +9,7 @@ src/services/scene_worker/__main__.py
 src/services/story_initializer/__init__.py
 src/services/story_initializer/__main__.py
 src/story_engine/__init__.py
+src/story_engine/cli.py
 src/story_engine.egg-info/PKG-INFO
 src/story_engine.egg-info/SOURCES.txt
 src/story_engine.egg-info/dependency_links.txt
@@ -54,7 +55,6 @@ src/story_engine/core/core/messaging/interface.py
 src/story_engine/core/core/messaging/rabbitmq.py
 src/story_engine/core/core/messaging/testutils.py
 src/story_engine/core/core/orchestration/autonomous_persona_agents.py
-src/story_engine/core/core/orchestration/db_logging.py
 src/story_engine/core/core/orchestration/kobold_normalizer.py
 src/story_engine/core/core/orchestration/llm_orchestrator.py
 src/story_engine/core/core/orchestration/model_filters.py
@@ -140,6 +140,16 @@ src/story_engine/poml/poml/templates/simulations/multi_character_response.poml
 src/story_engine/scripts/run_demo.py
 src/story_engine/scripts/run_hpq.py
 src/story_engine/scripts/run_scene_multi.py
+src/story_engine/tooling/__init__.py
+src/story_engine/tooling/environments/base.yaml
+src/story_engine/tooling/environments/cluster.yaml
+src/story_engine/tooling/environments/local.yaml
+src/story_engine/tooling/environments/production.yaml
+src/story_engine/tooling/environments/staging.yaml
+src/story_engine/tooling/storyctl/__init__.py
+src/story_engine/tooling/storyctl/checks.py
+src/story_engine/tooling/storyctl/cli.py
+src/story_engine/tooling/storyctl/config.py
 tests/test_agents_loader.py
 tests/test_autonomous_agent_breaking_points.py
 tests/test_breaking_points_simplified.py
@@ -183,3 +193,5 @@ tests/test_poml_goldens_cli.py
 tests/test_repro_harness.py
 tests/test_schema_character_response.py
 tests/test_silver_parallel.py
+tests/test_storyctl_cli.py
+tests/test_storyctl_config.py

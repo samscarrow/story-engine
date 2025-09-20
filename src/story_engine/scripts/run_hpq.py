@@ -24,7 +24,7 @@ import argparse
 import asyncio
 from typing import Any, Dict, List
 
-from story_engine.core.core.common.observability import init_logging_from_env, get_logger
+from llm_observability import get_logger, init_logging_from_env
 from story_engine.core.core.story_engine.hpq_pipeline import HPQPipeline, HPQOptions
 
 

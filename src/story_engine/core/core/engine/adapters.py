@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from ..common.observability import get_logger
+from llm_observability import get_logger
 from ..story_engine.narrative_pipeline import NarrativePipeline
 from story_engine.poml.lib.poml_integration import StoryEnginePOMLAdapter
 from .interfaces import (

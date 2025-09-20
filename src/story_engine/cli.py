@@ -6,12 +6,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-# Make sure package imports work if run from a checkout
 try:
-    from story_engine.core.core.common.observability import (
-        init_logging_from_env,
-        get_logger,
-    )
+    from llm_observability import get_logger, init_logging_from_env
     from story_engine.core.core.common.settings import get_db_settings
     from story_engine.core.core.storage.database import get_database_connection
     from story_engine.core.core.orchestration.llm_orchestrator import (
@@ -21,10 +17,7 @@ try:
     )
 except Exception:  # pragma: no cover - fall back to relative imports
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-    from story_engine.core.core.common.observability import (
-        init_logging_from_env,
-        get_logger,
-    )
+    from llm_observability import get_logger, init_logging_from_env
     from story_engine.core.core.common.settings import get_db_settings
     from story_engine.core.core.storage.database import get_database_connection
     from story_engine.core.core.orchestration.llm_orchestrator import (
@@ -234,8 +227,6 @@ async def cmd_run(args: argparse.Namespace) -> int:
                     db.store_output(args.workflow, payload)
             except Exception as e:
                 log.error("generation failed", extra={"error": str(e)})
-                if args.fail_fast:
-                    raise
 
     await asyncio.gather(*(worker(it) for it in items))
 
@@ -380,6 +371,10 @@ def build_parser() -> argparse.ArgumentParser:
     # config show
     pshow = sub.add_parser("config-show", help="Show effective runtime config")
 
+    # lm-models
+    plm = sub.add_parser("lm-models", help="List models from an OpenAI-compatible endpoint")
+    plm.add_argument("--endpoint", default=os.getenv("LM_ENDPOINT", "http://localhost:1234"), help="Base URL of LM endpoint")
+
     return p
 
 
@@ -394,9 +389,34 @@ def main(argv: Optional[List[str]] = None) -> int:
         return cmd_db_export(args)
     if args.cmd == "config-show":
         return cmd_config_show(args)
+    if args.cmd == "lm-models":
+        import aiohttp
+        async def _list_models(ep: str) -> int:
+            url = f"{ep.rstrip('/')}/v1/models"
+            print(f"Querying {url}...")
+            try:
+                async with aiohttp.ClientSession() as s:
+                    async with s.get(url, timeout=5) as r:
+                        txt = await r.text()
+                        if r.status != 200:
+                            print(f"HTTP {r.status}: {txt}")
+                            return 1
+                        data = json.loads(txt)
+                        items = data.get("data", [])
+                        for it in items:
+                            mid = it.get("id")
+                            if mid:
+                                print(mid)
+                        if not items:
+                            print("No models returned.")
+                        print("\nTip: export LM_MODEL='<one-of-the-ids>' to use in live runs.")
+                        return 0
+            except Exception as e:
+                print(f"Error: {e}")
+                return 2
+        return asyncio.run(_list_models(args.endpoint))
     return 1
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

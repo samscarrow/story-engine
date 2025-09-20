@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from dotenv import load_dotenv  # type: ignore
 
-from story_engine.core.core.common.observability import init_logging_from_env, get_logger
+from llm_observability import get_logger
 from story_engine.core.core.storage.database import OracleConnection
 
 

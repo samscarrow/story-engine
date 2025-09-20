@@ -6,7 +6,7 @@ import time
 import uuid
 
 from story_engine.core.core.common.config import load_config
-from story_engine.core.core.common.observability import init_logging_from_env
+from llm_observability import get_logger, init_logging_from_env
 from story_engine.core.core.messaging.interface import InMemoryBus, Message, Publisher
 from story_engine.core.core.contracts.topics import (
     PLOT_REQUEST,

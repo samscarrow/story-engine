@@ -26,13 +26,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 from story_engine.core.core.cache.response_cache import ResponseCache
-from story_engine.core.core.common.observability import (
-    get_logger,
-    observe_metric,
-    inc_metric,
-    log_exception,
-    ErrorCodes,
-)
+from llm_observability import get_logger, log_exception, observe_metric, inc_metric, ErrorCodes
 from story_engine.core.core.orchestration.unified_llm_orchestrator import (
     UnifiedLLMOrchestrator,
     LLMPersona,
@@ -120,7 +114,7 @@ class HPQPipeline:
         try:
             return await self.unified.orchestrator.list_models_filtered(prefer_small=prefer_small)
         except Exception as e:
-            log_exception(_obs, code=ErrorCodes.AI_LB_UNAVAILABLE, component="hpq.models", exc=e)
+            logger.error(f"Error in pipeline: {e}")
             return []
 
     async def _select_fast_model(self) -> Optional[str]:

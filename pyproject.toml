@@ -1,5 +1,8 @@
 [build-system]
-requires = ["setuptools>=67", "wheel"]
+requires = [
+    "setuptools>=67",
+    "wheel",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -15,21 +18,27 @@ dependencies = [
 ]
 
 [project.scripts]
-# CLI to render POML templates
 story-engine-poml = "story_engine.poml.cli:main"
-# Demo runner (mock or live orchestrator)
 story-engine-demo = "story_engine.scripts.run_demo:main"
-# HPQ pipeline demo
 story-engine-hpq = "story_engine.scripts.run_hpq:main"
-# Story Engine primary CLI
 story = "story_engine.cli:main"
 storyctl = "story_engine.tooling.storyctl.cli:main"
 
 [dependency-groups]
-dev = ["uv","pytest","pytest-asyncio>=0.23","black","ruff","setuptools>=67","wheel"]
+dev = [
+    "uv",
+    "pytest",
+    "pytest-asyncio>=0.23",
+    "black",
+    "ruff",
+    "setuptools>=67",
+    "wheel",
+]
 
 [tool.uv]
-default-groups = ["dev"]
+default-groups = [
+    "dev",
+]
 
 [tool.ruff]
 line-length = 120
@@ -46,37 +55,59 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F"]
+select = [
+    "E",
+    "F",
+]
 
 [tool.ruff.lint.per-file-ignores]
-# Allow long lines in this implementation file for now; will refactor later.
-"src/story_engine/core/core/character_engine/character_simulation_engine_v2.py" = ["E501"]
-"src/story_engine/core/core/character_engine/complex_group_dynamics.py" = ["E501"]
-"src/story_engine/core/core/character_engine/meta_narrative_pipeline.py" = ["E501"]
-"src/story_engine/core/core/character_engine/multi_character_simulation.py" = ["E501"]
-"src/story_engine/core/core/orchestration/llm_orchestrator.py" = ["E501"]
-"src/story_engine/core/core/messaging/testutils.py" = ["E501"]
-"src/story_engine/core/core/orchestration/autonomous_persona_agents.py" = ["E501"]
-"src/story_engine/core/core/orchestration/standardized_llm_interface.py" = ["E402"]
-"tests/*.py" = ["E501"]
-"src/story_engine/poml/poml/lib/poml_integration.py" = ["E501"]
-
-#[tool.ruff.lint.per-file-ignores]
-# (No per-file ignores; demo_prompt.py refactored to avoid E402.)
+"src/story_engine/core/core/character_engine/character_simulation_engine_v2.py" = [
+    "E501",
+]
+"src/story_engine/core/core/character_engine/complex_group_dynamics.py" = [
+    "E501",
+]
+"src/story_engine/core/core/character_engine/meta_narrative_pipeline.py" = [
+    "E501",
+]
+"src/story_engine/core/core/character_engine/multi_character_simulation.py" = [
+    "E501",
+]
+"src/story_engine/core/core/orchestration/llm_orchestrator.py" = [
+    "E501",
+]
+"src/story_engine/core/core/messaging/testutils.py" = [
+    "E501",
+]
+"src/story_engine/core/core/orchestration/autonomous_persona_agents.py" = [
+    "E501",
+]
+"src/story_engine/core/core/orchestration/standardized_llm_interface.py" = [
+    "E402",
+]
+"tests/*.py" = [
+    "E501",
+]
+"src/story_engine/poml/poml/lib/poml_integration.py" = [
+    "E501",
+]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
 include-package-data = true
 
+[tool.setuptools.package-dir]
+"" = "src"
+
 [tool.setuptools.packages.find]
-where = ["src"]
+where = [
+    "src",
+]
 
 [tool.setuptools.package-data]
-# Ship POML templates, configs, and ancillary docs
-"story_engine" = [
-  "poml/poml/templates/**/*.poml",
-  "poml/poml/config/*.yaml",
-  "poml/poml/**/*.md",
-  "tooling/environments/*.yaml",
-  "**/*.json",
+story_engine = [
+    "poml/poml/templates/**/*.poml",
+    "poml/poml/config/*.yaml",
+    "poml/poml/**/*.md",
+    "tooling/environments/*.yaml",
+    "**/*.json",
 ]

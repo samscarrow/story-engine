@@ -5,7 +5,7 @@ Manages complex simulation workflows where persona agents spawn sub-simulations
 
 import asyncio
 import logging
-from story_engine.core.core.common.observability import log_exception, ErrorCodes, get_logger
+from llm_observability import get_logger
 from typing import Dict, Any, Optional, List, Callable
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
@@ -346,10 +346,7 @@ class RecursiveSimulationEngine:
                     await asyncio.sleep(0.1)
 
             except Exception as e:
-                try:
-                    log_exception(get_logger("recursive_sim"), code=ErrorCodes.AI_LB_UNAVAILABLE, component="recursive_sim", exc=e)
-                except Exception:
-                    logger.error(f"Error in execution loop: {e}")
+                logger.error(f"Error in execution loop: {e}")
                 await asyncio.sleep(1)
 
     async def _execute_simulation(self, request: SimulationRequest):
@@ -446,10 +443,7 @@ class RecursiveSimulationEngine:
                     completed_at=end_time,
                 )
 
-                try:
-                    log_exception(get_logger("recursive_sim"), code=ErrorCodes.AI_LB_UNAVAILABLE, component="recursive_sim", exc=e)
-                except Exception:
-                    logger.error(f"Simulation {request.request_id} failed: {e}")
+                logger.error(f"Simulation {request.request_id} failed: {e}")
 
             # Mark as completed and trigger callbacks
             self.scheduler.mark_completed(request.request_id, result)
@@ -515,14 +509,6 @@ class RecursiveSimulationEngine:
                         else callback(result)
                     )
                 except Exception as e:
-                    try:
-                        log_exception(
-                            get_logger("recursive_sim"),
-                            code=ErrorCodes.AI_LB_UNAVAILABLE,
-                            component="recursive_sim",
-                            exc=e,
-                        )
-                    except Exception:
                         logger.error(f"Callback {callback_name} failed: {e}")
 
     # Monitoring and management methods

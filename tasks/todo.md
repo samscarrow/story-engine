@@ -1,9 +1,9 @@
 # tasks/todo.md
 
-_Exported: 2025-09-19 18:33:55_
+_Exported: 2025-09-20 18:33:01_
 
 ## Now
-- [ ] Stabilize Oracle DB connectivity P1 M due:2025-09-20 #infra  <!-- id:stabilize-oracle-db-connectivity -->
+- [>] Stabilize Oracle DB connectivity P1 M due:2025-09-20 #infra  <!-- id:stabilize-oracle-db-connectivity -->
 - [ ] Add structured logging to generation pipeline P1 S #observability  <!-- id:add-structured-logging-to-generation-pipeline -->
 - [ ] Stabilize Oracle DB connectivity  <!-- id:stabilize-oracle-db-connectivity --> P1 M due:2025-09-20 #infra  <!-- id:stabilize-oracle-db-connectivity----idstabilize-oracle-db-conne -->
 - [ ] Add structured logging to generation pipeline  <!-- id:add-structured-logging-to-generation-pipeline --> P1 S #observability  <!-- id:add-structured-logging-to-generation-pipeline----idadd-structur -->
@@ -18,6 +18,7 @@ _Exported: 2025-09-19 18:33:55_
 - [x] Add repro harness CLI P1 M due:2025-09-21 #observability #devex  <!-- id:add-repro-harness-cli -->
 - [x] Add repro harness CLI  <!-- id:add-repro-harness-cli --> P1 M due:2025-09-21 #observability #devex  <!-- id:add-repro-harness-cli----idadd-repro-harness-cli -->
 - [x] cli-staging-production: Build environment-aware CLI for staging/production (P1,,) P1 L #cli  <!-- id:cli-staging-production-build-environment-aware-cli-for-stagingpr -->
+- [x] Add repro harness CLI  <!-- id:add-repro-harness-cli -->  <!-- id:add-repro-harness-cli----idadd-repro-harness-cli --> P1 M due:2025-09-21 #observability #devex  <!-- id:add-repro-harness-cli----idadd-repro-harness-cli-------idadd-r -->
 
 ## Next
 - [ ] Set up project-specific configuration  <!-- id:set-up-project-specific-configuration -->

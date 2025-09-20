@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 # Structured logging helpers
-from ..common.observability import get_logger, log_exception
+from llm_observability import get_logger, log_exception, observe_metric
 
 # Note: You will need to install psycopg2-binary to use the PostgreSQL connection
 # pip install psycopg2-binary

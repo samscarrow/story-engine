@@ -65,3 +65,68 @@ The bundled staging and production definitions include:
 
 `storyctl check` exits non-zero when a required value is missing or a mandatory
 check fails, making it suitable for CI gating or manual promotion workflows.
+
+## Cluster Execution (LM Studio Fleet)
+
+Use the `cluster` environment to fan requests across multiple LM Studio hosts
+through the `ai-lb/` load balancer. The default configuration assumes:
+
+- `ai-lb` running on `pc-sam` (`http://localhost:8000`)
+- LM Studio nodes at `localhost:1234`, `sams-macbook-pro:1234`, and
+  `macbook:1234`
+- a PostgreSQL database whose connection details are supplied at runtime via
+  `CLUSTER_DB_HOST`, `CLUSTER_DB_NAME`, `CLUSTER_DB_USER`, and
+  `CLUSTER_DB_PASSWORD`
+
+### 1. Launch the load balancer
+
+```bash
+pushd ai-lb
+docker compose --profile full up --build
+popd
+```
+
+Override node endpoints by exporting `LM_NODE_LOCAL`, `LM_NODE_SAMS_MAC`, or
+`LM_NODE_MACBOOK` before invoking the CLI.
+
+### 2. Validate fleet health
+
+```bash
+storyctl check --env cluster --fail-fast
+```
+
+The cluster definition probes the load balancer as well as each individual
+node and optionally runs `scripts/aggregate_healthcheck.py`.
+
+### 3. Run and persist stories
+
+Use the helper script to execute full cluster runs and collect artifacts:
+
+```bash
+scripts/run_cluster_story.sh --prompt "Write an intense senate debate" --runs 5 --parallel 3
+```
+
+The script performs the following steps:
+
+1. `storyctl check --env cluster` to guard the run
+2. `storyctl run --env cluster --workflow <timestamp>`
+3. `storyctl env export --env cluster --format json` to snapshot effective config
+4. `story db-export --workflow <id>` saving results to
+   `artifacts/cluster/<workflow>/outputs.ndjson`
+
+Artifacts include an `env.json` capture and a `run.info` metadata file so you
+can replay or tune future iterations.
+
+### 4. Sync configuration with lmstudio-omnibus
+
+To keep the MCP omnibus server aligned with the cluster definition, generate
+its `.env` file from the same storyctl export:
+
+```bash
+scripts/sync_lmstudio_omnibus_env.py
+```
+
+By default the script writes to `../src/lmstudio-omnibus/.env`, populating
+`AILB_URL`, `LMSTUDIO_API_URL`, and all `LM_NODE_*` entries. Rerun it whenever
+the cluster environment changes (for example, if the ai-lb host or node ports
+move) so both toolchains share the same routing configuration.

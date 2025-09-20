@@ -1,11 +1,16 @@
 .PHONY: install test live-poc wheel docker-build docker-run docker-sh docs
- .PHONY: oracle-up oracle-down oracle-test
+.PHONY: oracle-up oracle-down oracle-test
 
 # Defaults for docker-run (can be overridden: `LM_ENDPOINT=... make docker-run`)
 LM_ENDPOINT ?= http://host.docker.internal:8000
 LMSTUDIO_MODEL ?=
 LLM_TIMEOUT_SECS ?= 300
 DOCKER_RUN_EXTRA ?=
+ifeq ($(VENV_PATH),)
+PYTHON ?= python
+else
+PYTHON ?= $(VENV_PATH)/bin/python
+endif
 
 install:
 	python -m pip install -U pip
@@ -13,7 +18,23 @@ install:
 	pip install pytest
 
 test:
-	pytest -q
+	$(PYTHON) -m pytest -q
+
+test-slow:
+	$(PYTHON) -m pytest -q -m slow
+
+test-oracle:
+	$(PYTHON) -m pytest -q -m oracle
+
+test-live-e2e:
+	RUN_LIVE_E2E=1 $(PYTHON) -m pytest -q tests/e2e/test_e2e_lmstudio.py
+
+
+make test-golden-core:
+	$(PYTHON) -m pytest -q -m golden_core
+
+make test-golden-extended:
+	$(PYTHON) -m pytest -q -m golden_extended
 
 live-poc:
 	bash scripts/run-live-poc.sh
@@ -59,7 +80,7 @@ oracle-down:
 
 # Run only Oracle-marked tests (expects DB_USER/DB_PASSWORD/DB_DSN env set)
 oracle-test:
-	pytest -q -m oracle
+	$(PYTHON) -m pytest -q -m oracle
 .PHONY: venv
 venv:
 	@bash scripts/venv-create.sh >/dev/null
@@ -68,14 +89,14 @@ venv:
 .PHONY: test-lmstudio
 test-lmstudio:
 	@. "$$VENV_PATH/bin/activate" 2>/dev/null || true; \
-	pytest tests/test_lmstudio_circuit.py -q
+	$(PYTHON) -m pytest tests/test_lmstudio_circuit.py -q
 
 .PHONY: test-orchestrator
 test-orchestrator:
 	@. "$$VENV_PATH/bin/activate" 2>/dev/null || true; \
-	pytest -q -k "lmstudio or kobold" -m "not slow"
+	$(PYTHON) -m pytest -q -k "lmstudio or kobold" -m "not slow"
 
 .PHONY: e2e
 e2e:
 	@. "$$VENV_PATH/bin/activate" 2>/dev/null || true; \
-	pytest -q -k "e2e" --maxfail=1 --disable-warnings
+	$(PYTHON) -m pytest -q -k "e2e" --maxfail=1 --disable-warnings

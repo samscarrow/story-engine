@@ -13,7 +13,7 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional
-from ..common.observability import set_correlation_id
+
 
 # Optional contract enforcement
 try:

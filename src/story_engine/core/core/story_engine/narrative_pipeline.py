@@ -16,7 +16,7 @@ from story_engine.core.cache.response_cache import ResponseCache
 from story_engine.core.common.config import load_config
 from story_engine.core.domain.models import NarrativeArc, SceneDescriptor
 
-from story_engine.core.core.common.observability import get_logger, log_exception, ErrorCodes
+from llm_observability import get_logger
 
 logger = logging.getLogger(__name__)
 _obs = get_logger("pipeline")
@@ -149,14 +149,7 @@ class NarrativePipeline:
                 )
                 return text
             except Exception as e:  # fallback to legacy
-                log_exception(
-                    _obs,
-                    code=ErrorCodes.GEN_TIMEOUT if "timeout" in str(e).lower() else ErrorCodes.AI_LB_UNAVAILABLE,
-                    component="pipeline",
-                    exc=e,
-                    job_id=self.job_id,
-                    **(context_extra or {}),
-                )
+                logger.error(f"Error generating with orchestrator: {e}")
 
         # Legacy path (direct HTTP)
         payload = {
@@ -183,14 +176,7 @@ class NarrativePipeline:
                         self.response_cache.set(cache_key, text)
                     return text
         except Exception as e:
-            log_exception(
-                _obs,
-                code=ErrorCodes.AI_LB_UNAVAILABLE,
-                component="legacy-http",
-                exc=e,
-                job_id=self.job_id,
-                **(context_extra or {}),
-            )
+            logger.error(f"Error in legacy http generation: {e}")
             return ""
 
     def build_arc(self, title: str, premise: str, num_beats: int = 5) -> NarrativeArc:

@@ -50,3 +50,32 @@ def test_export_helpers(registry: EnvironmentRegistry) -> None:
     exports = resolution.as_shell()
     assert any(line.startswith("export LM_ENDPOINT=") for line in exports)
     assert resolution.as_dict()["STORY_ENV"] == "local"
+
+
+def test_cluster_environment_requires_db(registry: EnvironmentRegistry) -> None:
+    cluster = registry.get("cluster")
+    # No DB credentials provided yet
+    missing_resolution = cluster.resolve()
+    assert missing_resolution.has_missing_required()
+    assert set(missing_resolution.missing_required) == {
+        "CLUSTER_DB_HOST",
+        "CLUSTER_DB_NAME",
+        "CLUSTER_DB_USER",
+        "CLUSTER_DB_PASSWORD",
+    }
+
+
+def test_cluster_environment_interpolation(registry: EnvironmentRegistry) -> None:
+    cluster = registry.get("cluster")
+    environ = {
+        "CLUSTER_DB_HOST": "cluster-db.internal",
+        "CLUSTER_DB_NAME": "story_engine",
+        "CLUSTER_DB_USER": "story",
+        "CLUSTER_DB_PASSWORD": "secret",
+    }
+    resolution = cluster.resolve(environ=environ)
+    assert resolution.values["LM_ENDPOINT"] == "http://localhost:8000"
+    assert resolution.values["LM_NODE_SAMS_MAC"] == "sams-macbook-pro:1234"
+    check_names = [chk.name for chk in cluster.checks]
+    assert "lb-health" in check_names
+    assert "lm-node-local" in check_names

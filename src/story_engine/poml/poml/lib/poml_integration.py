@@ -17,7 +17,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 import logging
 try:
-    from story_engine.core.core.common.observability import get_logger, init_logging_from_env  # type: ignore
+    from llm_observability import get_logger
     _obs = get_logger("poml.integration")
 except Exception:  # pragma: no cover
     _obs = logging.getLogger(__name__)
@@ -2038,7 +2038,7 @@ class StoryEnginePOMLAdapter:
             return parsed_response
         except json.JSONDecodeError as e:
             try:
-                from story_engine.core.core.common.observability import log_exception  # type: ignore
+                
                 log_exception(_obs, code="GEN_PARSE_ERROR", component="poml_integration", exc=e)
             except Exception:
                 pass

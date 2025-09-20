@@ -3,7 +3,7 @@ import json
 import sys
 from pathlib import Path
 from typing import Any, Dict
-from story_engine.core.core.common.observability import init_logging_from_env, get_logger
+from llm_observability import get_logger, init_logging_from_env
 
 try:
     import yaml  # type: ignore

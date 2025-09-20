@@ -5,11 +5,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
-from story_engine.core.core.common.observability import (
-    init_logging_from_env,
-    get_logger,
-    correlation_id_var,
-)
+from llm_observability import get_logger, init_logging_from_env
 
 try:
     import yaml  # type: ignore

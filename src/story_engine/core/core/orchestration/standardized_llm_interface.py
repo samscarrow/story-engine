@@ -6,7 +6,7 @@ Provides a unified API for all Story Engine components to interact with LLMs
 import asyncio
 import time as import_time
 import logging
-from story_engine.core.core.common.observability import log_exception, ErrorCodes, get_logger
+from llm_observability import get_logger
 from typing import Dict, Any, Optional, List, Protocol, runtime_checkable
 from dataclasses import dataclass
 from enum import Enum
@@ -165,17 +165,7 @@ class StandardizedLLMInterface:
             self._update_performance_metrics(
                 query_type_str, response_time, success=False
             )
-            try:
-                log_exception(
-                    get_logger("standardized_llm"),
-                    code=ErrorCodes.AI_LB_UNAVAILABLE,
-                    component="standardized_interface",
-                    exc=e,
-                    query_type=query_type_str,
-                    response_time_ms=int(response_time * 1000),
-                )
-            except Exception:
-                pass
+            logger.error(f"Error in standardized llm interface: {e}")
             raise
 
     async def batch_query(

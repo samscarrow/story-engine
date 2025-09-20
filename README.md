@@ -197,6 +197,17 @@ python test_character_simulation.py TestEmotionalState -v
 ```
 
 #### Pytest (recommended)
+#### Make targets
+- `make test` – run the default pytest suite (excludes slow/oracle)
+- `make test-slow` – run golden/silver prompt suites (`pytest -m slow`)
+- `make test-golden-core` – run the core golden narratives (`pytest -m golden_core`)
+- `make test-golden-extended` – run the extended golden narratives (`pytest -m golden_extended`)
+- `make test-oracle` – run Oracle integration tests (`pytest -m oracle`)
+- `make test-live-e2e` – run live LM Studio acceptance tests (`RUN_LIVE_E2E=1`)
+- `make test-lmstudio` – smoke-test the LM Studio circuit
+- `make test-orchestrator` – targeted orchestrator checks
+- `make e2e` – deterministic e2e stubs
+
 - Fast (excludes slow by default):
   - `pytest -q` or `pytest -n auto --dist=loadfile -q`
 - Only slow/live tests:

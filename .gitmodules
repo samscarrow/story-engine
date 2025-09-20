@@ -1,0 +1,4 @@
+[submodule "external/llm-observability-suite"]
+	path = external/llm-observability-suite
+	url = https://github.com/samscarrow/llm-observability-suite
+	branch = main
