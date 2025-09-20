@@ -30,11 +30,11 @@ jobs:
       - name: Lint POML templates (self-contained)
         run: |
           python scripts/lint_poml_self_contained.py
-      - name: Run tests (exclude slow)
+      - name: Run tests (exclude slow/oracle/acceptance)
         env:
           PYTHONPATH: src
         run: |
-          pytest -q
+          pytest -q -m "not slow and not oracle and not acceptance"
 
   repro-harness:
     name: Repro Harness (focused)

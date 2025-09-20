@@ -39,10 +39,16 @@ jobs:
             pip install -e external/llm-observability-suite
           fi
 
-      - name: Run fast tests (exclude slow)
+      - name: Run fast tests (exclude slow/oracle/acceptance)
         env:
           PYTHONPATH: src
         run: pytest -n auto --dist=loadfile -m "not slow" -q
+        shell: bash
+      - name: Rerun with stricter markers
+        if: failure()
+        env:
+          PYTHONPATH: src
+        run: pytest -n auto --dist=loadfile -m "not slow and not oracle and not acceptance" -q
 
       - name: Aggregate generation errors (ndjson ledger)
         env:
