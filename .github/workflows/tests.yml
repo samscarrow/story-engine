@@ -26,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
           pip install -e .
-          pip install pytest
+          pip install pytest pytest-asyncio
       - name: Lint POML templates (self-contained)
         run: |
           python scripts/lint_poml_self_contained.py
@@ -51,7 +51,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
           pip install -e .
-          pip install pytest
+          pip install pytest pytest-asyncio
       - name: Run repro harness tests
         env:
           PYTHONPATH: src
@@ -86,7 +86,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
           pip install -e .
-          pip install pytest
+          pip install pytest pytest-asyncio
       - name: Point config to ai-lb over Tailscale
         run: |
           sed -i 's#http://localhost:8000#http://pc-sam.dory-phrygian\.ts\.net:8000#' config.yaml
@@ -115,7 +115,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
           pip install -e .
-          pip install pytest
+          pip install pytest pytest-asyncio
       - name: Run DB smoke tests
         env:
           DB_WALLET_LOCATION: ${{ secrets.DB_WALLET_LOCATION }}

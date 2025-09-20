@@ -31,8 +31,8 @@ jobs:
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           else
-            # Minimal deps for tests
-            pip install pytest pytest-xdist pytest-forked aiohttp pyyaml numpy
+            # Minimal deps for tests (incl. asyncio)
+            pip install pytest pytest-asyncio pytest-xdist pytest-forked aiohttp pyyaml numpy
           fi
           # Install observability submodule
           if [ -d external/llm-observability-suite ]; then
