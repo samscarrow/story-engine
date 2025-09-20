@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -31,6 +33,10 @@ jobs:
           else
             # Minimal deps for tests
             pip install pytest pytest-xdist pytest-forked aiohttp pyyaml numpy
+          fi
+          # Install observability submodule
+          if [ -d external/llm-observability-suite ]; then
+            pip install -e external/llm-observability-suite
           fi
 
       - name: Run fast tests (exclude slow)

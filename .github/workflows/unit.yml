@@ -9,10 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - run: pip install -U pip
+      - run: pip install -e external/llm-observability-suite
       - run: pip install -e .
       - run: pip install pytest
       - name: Run unit tests
