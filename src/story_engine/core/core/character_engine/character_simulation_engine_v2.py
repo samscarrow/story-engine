@@ -10,7 +10,6 @@ import aiohttp
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Any
-import os
 from datetime import datetime
 from pathlib import Path
 import random
