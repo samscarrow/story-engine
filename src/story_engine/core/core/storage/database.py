@@ -475,7 +475,6 @@ class OracleConnection(DatabaseConnection):
                 )
                 try:
                     # Emit a lightweight timing metric
-                    from ..common.observability import observe_metric
                     observe_metric("db.oracle.connect_ms", elapsed_ms, dsn=self.dsn, pooled=bool(self._pool))
                 except Exception:
                     pass
