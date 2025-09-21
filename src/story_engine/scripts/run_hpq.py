@@ -35,7 +35,14 @@ def _make_characters(names: List[str]) -> List[Dict[str, Any]]:
     # Basic mock character objects; real systems can pass full descriptors
     out = []
     for n in names:
-        out.append({"id": n.lower().replace(" ", "_"), "name": n, "role": "unknown", "traits": []})
+        out.append(
+            {
+                "id": n.lower().replace(" ", "_"),
+                "name": n,
+                "role": "unknown",
+                "traits": [],
+            }
+        )
     return out
 
 
@@ -62,7 +69,13 @@ async def main_async(args):
 
     _log.info("hpq.start", extra={"candidates": opts.candidates})
     result = await hpq.craft_scene_hpq(beat, characters)
-    _log.info("hpq.done", extra={"best_avg": result.get("best_avg"), "used_model": result.get("used_model")})
+    _log.info(
+        "hpq.done",
+        extra={
+            "best_avg": result.get("best_avg"),
+            "used_model": result.get("used_model"),
+        },
+    )
 
     # Pretty print excerpt
     print("\n=== Situation ===\n")
@@ -75,8 +88,14 @@ async def main_async(args):
 def build_parser():
     ap = argparse.ArgumentParser(description="Run HPQ pipeline demo")
     ap.add_argument("--title", default="The Trial")
-    ap.add_argument("--premise", default="Roman prefect under pressure decides a prophet's fate")
-    ap.add_argument("--characters", nargs="+", default=["Pontius Pilate", "Caiaphas", "Crowd Representative"])
+    ap.add_argument(
+        "--premise", default="Roman prefect under pressure decides a prophet's fate"
+    )
+    ap.add_argument(
+        "--characters",
+        nargs="+",
+        default=["Pontius Pilate", "Caiaphas", "Crowd Representative"],
+    )
     ap.add_argument("--beats", type=int, default=1)
     ap.add_argument("--candidates", type=int, default=3)
     ap.add_argument("--threshold", type=float, default=7.5)
@@ -85,10 +104,17 @@ def build_parser():
     ap.add_argument("--max-tokens-hq", dest="max_tokens_hq", type=int, default=800)
     ap.add_argument("--temp-fast", dest="temp_fast", type=float, default=0.7)
     ap.add_argument("--temp-hq", dest="temp_hq", type=float, default=0.6)
-    ap.add_argument("--canary", type=float, default=0.0, help="0..1 fraction of calls escalated for canary")
+    ap.add_argument(
+        "--canary",
+        type=float,
+        default=0.0,
+        help="0..1 fraction of calls escalated for canary",
+    )
     ap.add_argument("--budget-ms", dest="budget_ms", type=int, default=0)
     ap.add_argument("--concurrency", type=int, default=2)
-    ap.add_argument("--structured-scoring", action="store_true", help="Enable two-pass JSON scoring")
+    ap.add_argument(
+        "--structured-scoring", action="store_true", help="Enable two-pass JSON scoring"
+    )
     return ap
 
 

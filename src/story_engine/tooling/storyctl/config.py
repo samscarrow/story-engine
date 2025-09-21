@@ -45,7 +45,9 @@ class EnvVarSpec:
             value=other.value if other.value is not None else self.value,
             from_env=other.from_env if other.from_env is not None else self.from_env,
             required=self.required if other.required is None else other.required,
-            description=other.description if other.description is not None else self.description,
+            description=(
+                other.description if other.description is not None else self.description
+            ),
             sensitive=self.sensitive if other.sensitive is None else other.sensitive,
         )
 
@@ -284,7 +286,9 @@ class EnvironmentRegistry:
         if data.get("default"):
             self._default = name
 
-    def _build_environment(self, name: str, stack: Optional[List[str]] = None) -> EnvironmentDefinition:
+    def _build_environment(
+        self, name: str, stack: Optional[List[str]] = None
+    ) -> EnvironmentDefinition:
         if name in self._cache:
             return self._cache[name].copy()
 
@@ -293,7 +297,9 @@ class EnvironmentRegistry:
 
         stack = list(stack or [])
         if name in stack:
-            raise RuntimeError(f"Cyclic environment inheritance detected: {' -> '.join(stack + [name])}")
+            raise RuntimeError(
+                f"Cyclic environment inheritance detected: {' -> '.join(stack + [name])}"
+            )
         stack.append(name)
 
         raw = self._raw[name]
@@ -356,9 +362,17 @@ def _parse_env_section(data: Mapping[str, Any]) -> Dict[str, EnvVarSpec]:
             spec = EnvVarSpec(
                 key=key,
                 value=str(raw.get("value")) if raw.get("value") is not None else None,
-                from_env=str(raw.get("from_env")) if raw.get("from_env") is not None else None,
+                from_env=(
+                    str(raw.get("from_env"))
+                    if raw.get("from_env") is not None
+                    else None
+                ),
                 required=raw.get("required"),
-                description=str(raw.get("description")) if raw.get("description") is not None else None,
+                description=(
+                    str(raw.get("description"))
+                    if raw.get("description") is not None
+                    else None
+                ),
                 sensitive=raw.get("sensitive"),
             )
         else:

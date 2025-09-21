@@ -27,7 +27,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import logging
 from story_engine.core.core.cache.response_cache import ResponseCache
-from llm_observability import get_logger, log_exception, observe_metric, inc_metric, ErrorCodes
+from llm_observability import (
+    get_logger,
+    log_exception,
+    observe_metric,
+    inc_metric,
+    ErrorCodes,
+)
 from story_engine.core.core.orchestration.unified_llm_orchestrator import (
     UnifiedLLMOrchestrator,
     LLMPersona,
@@ -62,7 +68,11 @@ def _truthy_env(name: str, default: bool = False) -> bool:
 
 
 class HPQPipeline:
-    def __init__(self, orchestrator: Optional[UnifiedLLMOrchestrator] = None, opts: Optional[HPQOptions] = None) -> None:
+    def __init__(
+        self,
+        orchestrator: Optional[UnifiedLLMOrchestrator] = None,
+        opts: Optional[HPQOptions] = None,
+    ) -> None:
         # Prefer unified orchestrator for POML personas
         self.unified = orchestrator or UnifiedLLMOrchestrator.from_env_and_config()
         self.opts = opts or HPQOptions()
@@ -95,18 +105,24 @@ class HPQPipeline:
             # Canary
             if "canary_pct" in hpq:
                 try:
-                    self.opts.canary_pct = float(hpq.get("canary_pct", self.opts.canary_pct))
+                    self.opts.canary_pct = float(
+                        hpq.get("canary_pct", self.opts.canary_pct)
+                    )
                 except Exception:
                     pass
             # Thresholds
             if "threshold_low" in hpq:
                 try:
-                    self.opts.threshold_avg = float(hpq.get("threshold_low", self.opts.threshold_avg))
+                    self.opts.threshold_avg = float(
+                        hpq.get("threshold_low", self.opts.threshold_avg)
+                    )
                 except Exception:
                     pass
             if "threshold_high" in hpq:
                 try:
-                    self.opts.threshold_high = float(hpq.get("threshold_high", self.opts.threshold_high))
+                    self.opts.threshold_high = float(
+                        hpq.get("threshold_high", self.opts.threshold_high)
+                    )
                 except Exception:
                     pass
         except Exception:
@@ -114,9 +130,11 @@ class HPQPipeline:
 
     async def _list_models(self, prefer_small: bool) -> List[Dict[str, Any]]:
         try:
-            return await self.unified.orchestrator.list_models_filtered(prefer_small=prefer_small)
+            return await self.unified.orchestrator.list_models_filtered(
+                prefer_small=prefer_small
+            )
         except Exception as e:
-            logger.error(f"Error in pipeline: {e}")
+            logger.error("Error in pipeline: %s", e)
             return []
 
     async def _select_fast_model(self) -> Optional[str]:
@@ -137,7 +155,13 @@ class HPQPipeline:
             return None
         # Prefer obvious large variants
         preferred = [
-            r"70b", r"72b", r"65b", r"40b", r"32b", r"24b", r"8x7b",
+            r"70b",
+            r"72b",
+            r"65b",
+            r"40b",
+            r"32b",
+            r"24b",
+            r"8x7b",
         ]
         ids = [c.get("id", "") for c in candidates]
         for pat in preferred:
@@ -261,7 +285,9 @@ class HPQPipeline:
             "Overall Engagement",
         ]
         # Choose structured scoring when enabled (two-pass), else text 8-line eval
-        if self.opts.use_structured_scoring or _truthy_env("HPQ_STRUCTURED_SCORING", False):
+        if self.opts.use_structured_scoring or _truthy_env(
+            "HPQ_STRUCTURED_SCORING", False
+        ):
             # Pass 1: freeform evaluation
             freeform = await self.unified.orchestrator.generate(
                 prompt=self.unified.poml.render(
@@ -303,17 +329,22 @@ class HPQPipeline:
 
         # Text 8-line fallback
         resp = await self.unified.orchestrator.generate(
-            prompt=self.unified.poml.render("narrative/quality_evaluation.poml", {"story": story, "metrics": metrics}),
+            prompt=self.unified.poml.render(
+                "narrative/quality_evaluation.poml",
+                {"story": story, "metrics": metrics},
+            ),
             temperature=0.2,
             max_tokens=200,
             allow_fallback=True,
             budget_ms=self.opts.budget_ms,
         )
         text = getattr(resp, "text", "")
-        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
         return self._score_quality_lines(lines[:8])
 
-    async def _generate_candidate(self, situation: str, characters: List[Dict[str, Any]], *, model: Optional[str]) -> str:
+    async def _generate_candidate(
+        self, situation: str, characters: List[Dict[str, Any]], *, model: Optional[str]
+    ) -> str:
         # Simple direct instruction prompt; keep output in a single narrative block.
         char_names = ", ".join([c.get("name", c.get("id", "")) for c in characters])
         prompt = (
@@ -340,7 +371,8 @@ class HPQPipeline:
             "You are a masterful line editor and ghostwriter for high historical drama."
         )
         prompt = (
-            "Refine the following scene for maximal coherence, rhythm, and dramatic intensity while preserving content.\n"
+            "Refine the following scene for maximal coherence, rhythm, and "
+            "dramatic intensity while preserving content.\n"
             "- Keep voice consistent; cut filler; tighten pacing.\n"
             "- Use concrete sensory details and subtext.\n"
             "- Return only the improved scene text.\n\n"
@@ -371,7 +403,11 @@ class HPQPipeline:
         # Stage 1: Situation via persona (fast)
         scene_arch = await self.unified.generate_with_persona(
             LLMPersona.SCENE_ARCHITECT,
-            {"beat": beat, "characters": characters, "previous_context": previous_context},
+            {
+                "beat": beat,
+                "characters": characters,
+                "previous_context": previous_context,
+            },
             temperature=0.6,
             max_tokens=300,
             allow_fallback=True,
@@ -387,7 +423,9 @@ class HPQPipeline:
             async with sem:
                 try:
                     t0 = asyncio.get_event_loop().time()
-                    text = await self._generate_candidate(situation, characters, model=fast_model)
+                    text = await self._generate_candidate(
+                        situation, characters, model=fast_model
+                    )
                     elapsed_ms = int((asyncio.get_event_loop().time() - t0) * 1000)
                     try:
                         observe_metric("hpq.candidate_ms", elapsed_ms, idx=i)
@@ -395,12 +433,25 @@ class HPQPipeline:
                         pass
                     candidates[i] = text or ""
                 except Exception as e:
-                    log_exception(_obs, code=ErrorCodes.GEN_TIMEOUT, component="hpq.candidate", exc=e, idx=i)
+                    log_exception(
+                        _obs,
+                        code=ErrorCodes.GEN_TIMEOUT,
+                        component="hpq.candidate",
+                        exc=e,
+                        idx=i,
+                    )
 
         await asyncio.gather(*[_one(i) for i in range(n)])
 
         if not candidates:
-            return {"situation": situation, "final": "", "candidates": [], "scores": [], "model_hq": hq_model, "model_fast": fast_model}
+            return {
+                "situation": situation,
+                "final": "",
+                "candidates": [],
+                "scores": [],
+                "model_hq": hq_model,
+                "model_fast": fast_model,
+            }
 
         # Stage 4: Checks + rerank
         scored: List[Tuple[float, int]] = []  # (avg, index)
@@ -412,11 +463,21 @@ class HPQPipeline:
                 scored.append((avg, idx))
                 score_breakdown.append(details)
                 try:
-                    observe_metric("hpq.evaluate_ms", int((asyncio.get_event_loop().time() - t0) * 1000), idx=idx)
+                    observe_metric(
+                        "hpq.evaluate_ms",
+                        int((asyncio.get_event_loop().time() - t0) * 1000),
+                        idx=idx,
+                    )
                 except Exception:
                     pass
             except Exception as e:
-                log_exception(_obs, code=ErrorCodes.GEN_PARSE_ERROR, component="hpq.evaluate", exc=e, idx=idx)
+                log_exception(
+                    _obs,
+                    code=ErrorCodes.GEN_PARSE_ERROR,
+                    component="hpq.evaluate",
+                    exc=e,
+                    idx=idx,
+                )
                 scored.append((0.0, idx))
                 score_breakdown.append({})
 
@@ -434,9 +495,25 @@ class HPQPipeline:
                 do_canary = False
         # Hysteresis window: if clearly good, skip; if clearly low, escalate; else rely on canary/force
         escalate = force_24b or do_canary or (best_avg < float(self.opts.threshold_avg))
-        if not force_24b and not do_canary and best_avg >= float(self.opts.threshold_high):
+        if (
+            not force_24b
+            and not do_canary
+            and best_avg >= float(self.opts.threshold_high)
+        ):
             escalate = False
-        inc_metric("hpq.escalate", 1 if escalate else 0, reason=("force" if force_24b else ("canary" if do_canary else ("score" if best_avg < self.opts.threshold_avg else "skip"))))
+        inc_metric(
+            "hpq.escalate",
+            1 if escalate else 0,
+            reason=(
+                "force"
+                if force_24b
+                else (
+                    "canary"
+                    if do_canary
+                    else ("score" if best_avg < self.opts.threshold_avg else "skip")
+                )
+            ),
+        )
 
         # Stage 6: Finalize (HQ when needed)
         final: str
@@ -451,13 +528,19 @@ class HPQPipeline:
                 t0 = asyncio.get_event_loop().time()
                 final = await self._finalize_hq(best_candidate, model=with_model)
                 try:
-                    observe_metric("hpq.finalize_ms", int((asyncio.get_event_loop().time() - t0) * 1000), model=with_model)
+                    observe_metric(
+                        "hpq.finalize_ms",
+                        int((asyncio.get_event_loop().time() - t0) * 1000),
+                        model=with_model,
+                    )
                 except Exception:
                     pass
             else:
                 final = best_candidate
         except Exception as e:
-            log_exception(_obs, code=ErrorCodes.AI_LB_UNAVAILABLE, component="hpq.finalize", exc=e)
+            log_exception(
+                _obs, code=ErrorCodes.AI_LB_UNAVAILABLE, component="hpq.finalize", exc=e
+            )
             final = best_candidate
 
         try:

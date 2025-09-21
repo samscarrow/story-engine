@@ -53,7 +53,9 @@ def run_preflight_checks(
     return results
 
 
-def _run_single_check(check: PreflightCheck, resolution: EnvironmentResolution) -> CheckResult:
+def _run_single_check(
+    check: PreflightCheck, resolution: EnvironmentResolution
+) -> CheckResult:
     if check.check_type == "db":
         return _run_db_check(check, resolution)
     if check.check_type == "http":
@@ -62,10 +64,14 @@ def _run_single_check(check: PreflightCheck, resolution: EnvironmentResolution) 
         return _run_command_check(check, resolution)
     if check.check_type == "json":
         return _run_json_check(check, resolution)
-    return CheckResult(check=check, success=False, message=f"Unknown check type '{check.check_type}'")
+    return CheckResult(
+        check=check, success=False, message=f"Unknown check type '{check.check_type}'"
+    )
 
 
-def _run_db_check(check: PreflightCheck, resolution: EnvironmentResolution) -> CheckResult:
+def _run_db_check(
+    check: PreflightCheck, resolution: EnvironmentResolution
+) -> CheckResult:
     buffer = io.StringIO()
     with temporary_env(resolution.values), redirect_stdout(buffer):
         rc = story_cli.cmd_db_health(argparse.Namespace())
@@ -81,11 +87,15 @@ def _run_db_check(check: PreflightCheck, resolution: EnvironmentResolution) -> C
     )
 
 
-def _run_http_check(check: PreflightCheck, resolution: EnvironmentResolution) -> CheckResult:
+def _run_http_check(
+    check: PreflightCheck, resolution: EnvironmentResolution
+) -> CheckResult:
     params = check.params
     url_template = params.get("url")
     if not url_template:
-        return CheckResult(check=check, success=False, message="Missing 'url' parameter")
+        return CheckResult(
+            check=check, success=False, message="Missing 'url' parameter"
+        )
 
     url = _render_template(str(url_template), resolution)
     method = str(params.get("method", "GET")).upper()
@@ -95,7 +105,9 @@ def _run_http_check(check: PreflightCheck, resolution: EnvironmentResolution) ->
     request = Request(url, method=method, headers=headers)
 
     try:
-        with urlopen(request, timeout=timeout) as response:  # nosec B310 - controlled destinations
+        with urlopen(
+            request, timeout=timeout
+        ) as response:  # nosec B310 - controlled destinations
             status_code = int(response.status)
             body_preview = response.read(256).decode("utf-8", errors="ignore")
             success = 200 <= status_code < 400
@@ -121,7 +133,9 @@ def _run_http_check(check: PreflightCheck, resolution: EnvironmentResolution) ->
         )
 
 
-def _run_command_check(check: PreflightCheck, resolution: EnvironmentResolution) -> CheckResult:
+def _run_command_check(
+    check: PreflightCheck, resolution: EnvironmentResolution
+) -> CheckResult:
     params = check.params
     command = params.get("command")
     args = params.get("args")
@@ -134,18 +148,24 @@ def _run_command_check(check: PreflightCheck, resolution: EnvironmentResolution)
 
     if command:
         to_run = command if isinstance(command, str) else " ".join(map(str, command))
-        completed = subprocess.run(  # noqa: S603 # nosec B603 - command defined in repo config
-            to_run,
-            shell=True,
-            capture_output=True,
-            text=True,
-            cwd=cwd,
-            env=env,
-            check=False,
+        completed = (
+            subprocess.run(  # noqa: S603 # nosec B603 - command defined in repo config
+                to_run,
+                shell=True,
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+                env=env,
+                check=False,
+            )
         )
     else:
         if not isinstance(args, (list, tuple)):
-            return CheckResult(check=check, success=False, message="Command check requires 'command' or 'args'")
+            return CheckResult(
+                check=check,
+                success=False,
+                message="Command check requires 'command' or 'args'",
+            )
         arg_list = [str(a) for a in args]
         completed = subprocess.run(  # noqa: S603 - args provided
             arg_list,
@@ -157,7 +177,11 @@ def _run_command_check(check: PreflightCheck, resolution: EnvironmentResolution)
         )
 
     success = completed.returncode == expected_rc
-    message = completed.stdout.strip() or completed.stderr.strip() or f"Exit {completed.returncode}"
+    message = (
+        completed.stdout.strip()
+        or completed.stderr.strip()
+        or f"Exit {completed.returncode}"
+    )
     details: Dict[str, object] = {
         "returncode": completed.returncode,
     }
@@ -175,18 +199,26 @@ def _run_command_check(check: PreflightCheck, resolution: EnvironmentResolution)
     )
 
 
-def _run_json_check(check: PreflightCheck, resolution: EnvironmentResolution) -> CheckResult:
+def _run_json_check(
+    check: PreflightCheck, resolution: EnvironmentResolution
+) -> CheckResult:
     params = check.params
     path_template = params.get("path")
     if not path_template:
-        return CheckResult(check=check, success=False, message="Missing 'path' parameter")
+        return CheckResult(
+            check=check, success=False, message="Missing 'path' parameter"
+        )
     path = os.path.expanduser(_render_template(str(path_template), resolution))
     if not os.path.exists(path):
-        return CheckResult(check=check, success=False, message=f"File not found: {path}")
+        return CheckResult(
+            check=check, success=False, message=f"File not found: {path}"
+        )
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
     except Exception as exc:
-        return CheckResult(check=check, success=False, message=f"JSON load failed: {exc}")
+        return CheckResult(
+            check=check, success=False, message=f"JSON load failed: {exc}"
+        )
     keys = list(data)[:5] if isinstance(data, dict) else None
     return CheckResult(
         check=check,

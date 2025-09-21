@@ -87,7 +87,9 @@ class FileJobRepo(InMemoryJobRepo):
     Not concurrency-safe; acceptable for single-process development.
     """
 
-    def __init__(self, path: str | os.PathLike[str] = "artifacts/idempotency.json") -> None:
+    def __init__(
+        self, path: str | os.PathLike[str] = "artifacts/idempotency.json"
+    ) -> None:
         super().__init__()
         self._path = Path(path)
         if self._path.exists():
@@ -101,7 +103,9 @@ class FileJobRepo(InMemoryJobRepo):
         super().mark_processed(idempotency_key)
         self._path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            self._path.write_text(json.dumps(sorted(list(self._seen))), encoding="utf-8")
+            self._path.write_text(
+                json.dumps(sorted(list(self._seen))), encoding="utf-8"
+            )
         except Exception:
             pass
 

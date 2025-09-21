@@ -29,7 +29,9 @@ def get_db_settings(env_file: Optional[str] = None) -> Dict[str, Any]:
             "db_type": "oracle",
             "user": os.getenv("DB_USER"),
             "password": os.getenv("DB_PASSWORD"),
-            "dsn": os.getenv("DB_DSN") or os.getenv("DB_CONNECT_STRING") or "localhost/XEPDB1",
+            "dsn": os.getenv("DB_DSN")
+            or os.getenv("DB_CONNECT_STRING")
+            or "localhost/XEPDB1",
             "wallet_location": os.getenv("DB_WALLET_LOCATION"),
             "wallet_password": os.getenv("DB_WALLET_PASSWORD"),
             # Stability / pooling knobs (optional)
@@ -40,7 +42,9 @@ def get_db_settings(env_file: Optional[str] = None) -> Dict[str, Any]:
             "pool_timeout": int(os.getenv("ORACLE_POOL_TIMEOUT", "60") or 60),
             "wait_timeout": int(os.getenv("ORACLE_WAIT_TIMEOUT", "0") or 0) or None,
             "retry_attempts": int(os.getenv("ORACLE_RETRY_ATTEMPTS", "3") or 3),
-            "retry_backoff_seconds": float(os.getenv("ORACLE_RETRY_BACKOFF", "1.0") or 1.0),
+            "retry_backoff_seconds": float(
+                os.getenv("ORACLE_RETRY_BACKOFF", "1.0") or 1.0
+            ),
             "ping_on_connect": _to_bool(os.getenv("ORACLE_PING_ON_CONNECT"), True),
         }
         # Health-aware fallback: unless strictly required, prefer SQLite when

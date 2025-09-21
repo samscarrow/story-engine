@@ -39,6 +39,7 @@ def timing(metric: str, **tags):
             except Exception:
                 pass
 
+
 __all__ = [
     "DBLogger",
     "ErrorCodes",

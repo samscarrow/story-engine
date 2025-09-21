@@ -47,7 +47,13 @@ class JsonLogFormatter(logging.Formatter):
             "error_code",
         )
         # Basic redaction of sensitive keys
-        redact = {"api_key", "authorization", "password", "db_password", "oracle_password"}
+        redact = {
+            "api_key",
+            "authorization",
+            "password",
+            "db_password",
+            "oracle_password",
+        }
         for key in base_keys:
             if hasattr(record, key):
                 val = getattr(record, key)
@@ -55,10 +61,27 @@ class JsonLogFormatter(logging.Formatter):
 
         # Include any additional extras provided via LoggerAdapter/extra
         std_attrs = {
-            "name", "msg", "args", "levelname", "levelno", "pathname", "filename",
-            "module", "exc_info", "exc_text", "stack_info", "lineno", "funcName",
-            "created", "msecs", "relativeCreated", "thread", "threadName", "processName",
-            "process", "asctime",
+            "name",
+            "msg",
+            "args",
+            "levelname",
+            "levelno",
+            "pathname",
+            "filename",
+            "module",
+            "exc_info",
+            "exc_text",
+            "stack_info",
+            "lineno",
+            "funcName",
+            "created",
+            "msecs",
+            "relativeCreated",
+            "thread",
+            "threadName",
+            "processName",
+            "process",
+            "asctime",
         }
         for k, v in record.__dict__.items():
             if k in payload or k in std_attrs or k.startswith("_"):

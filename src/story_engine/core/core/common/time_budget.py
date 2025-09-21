@@ -24,4 +24,3 @@ class TimeBudget:
 
     def remaining_seconds(self) -> float:
         return max(0.0, self.remaining_ms() / 1000.0)
-

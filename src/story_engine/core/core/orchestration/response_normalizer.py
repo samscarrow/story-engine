@@ -17,6 +17,7 @@ def _first_non_empty(*vals: Optional[str]) -> str:
             return v.strip()
     return ""
 
+
 def _coerce_text(value: Any) -> str:
     """Convert structured content (str or list of segments) into plain text."""
 
@@ -52,9 +53,6 @@ def _extract_reasoning(message: Dict[str, Any]) -> str:
     return ""
 
 
-
-
-
 def extract_text_and_reasoning(message: Dict[str, Any]) -> tuple[str, str]:
     """Return (text, reasoning) pairs from an OpenAI message structure."""
 
@@ -63,6 +61,7 @@ def extract_text_and_reasoning(message: Dict[str, Any]) -> tuple[str, str]:
     content = _coerce_text(message.get("content"))
     reasoning = _extract_reasoning(message)
     return content, reasoning
+
 
 def normalize_openai_chat(
     data: Dict[str, Any], headers: Optional[Dict[str, Any]] = None

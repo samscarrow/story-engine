@@ -51,11 +51,13 @@ def oracle_env_is_healthy(
     user = os.getenv("DB_USER") or os.getenv("ORACLE_USER")
     password = os.getenv("DB_PASSWORD") or os.getenv("ORACLE_PASSWORD")
     dsn = (
-        os.getenv("DB_DSN")
-        or os.getenv("ORACLE_DSN")
-        or os.getenv("DB_CONNECT_STRING")
+        os.getenv("DB_DSN") or os.getenv("ORACLE_DSN") or os.getenv("DB_CONNECT_STRING")
     )
-    wallet = os.getenv("DB_WALLET_LOCATION") or os.getenv("ORACLE_WALLET_DIR") or os.getenv("TNS_ADMIN")
+    wallet = (
+        os.getenv("DB_WALLET_LOCATION")
+        or os.getenv("ORACLE_WALLET_DIR")
+        or os.getenv("TNS_ADMIN")
+    )
 
     # Minimal config requirements: DSN present, user/password typically required
     if not dsn or not user or not password:
@@ -394,6 +396,7 @@ class OracleConnection(DatabaseConnection):
         """Connect to the Oracle database with optional pooling and retries."""
         from pathlib import Path
         import os
+
         log = get_logger(
             __name__,
             component="db.oracle",
@@ -483,7 +486,12 @@ class OracleConnection(DatabaseConnection):
                 )
                 try:
                     # Emit a lightweight timing metric
-                    observe_metric("db.oracle.connect_ms", elapsed_ms, dsn=self.dsn, pooled=bool(self._pool))
+                    observe_metric(
+                        "db.oracle.connect_ms",
+                        elapsed_ms,
+                        dsn=self.dsn,
+                        pooled=bool(self._pool),
+                    )
                 except Exception:
                     pass
                 return
@@ -507,6 +515,7 @@ class OracleConnection(DatabaseConnection):
                     # add small jitter
                     try:
                         import random
+
                         backoff = backoff * (0.8 + 0.4 * random.random())
                     except Exception:
                         pass
@@ -601,7 +610,9 @@ class OracleConnection(DatabaseConnection):
                     self.conn.commit()
                 cursor.close()
             except Exception as e:
-                get_logger(__name__, component="db.oracle", workflow="create_table").error(
+                get_logger(
+                    __name__, component="db.oracle", workflow="create_table"
+                ).error(
                     "error creating workflow_outputs",
                     extra={"error": str(e)},
                 )
@@ -626,7 +637,9 @@ class OracleConnection(DatabaseConnection):
                     self.conn.commit()
                 cursor.close()
             except Exception as e:
-                get_logger(__name__, component="db.oracle", workflow="store_output").error(
+                get_logger(
+                    __name__, component="db.oracle", workflow="store_output"
+                ).error(
                     "error storing output",
                     extra={"error": str(e)},
                 )
@@ -657,7 +670,9 @@ class OracleConnection(DatabaseConnection):
                     results.append(json.loads(text))
                 return results
             except oracledb.Error as e:
-                get_logger(__name__, component="db.oracle", workflow="get_outputs").error(
+                get_logger(
+                    __name__, component="db.oracle", workflow="get_outputs"
+                ).error(
                     "error getting outputs",
                     extra={"error": str(e)},
                 )

@@ -43,4 +43,3 @@ def validate_oracle_env() -> Dict[str, List[str]]:
         warnings.append("Missing DB_USER/DB_PASSWORD")
 
     return {"errors": errors, "warnings": warnings}
-

@@ -58,7 +58,9 @@ def store_workflow_output(workflow_name: str, output: Dict[str, Any]) -> None:
                 sslkey=s.get("sslkey"),
             )
         else:
-            db = get_database_connection("sqlite", db_name=s.get("db_name", "workflow_outputs.db"))
+            db = get_database_connection(
+                "sqlite", db_name=s.get("db_name", "workflow_outputs.db")
+            )
         db.connect()
         db.store_output(workflow_name, output)
     except Exception:

@@ -16,8 +16,14 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 import logging
+from story_engine.core.core.common.observability import (
+    log_exception,
+    init_logging_from_env,
+)
+
 try:
     from llm_observability import get_logger
+
     _obs = get_logger("poml.integration")
 except Exception:  # pragma: no cover
     _obs = logging.getLogger(__name__)
@@ -379,7 +385,10 @@ class POMLEngine:
 
         def _resolve_imports(text: str) -> str:
             import re as _re
-            pat = _re.compile(r'<import\s+src="([^"]+)"(?:\s+data=\"\{\{([^}]+)\}\}\")?\s*/?>')
+
+            pat = _re.compile(
+                r'<import\s+src="([^"]+)"(?:\s+data=\"\{\{([^}]+)\}\}\")?\s*/?>'
+            )
 
             def repl(m):
                 src = m.group(1)
@@ -388,8 +397,15 @@ class POMLEngine:
                     tpath = self._find_template(src)
                     if not tpath:
                         return ""
-                    sub_data = processed_data if not data_expr else _eval_path(processed_data, data_expr)
-                    return self._render_native(tpath, sub_data if isinstance(sub_data, dict) else processed_data)
+                    sub_data = (
+                        processed_data
+                        if not data_expr
+                        else _eval_path(processed_data, data_expr)
+                    )
+                    return self._render_native(
+                        tpath,
+                        sub_data if isinstance(sub_data, dict) else processed_data,
+                    )
                 except Exception:
                     return ""
 
@@ -488,11 +504,17 @@ class POMLEngine:
                 if not tpath:
                     return ""
                 sub_data = data if not data_expr else eval_path(data, data_expr)
-                return self._render_native(tpath, sub_data if isinstance(sub_data, dict) else data)
+                return self._render_native(
+                    tpath, sub_data if isinstance(sub_data, dict) else data
+                )
             except Exception:
                 return ""
 
-        result = re.sub(r'<import\s+src="([^"]+)"(?:\s+data=\"\{\{([^}]+)\}\}\")?\s*/?>', import_repl, result)
+        result = re.sub(
+            r'<import\s+src="([^"]+)"(?:\s+data=\"\{\{([^}]+)\}\}\")?\s*/?>',
+            import_repl,
+            result,
+        )
 
         # Remove POML-specific tags for text output
         result = re.sub(r"<document[^>]*>", "", result)
@@ -1526,16 +1548,16 @@ class StoryEnginePOMLAdapter:
                                         "type": "object",
                                         "properties": {
                                             "name": {"type": "string"},
-                                            "role": {"type": "string"}
-                                        }
-                                    }
+                                            "role": {"type": "string"},
+                                        },
+                                    },
                                 },
                                 "setting_details": {
                                     "type": "object",
                                     "properties": {
                                         "location": {"type": "string"},
-                                        "atmosphere": {"type": "string"}
-                                    }
+                                        "atmosphere": {"type": "string"},
+                                    },
                                 },
                                 "key_actions": {
                                     "type": "array",
@@ -1543,9 +1565,9 @@ class StoryEnginePOMLAdapter:
                                         "type": "object",
                                         "properties": {
                                             "character": {"type": "string"},
-                                            "action": {"type": "string"}
-                                        }
-                                    }
+                                            "action": {"type": "string"},
+                                        },
+                                    },
                                 },
                                 "dialogue_snippets": {
                                     "type": "array",
@@ -1553,15 +1575,15 @@ class StoryEnginePOMLAdapter:
                                         "type": "object",
                                         "properties": {
                                             "speaker": {"type": "string"},
-                                            "line": {"type": "string"}
-                                        }
-                                    }
+                                            "line": {"type": "string"},
+                                        },
+                                    },
                                 },
                                 "emotional_tone": {"type": "string"},
-                                "scene_objective": {"type": "string"}
-                            }
-                        }
-                    }
+                                "scene_objective": {"type": "string"},
+                            },
+                        },
+                    },
                 },
                 max_tokens=4000,
             )
@@ -1662,14 +1684,14 @@ class StoryEnginePOMLAdapter:
                                             "speaker": {"type": "string"},
                                             "line": {"type": "string"},
                                             "tone": {"type": "string"},
-                                            "recipient": {"type": "string"}
-                                        }
-                                    }
+                                            "recipient": {"type": "string"},
+                                        },
+                                    },
                                 }
                             },
-                            "required": ["dialogue"]
-                        }
-                    }
+                            "required": ["dialogue"],
+                        },
+                    },
                 },
                 max_tokens=1000,
                 timeout=180,
@@ -1762,11 +1784,11 @@ class StoryEnginePOMLAdapter:
                             "type": "object",
                             "properties": {
                                 "evaluation_text": {"type": "string"},
-                                "scores": {"type": "object"}
+                                "scores": {"type": "object"},
                             },
-                            "required": ["evaluation_text"]
-                        }
-                    }
+                            "required": ["evaluation_text"],
+                        },
+                    },
                 },
                 max_tokens=1000,
             )
@@ -1918,7 +1940,8 @@ class StoryEnginePOMLAdapter:
         # --- Stage 1: Generate Stream of Consciousness ---
         # The persona template renders the SYSTEM prompt
         sim_system_prompt = self.engine.render_roles(
-            "personas/persona_stream_of_consciousness.poml", {"character": character, "world_brief": world_brief or ""}
+            "personas/persona_stream_of_consciousness.poml",
+            {"character": character, "world_brief": world_brief or ""},
         )  # Use render_roles to get system/user split
 
         # The USER prompt is just the situation
@@ -1926,12 +1949,17 @@ class StoryEnginePOMLAdapter:
 
         # Flexible routing: prefer explicit LMSTUDIO_MODEL, else 'auto'
         import os as _os
-        call_model = _os.environ.get("LM_MODEL") or _os.environ.get("LMSTUDIO_MODEL") or "auto"
+
+        call_model = (
+            _os.environ.get("LM_MODEL") or _os.environ.get("LMSTUDIO_MODEL") or "auto"
+        )
         # Stage 1 request with fallback: if a concrete model fails with 404/no-healthy, retry with 'auto'
         try:
             sim_response = await orchestrator.generate(
                 prompt=sim_user_prompt,
-                system=sim_system_prompt["system"],  # Pass system part of rendered roles
+                system=sim_system_prompt[
+                    "system"
+                ],  # Pass system part of rendered roles
                 model=model_identifier or call_model,
                 temperature=0.75,  # Slightly higher for more creative prose
                 max_tokens=500,
@@ -1939,7 +1967,11 @@ class StoryEnginePOMLAdapter:
             )
         except Exception as e:
             msg = str(e)
-            if (model_identifier or call_model) != "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+            if (model_identifier or call_model) != "auto" and (
+                "No healthy nodes found" in msg
+                or "model_not_found" in msg
+                or "HTTP 404" in msg
+            ):
                 sim_response = await orchestrator.generate(
                     prompt=sim_user_prompt,
                     system=sim_system_prompt["system"],
@@ -1948,7 +1980,11 @@ class StoryEnginePOMLAdapter:
                     max_tokens=500,
                     timeout=180,
                 )
-            elif (model_identifier or call_model) == "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+            elif (model_identifier or call_model) == "auto" and (
+                "No healthy nodes found" in msg
+                or "model_not_found" in msg
+                or "HTTP 404" in msg
+            ):
                 # Smart-pick: query models and retry with first viable id
                 try:
                     models = await orchestrator.list_models_filtered(prefer_small=True)
@@ -1994,7 +2030,11 @@ class StoryEnginePOMLAdapter:
             )
         except Exception as e:
             msg = str(e)
-            if (model_identifier or call_model) != "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+            if (model_identifier or call_model) != "auto" and (
+                "No healthy nodes found" in msg
+                or "model_not_found" in msg
+                or "HTTP 404" in msg
+            ):
                 structured_response = await orchestrator.generate(
                     prompt=stream_of_consciousness_text,
                     system=structuring_system_prompt["system"],
@@ -2003,7 +2043,11 @@ class StoryEnginePOMLAdapter:
                     max_tokens=3000,
                     timeout=300,
                 )
-            elif (model_identifier or call_model) == "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+            elif (model_identifier or call_model) == "auto" and (
+                "No healthy nodes found" in msg
+                or "model_not_found" in msg
+                or "HTTP 404" in msg
+            ):
                 try:
                     models = await orchestrator.list_models_filtered(prefer_small=True)
                     mid = None
@@ -2039,7 +2083,9 @@ class StoryEnginePOMLAdapter:
         except json.JSONDecodeError as e:
             try:
 
-                log_exception(_obs, code="GEN_PARSE_ERROR", component="poml_integration", exc=e)
+                log_exception(
+                    _obs, code="GEN_PARSE_ERROR", component="poml_integration", exc=e
+                )
             except Exception:
                 pass
             raise ValueError(

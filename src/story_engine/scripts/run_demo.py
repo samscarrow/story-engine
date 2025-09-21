@@ -96,13 +96,19 @@ async def run(args: argparse.Namespace) -> int:
     init_logging_from_env()
     # Global seed for more deterministic behavior (optional via env)
     try:
-        seed_str = os.getenv("DEMO_SEED") or os.getenv("STORY_ENGINE_SEED") or os.getenv("SEED")
+        seed_str = (
+            os.getenv("DEMO_SEED")
+            or os.getenv("STORY_ENGINE_SEED")
+            or os.getenv("SEED")
+        )
         if seed_str:
             import random
+
             os.environ["PYTHONHASHSEED"] = str(int(seed_str))
             random.seed(int(seed_str))
             try:
                 import numpy as _np  # type: ignore
+
                 _np.random.seed(int(seed_str))  # type: ignore[attr-defined]
             except Exception:
                 pass
@@ -225,7 +231,9 @@ async def run(args: argparse.Namespace) -> int:
     if orchestrator is not None:
         try:
             health = await orchestrator.health_check_all()
-            (outdir / "orchestrator_health.json").write_text(json.dumps(health, indent=2))
+            (outdir / "orchestrator_health.json").write_text(
+                json.dumps(health, indent=2)
+            )
         except Exception:
             pass
         try:
@@ -236,8 +244,11 @@ async def run(args: argparse.Namespace) -> int:
         # Optional: scrape /metrics from ai-lb if reachable
         try:
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
-                async with session.get("http://localhost:8000/metrics", timeout=5) as resp:
+                async with session.get(
+                    "http://localhost:8000/metrics", timeout=5
+                ) as resp:
                     if resp.status == 200:
                         (outdir / "lb_metrics.txt").write_text(await resp.text())
         except Exception:
@@ -253,9 +264,7 @@ async def run(args: argparse.Namespace) -> int:
     }
     if decisions_id:
         story_payload["decisions_id"] = decisions_id
-    (outdir / "story.json").write_text(
-        json.dumps(story_payload, indent=2)
-    )
+    (outdir / "story.json").write_text(json.dumps(story_payload, indent=2))
 
     (outdir / "continuity_report.json").write_text(json.dumps(continuity, indent=2))
 
@@ -309,22 +318,27 @@ async def run(args: argparse.Namespace) -> int:
     try:
         with (outdir / "trace.ndjson").open("w") as tf:
             for r in results:
-                m = (r.get("metadata") or {})
+                m = r.get("metadata") or {}
                 lb = m.get("lb") or {}
-                tf.write(json.dumps({
-                    "ts": r.get("timestamp"),
-                    "character": r.get("character_id"),
-                    "emphasis": r.get("emphasis"),
-                    "temperature": r.get("temperature"),
-                    "provider_name": m.get("provider_name"),
-                    "provider_type": m.get("provider_type"),
-                    "model": m.get("model"),
-                    "lb": {
-                        "x_selected_model": lb.get("x_selected_model"),
-                        "x_routed_node": lb.get("x_routed_node"),
-                        "x_request_id": lb.get("x_request_id"),
-                    }
-                }) + "\n")
+                tf.write(
+                    json.dumps(
+                        {
+                            "ts": r.get("timestamp"),
+                            "character": r.get("character_id"),
+                            "emphasis": r.get("emphasis"),
+                            "temperature": r.get("temperature"),
+                            "provider_name": m.get("provider_name"),
+                            "provider_type": m.get("provider_type"),
+                            "model": m.get("model"),
+                            "lb": {
+                                "x_selected_model": lb.get("x_selected_model"),
+                                "x_routed_node": lb.get("x_routed_node"),
+                                "x_request_id": lb.get("x_request_id"),
+                            },
+                        }
+                    )
+                    + "\n"
+                )
     except Exception:
         pass
 
@@ -350,9 +364,10 @@ async def run(args: argparse.Namespace) -> int:
     # Strict gating (optional): fail on degraded or continuity violations
     if getattr(args, "strict_output", False):
         degraded = metrics.get("degraded_runs", 0) > 0
-        cont_bad = not metrics.get("continuity_ok", True) and metrics.get(
-            "continuity_violations", 0
-        ) > 0
+        cont_bad = (
+            not metrics.get("continuity_ok", True)
+            and metrics.get("continuity_violations", 0) > 0
+        )
         if degraded or cont_bad:
             print(
                 f"Strict output gating failed: degraded_runs={metrics.get('degraded_runs')}, "

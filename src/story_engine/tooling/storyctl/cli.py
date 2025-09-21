@@ -89,10 +89,12 @@ def env_show(ctx: CLIContext, env_name: Optional[str], reveal: bool) -> None:
     definition, resolution = _resolve_environment(ctx, env_name)
     click.echo(f"Environment: {definition.name}")
     click.echo(definition.description or "(no description)")
-    click.echo("""
+    click.echo(
+        """
 Key                  Value                        Source
 -------------------- --------------------------- ----------------
-""".rstrip())
+""".rstrip()
+    )
 
     for key in sorted(resolution.statuses.keys()):
         status = resolution.statuses[key]
@@ -172,7 +174,9 @@ def check(
     checks_to_run = definition.checks
     if filters:
         checks_to_run = [
-            chk for chk in definition.checks if chk.name.lower() in filters or chk.check_type.lower() in filters
+            chk
+            for chk in definition.checks
+            if chk.name.lower() in filters or chk.check_type.lower() in filters
         ]
         if not checks_to_run:
             click.echo("No checks matched the provided filters", err=True)
@@ -210,9 +214,13 @@ def check(
 @app.command()
 @click.argument("command", nargs=-1, required=True)
 @click.option("--env", "env_name", default=None, help="Environment context to apply")
-@click.option("--dry-run", is_flag=True, help="Print command and exports without running")
+@click.option(
+    "--dry-run", is_flag=True, help="Print command and exports without running"
+)
 @click.pass_obj
-def run(ctx: CLIContext, command: tuple[str, ...], env_name: Optional[str], dry_run: bool) -> None:
+def run(
+    ctx: CLIContext, command: tuple[str, ...], env_name: Optional[str], dry_run: bool
+) -> None:
     """Run a command with environment variables applied."""
 
     if not command:
@@ -257,7 +265,9 @@ __all__ = ["app", "main"]
 
 
 @app.command("models")
-@click.option("--env", "env_name", default=None, help="Environment to use for LM endpoint")
+@click.option(
+    "--env", "env_name", default=None, help="Environment to use for LM endpoint"
+)
 @click.option("--json", "json_output", is_flag=True, help="Print raw JSON response")
 @click.pass_obj
 def models_cmd(ctx: CLIContext, env_name: Optional[str], json_output: bool) -> None:
@@ -269,7 +279,9 @@ def models_cmd(ctx: CLIContext, env_name: Optional[str], json_output: bool) -> N
         raise click.ClickException("LM_ENDPOINT not set in environment")
     url = base.rstrip("/") + "/v1/models"
     try:
-        with urllib.request.urlopen(url, timeout=10) as resp:  # nosec - internal tooling
+        with urllib.request.urlopen(
+            url, timeout=10
+        ) as resp:  # nosec - internal tooling
             body = resp.read().decode("utf-8", errors="replace")
     except urllib.error.URLError as exc:
         raise click.ClickException(f"Failed to reach {url}: {exc}") from exc
@@ -293,7 +305,12 @@ def models_cmd(ctx: CLIContext, env_name: Optional[str], json_output: bool) -> N
 
 
 @app.command("status")
-@click.option("--db", "db_path", default=None, help="SQLite DB path (defaults to $SQLITE_DB or workflow_outputs.db)")
+@click.option(
+    "--db",
+    "db_path",
+    default=None,
+    help="SQLite DB path (defaults to $SQLITE_DB or workflow_outputs.db)",
+)
 @click.option("--limit", default=20, show_default=True, help="Max rows to show")
 @click.option("--workflow", default=None, help="Filter by workflow name")
 def status_cmd(db_path: Optional[str], limit: int, workflow: Optional[str]) -> None:

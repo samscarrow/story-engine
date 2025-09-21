@@ -3,7 +3,16 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Mapping, Optional, Protocol, runtime_checkable
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Protocol,
+    runtime_checkable,
+)
 
 from llm_observability import get_logger
 
@@ -92,7 +101,9 @@ class ValidationReport:
 
 @runtime_checkable
 class AIClient(Protocol):
-    async def generate(self, prompt: str, **kwargs: Any) -> Any:  # returns object with .text
+    async def generate(
+        self, prompt: str, **kwargs: Any
+    ) -> Any:  # returns object with .text
         ...
 
 

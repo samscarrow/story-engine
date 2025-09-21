@@ -34,12 +34,14 @@ except ImportError:
 # Logger (configuration is typically handled during application initialization)
 logger = logging.getLogger(__name__)
 
+
 # Small helpers
 def _truthy(val: Optional[str]) -> bool:
     """Parse common truthy env/flags: 1,true,yes,on (case-insensitive)."""
     if val is None:
         return False
     return str(val).strip().lower() in {"1", "true", "yes", "on"}
+
 
 # ============================================================================
 # HIGH PRIORITY: LLM Interface Abstraction
@@ -676,15 +678,41 @@ class SimulationEngine:
                                     "emotional_shift": {
                                         "type": "object",
                                         "properties": {
-                                            "anger": {"type": "number", "minimum": -1, "maximum": 1},
-                                            "doubt": {"type": "number", "minimum": -1, "maximum": 1},
-                                            "fear": {"type": "number", "minimum": -1, "maximum": 1},
-                                            "compassion": {"type": "number", "minimum": -1, "maximum": 1},
+                                            "anger": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
+                                            "doubt": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
+                                            "fear": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
+                                            "compassion": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
                                         },
-                                        "required": ["anger", "doubt", "fear", "compassion"],
+                                        "required": [
+                                            "anger",
+                                            "doubt",
+                                            "fear",
+                                            "compassion",
+                                        ],
                                     },
                                 },
-                                "required": ["dialogue", "thought", "action", "emotional_shift"],
+                                "required": [
+                                    "dialogue",
+                                    "thought",
+                                    "action",
+                                    "emotional_shift",
+                                ],
                             },
                         },
                     }
@@ -698,7 +726,12 @@ class SimulationEngine:
                             kwargs["max_tokens"] = mt
                         # Avoid provider-specific response_format toggles; rely on strict prompting + parser
                         import os as _os
-                        call_model = _os.environ.get("LM_MODEL") or _os.environ.get("LMSTUDIO_MODEL") or "auto"
+
+                        call_model = (
+                            _os.environ.get("LM_MODEL")
+                            or _os.environ.get("LMSTUDIO_MODEL")
+                            or "auto"
+                        )
                         try:
                             return await self.orchestrator.generate(
                                 p.get("user", ""),
@@ -709,7 +742,11 @@ class SimulationEngine:
                             )
                         except Exception as e:
                             msg = str(e)
-                            if call_model != "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+                            if call_model != "auto" and (
+                                "No healthy nodes found" in msg
+                                or "model_not_found" in msg
+                                or "HTTP 404" in msg
+                            ):
                                 return await self.orchestrator.generate(
                                     p.get("user", ""),
                                     system=p.get("system", ""),
@@ -717,9 +754,17 @@ class SimulationEngine:
                                     model="auto",
                                     **kwargs,
                                 )
-                            elif call_model == "auto" and ("No healthy nodes found" in msg or "model_not_found" in msg or "HTTP 404" in msg):
+                            elif call_model == "auto" and (
+                                "No healthy nodes found" in msg
+                                or "model_not_found" in msg
+                                or "HTTP 404" in msg
+                            ):
                                 try:
-                                    models = await self.orchestrator.list_models_filtered(prefer_small=True)
+                                    models = (
+                                        await self.orchestrator.list_models_filtered(
+                                            prefer_small=True
+                                        )
+                                    )
                                     mid = None
                                     for m in models:
                                         mid = m.get("id") or m.get("name")
@@ -996,7 +1041,13 @@ class SimulationEngine:
         # Optional client-side model auto-pick (disabled by default)
         try:
             import os as _os
-            if str(_os.environ.get("LM_CLIENT_MODEL_AUTOPICK", "")).strip().lower() in {"1","true","yes","on"}:
+
+            if str(_os.environ.get("LM_CLIENT_MODEL_AUTOPICK", "")).strip().lower() in {
+                "1",
+                "true",
+                "yes",
+                "on",
+            }:
                 await self._ensure_model_selected_env()
         except Exception:
             pass
@@ -1051,12 +1102,12 @@ class SimulationEngine:
         logger.info(f"Completed {len(results)}/{num_runs} simulations successfully")
         return results
 
-
     async def _ensure_model_selected_env(self) -> None:
         """Pick a model via orchestrator when LM_MODEL is unset (client-side auto).
         Respects LMSTUDIO_MODEL and LM_PREFER_SMALL.
         """
         import os as _os
+
         pinned = _os.environ.get("LMSTUDIO_MODEL")
         if pinned:
             _os.environ.setdefault("LM_MODEL", pinned)
@@ -1065,9 +1116,16 @@ class SimulationEngine:
             return
         if not self.orchestrator:
             return
-        prefer_small = str(_os.environ.get("LM_PREFER_SMALL", "")).strip().lower() in {"1","true","yes","on"}
+        prefer_small = str(_os.environ.get("LM_PREFER_SMALL", "")).strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
         try:
-            models = await self.orchestrator.list_models_filtered(prefer_small=prefer_small)
+            models = await self.orchestrator.list_models_filtered(
+                prefer_small=prefer_small
+            )
             for m in models:
                 mid = (m.get("id") or m.get("name")) if isinstance(m, dict) else None
                 if mid:
@@ -1075,6 +1133,7 @@ class SimulationEngine:
                     return
         except Exception:
             return
+
     async def run_iterative_simulation(
         self,
         character: CharacterState,

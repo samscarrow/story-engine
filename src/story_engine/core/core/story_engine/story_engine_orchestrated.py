@@ -351,8 +351,14 @@ class OrchestratedStoryEngine:
         Returns the chosen id, or None if no action was necessary.
         """
         import os as _os
+
         # Optional client-side auto-pick (disabled by default)
-        if str(_os.environ.get("LM_CLIENT_MODEL_AUTOPICK", "")).strip().lower() not in {"1","true","yes","on"}:
+        if str(_os.environ.get("LM_CLIENT_MODEL_AUTOPICK", "")).strip().lower() not in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }:
             return None
 
         # If env already set, respect it
@@ -712,7 +718,9 @@ Format: Metric: Score/10 - Brief reason"""
             enhanced_text = str(enhancement_data.get("enhanced_content", "")).strip()
             if not enhanced_text:
                 # Fallback to original content, or a minimal placeholder if empty
-                fallback_text = (content or "").strip() or "Enhanced content unavailable."
+                fallback_text = (
+                    content or ""
+                ).strip() or "Enhanced content unavailable."
                 return fallback_text
             return enhanced_text
         else:
@@ -800,8 +808,11 @@ Provide an improved version that:
             scene_limit = int(
                 os.environ.get(
                     "SCENE_MAX_CONCURRENT",
-                    (self._config.get("simulation", {}).get("scene_max_concurrent")
-                     if isinstance(self._config, dict) else 3)
+                    (
+                        self._config.get("simulation", {}).get("scene_max_concurrent")
+                        if isinstance(self._config, dict)
+                        else 3
+                    ),
                 )
                 or 3
             )
@@ -817,10 +828,14 @@ Provide an improved version that:
                                 prev_ctx = f"World Context: {request.setting}"
                         except Exception:
                             prev_ctx = ""
-                        scene = await self.generate_scene(point, request.characters, prev_ctx)
+                        scene = await self.generate_scene(
+                            point, request.characters, prev_ctx
+                        )
                         return idx, scene
                     except Exception as e:
-                        return idx, {"scene_description": f"Scene {idx+1} unavailable ({e})"}
+                        return idx, {
+                            "scene_description": f"Scene {idx+1} unavailable ({e})"
+                        }
 
             if iterative_world and initial_world:
                 # Sequential path with world updates
@@ -845,7 +860,9 @@ Provide an improved version that:
                 story_data["components"]["world_state_initial"] = initial_world
                 story_data["components"]["world_state_final"] = world_state
             else:
-                tasks = [gen_scene_indexed(i, point) for i, point in enumerate(plot_points)]
+                tasks = [
+                    gen_scene_indexed(i, point) for i, point in enumerate(plot_points)
+                ]
                 scene_results: list[tuple[int, Dict]] = await asyncio.gather(*tasks)
                 for _, scene in sorted(scene_results, key=lambda x: x[0]):
                     scenes.append(scene)
@@ -867,8 +884,13 @@ Provide an improved version that:
                 dlg_limit = int(
                     os.environ.get(
                         "DIALOGUE_MAX_CONCURRENT",
-                        (self._config.get("simulation", {}).get("dialogue_max_concurrent")
-                         if isinstance(self._config, dict) else 3)
+                        (
+                            self._config.get("simulation", {}).get(
+                                "dialogue_max_concurrent"
+                            )
+                            if isinstance(self._config, dict)
+                            else 3
+                        ),
                     )
                     or 3
                 )

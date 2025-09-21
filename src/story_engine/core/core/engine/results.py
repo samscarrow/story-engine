@@ -24,4 +24,3 @@ class StepResult:
     elapsed_ms: float = 0.0
     summary: Dict[str, Any] = field(default_factory=dict)
     error: Optional[str] = None
-

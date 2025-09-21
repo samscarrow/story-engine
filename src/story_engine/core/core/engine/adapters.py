@@ -51,7 +51,9 @@ class NarrativePipelineEngine(BaseEngine):
         title = inputs.get("title") or "Untitled"
         premise = inputs.get("premise") or ""
         characters: List[Dict[str, Any]] = list(inputs.get("characters") or [])
-        int(inputs.get("num_beats", 5))  # parsed but not used directly in this simple plan
+        int(
+            inputs.get("num_beats", 5)
+        )  # parsed but not used directly in this simple plan
         artifact_key = inputs.get("artifact_key") or self._default_artifact_key(
             title, premise, characters
         )
@@ -81,14 +83,17 @@ class NarrativePipelineEngine(BaseEngine):
                     "Tension level: 0.2\n"
                     f"Characters: {', '.join([c['name'] for c in characters])}\n"
                     "Previous context: Opening scene\n\n"
-                    "Provide a detailed situation description (2-3 sentences) that gives characters clear dramatic opportunities.\n"
+                    "Provide a detailed situation description (2-3 sentences) "
+                    "that gives characters clear dramatic opportunities.\n"
                     "Include: location, time of day, immediate conflict or tension, and what's at stake.\n\n"
                     "Scene situation:"
                 )
             return {"prompt": prompt}
 
         # AI step: generate situation text from prompt
-        async def _generate_situation(ctx: EngineContext, params: Dict[str, Any]) -> Any:
+        async def _generate_situation(
+            ctx: EngineContext, params: Dict[str, Any]
+        ) -> Any:
             if not ctx.ai:
                 raise RuntimeError("EngineContext.ai is not configured")
             p = ctx.results.get("build_scene_prompt", {}).get("prompt", "")
@@ -195,7 +200,11 @@ class NarrativePipelineEngine(BaseEngine):
                 metadata={"engine": "narrative_pipeline", "stage": "persist"},
             ),
         }
-        return Plan(steps=steps, roots=["build_scene_prompt"], metadata={"artifact_key": artifact_key})
+        return Plan(
+            steps=steps,
+            roots=["build_scene_prompt"],
+            metadata={"artifact_key": artifact_key},
+        )
 
     async def execute(self, plan: Plan, ctx: EngineContext) -> EngineResult:
         orch = EngineOrchestrator()
@@ -234,12 +243,15 @@ class NarrativePipelineEngine(BaseEngine):
         # Rough estimate: one scene generation ~ N tokens
         return {"calls": 2, "approx_tokens": 1200}
 
-    def _default_artifact_key(self, title: str, premise: str, chars: List[Dict[str, Any]]) -> str:
+    def _default_artifact_key(
+        self, title: str, premise: str, chars: List[Dict[str, Any]]
+    ) -> str:
         raw = f"{title}:{premise}:{','.join([c.get('id','') for c in chars])}"
         return hashlib.md5(raw.encode("utf-8")).hexdigest()[:12]
 
 
 # --- Local helpers mirroring NarrativePipeline heuristics ---
+
 
 def _parse_sensory(response: str) -> Dict[str, str]:
     sensory = {

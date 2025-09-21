@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict, Optional
 try:  # pragma: no cover - optional
     from story_engine.core.core.common.logging import set_correlation_id  # type: ignore
 except Exception:  # pragma: no cover
+
     def set_correlation_id(_val: str) -> None:  # type: ignore
         return
 

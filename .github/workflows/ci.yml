@@ -28,6 +28,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
+          PYVER=$(python -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           else
@@ -38,8 +39,10 @@ jobs:
           if [ -d external/llm-observability-suite ]; then
             pip install -e external/llm-observability-suite
           fi
-          # Install project (with Postgres extra for tests that import it)
-          pip install -e ".[postgres]"
+          # Install project (with Postgres extra) except on Python 3.13 where oracledb may be unsupported
+          if [ "$PYVER" != "3.13" ]; then
+            pip install -e ".[postgres]"
+          fi
           # Ensure CLI runtime deps present for src imports under Python 3.11 matrix
           pip install click || true
 

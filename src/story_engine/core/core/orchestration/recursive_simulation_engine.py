@@ -508,7 +508,7 @@ class RecursiveSimulationEngine:
                         else callback(result)
                     )
                 except Exception as e:
-                        logger.error(f"Callback {callback_name} failed: {e}")
+                    logger.error(f"Callback {callback_name} failed: {e}")
 
     # Monitoring and management methods
 

@@ -23,7 +23,6 @@ from .kobold_normalizer import normalize_kobold
 from llm_observability import (
     get_logger,
     GenerationDBLogger,
-    DBLogger,
     log_exception,
     ErrorCodes,
 )
@@ -257,7 +256,9 @@ class LMStudioProvider(LLMProvider):
         self._cb_open_until: float = 0.0
         self._capabilities: Optional[LMStudioCapabilities] = None
         try:
-            self._capabilities_ttl = float(os.getenv("LM_CAPABILITIES_TTL", "300") or 300.0)
+            self._capabilities_ttl = float(
+                os.getenv("LM_CAPABILITIES_TTL", "300") or 300.0
+            )
         except Exception:
             self._capabilities_ttl = 300.0
 
@@ -366,7 +367,9 @@ class LMStudioProvider(LLMProvider):
         except Exception:
             return False
 
-    async def _get_capabilities(self, force_refresh: bool = False) -> LMStudioCapabilities:
+    async def _get_capabilities(
+        self, force_refresh: bool = False
+    ) -> LMStudioCapabilities:
         if not force_refresh and self._capabilities_fresh():
             return self._capabilities  # type: ignore[return-value]
 
@@ -391,7 +394,8 @@ class LMStudioProvider(LLMProvider):
                             if isinstance(data, dict):
                                 models = data.get("data", []) or []
                             supports_reasoning = prefer_reasoning or any(
-                                isinstance(item, dict) and _model_supports_reasoning(item)
+                                isinstance(item, dict)
+                                and _model_supports_reasoning(item)
                                 for item in models
                             )
                             supports_tools = any(
@@ -425,7 +429,9 @@ class LMStudioProvider(LLMProvider):
         self._capabilities = default_caps
         return default_caps
 
-    def _select_model(self, caps: LMStudioCapabilities, requested: Optional[str]) -> str:
+    def _select_model(
+        self, caps: LMStudioCapabilities, requested: Optional[str]
+    ) -> str:
         if requested:
             return requested
         if self.config.model:
@@ -484,12 +490,18 @@ class LMStudioProvider(LLMProvider):
 
         attempts = max(env_attempts, 2 if "response_format" in payload else 1)
 
-        expect_reasoning = caps.supports_reasoning or _model_id_prefers_reasoning(selected_model)
+        expect_reasoning = caps.supports_reasoning or _model_id_prefers_reasoning(
+            selected_model
+        )
         if _env_truthy(os.getenv("LM_DISABLE_REASONING")):
             expect_reasoning = False
 
         if not stream_requested:
-            auto_stream = expect_reasoning and caps.supports_reasoning and _env_truthy(os.getenv("LM_STREAM_REASONING"))
+            auto_stream = (
+                expect_reasoning
+                and caps.supports_reasoning
+                and _env_truthy(os.getenv("LM_STREAM_REASONING"))
+            )
             if auto_stream:
                 stream_requested = True
         payload["stream"] = stream_requested
@@ -515,14 +527,28 @@ class LMStudioProvider(LLMProvider):
                 pass  # allow single probe
             else:
                 msg = f"circuit open until {self._cb_open_until:.2f}"
-                log_exception(_obs, code=ErrorCodes.AI_LB_UNAVAILABLE, component="lmstudio", exc=RuntimeError(msg))
-                raise GenerationError("lmstudio", RuntimeError("circuit_open"), {"until": self._cb_open_until})
+                log_exception(
+                    _obs,
+                    code=ErrorCodes.AI_LB_UNAVAILABLE,
+                    component="lmstudio",
+                    exc=RuntimeError(msg),
+                )
+                raise GenerationError(
+                    "lmstudio",
+                    RuntimeError("circuit_open"),
+                    {"until": self._cb_open_until},
+                )
 
         start_time = asyncio.get_event_loop().time()
         caps = await self._get_capabilities()
         plan = await self._build_request_plan(prompt, system, caps, kwargs)
 
-        model_for_log = plan.payload.get("model") or kwargs.get("model") or self.config.model or os.getenv("LM_MODEL", "auto")
+        model_for_log = (
+            plan.payload.get("model")
+            or kwargs.get("model")
+            or self.config.model
+            or os.getenv("LM_MODEL", "auto")
+        )
         _obs.info(
             "llm.request",
             extra={
@@ -542,7 +568,9 @@ class LMStudioProvider(LLMProvider):
             if "response_format" in payload_base
             else payload_base
         )
-        payload_has_response_format = payload_without_response_format is not payload_base
+        payload_has_response_format = (
+            payload_without_response_format is not payload_base
+        )
         expect_reasoning = plan.expect_reasoning
 
         try:
@@ -551,15 +579,18 @@ class LMStudioProvider(LLMProvider):
                 attempts = plan.attempts
                 base_delay = plan.base_delay
 
-
                 _evt_logger = GenerationDBLogger()
                 # optional time budget in ms
-                budget_ms = kwargs.get("budget_ms") or int(os.getenv("LM_REQUEST_BUDGET_MS", "0") or 0)
+                budget_ms = kwargs.get("budget_ms") or int(
+                    os.getenv("LM_REQUEST_BUDGET_MS", "0") or 0
+                )
                 tb_start = asyncio.get_event_loop().time()
                 for i in range(attempts):
                     drop_response_format = i > 0 and payload_has_response_format
                     current_payload = (
-                        payload_without_response_format if drop_response_format else payload_base
+                        payload_without_response_format
+                        if drop_response_format
+                        else payload_base
                     )
                     if drop_response_format:
                         logger.warning(
@@ -571,7 +602,13 @@ class LMStudioProvider(LLMProvider):
                     # LB hints (best-effort, optional)
                     try:
                         import os as _os
-                        if _os.environ.get("LM_PREFER_SMALL", "").strip().lower() in {"1", "true", "yes", "on"}:
+
+                        if _os.environ.get("LM_PREFER_SMALL", "").strip().lower() in {
+                            "1",
+                            "true",
+                            "yes",
+                            "on",
+                        }:
                             headers["x-prefer-small"] = "1"
                     except Exception:
                         pass
@@ -581,7 +618,9 @@ class LMStudioProvider(LLMProvider):
                     # compute remaining timeout if budget present
                     total_timeout = self.config.timeout
                     if budget_ms and budget_ms > 0:
-                        elapsed_ms = int((asyncio.get_event_loop().time() - tb_start) * 1000)
+                        elapsed_ms = int(
+                            (asyncio.get_event_loop().time() - tb_start) * 1000
+                        )
                         remaining_ms = max(0, budget_ms - elapsed_ms)
                         if remaining_ms <= 0:
                             raise asyncio.TimeoutError("time_budget_exhausted")
@@ -600,13 +639,24 @@ class LMStudioProvider(LLMProvider):
                                     error_text = await response.text()
                                     raise GenerationError(
                                         "lmstudio",
-                                        Exception(f"HTTP {response.status}: {error_text}"),
-                                        {"status": response.status, "response": error_text},
+                                        Exception(
+                                            f"HTTP {response.status}: {error_text}"
+                                        ),
+                                        {
+                                            "status": response.status,
+                                            "response": error_text,
+                                        },
                                     )
-                                stream_text, stream_reasoning, usage, events = await self._consume_stream(
-                                    response, expect_reasoning, model=model_for_log
+                                stream_text, stream_reasoning, usage, events = (
+                                    await self._consume_stream(
+                                        response, expect_reasoning, model=model_for_log
+                                    )
                                 )
-                                if not stream_text and stream_reasoning and not expect_reasoning:
+                                if (
+                                    not stream_text
+                                    and stream_reasoning
+                                    and not expect_reasoning
+                                ):
                                     stream_text = stream_reasoning
                                 result = LLMResponse(
                                     text=stream_text,
@@ -616,10 +666,16 @@ class LMStudioProvider(LLMProvider):
                                     usage=usage or {},
                                     raw_response={
                                         "stream": events,
-                                        "headers": {k.lower(): v for k, v in response.headers.items()},
+                                        "headers": {
+                                            k.lower(): v
+                                            for k, v in response.headers.items()
+                                        },
                                         "normalized": {"reasoning": stream_reasoning},
                                     },
-                                    generation_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000,
+                                    generation_time_ms=(
+                                        asyncio.get_event_loop().time() - start_time
+                                    )
+                                    * 1000,
                                 )
                                 # Metrics code removed as it is no longer needed.
                                 try:
@@ -629,7 +685,9 @@ class LMStudioProvider(LLMProvider):
                                             "provider": "lmstudio",
                                             "endpoint": self.config.endpoint,
                                             "model": result.model,
-                                            "elapsed_ms": int(result.generation_time_ms or 0),
+                                            "elapsed_ms": int(
+                                                result.generation_time_ms or 0
+                                            ),
                                             "len": len(result.text or ""),
                                             "ok": True,
                                             "attempt": int(i + 1),
@@ -640,14 +698,19 @@ class LMStudioProvider(LLMProvider):
                                 except Exception:
                                     pass
                                 if self._cb_open_until:
-                                    _obs.info("circuit.reset", extra={"provider": "lmstudio"})
+                                    _obs.info(
+                                        "circuit.reset", extra={"provider": "lmstudio"}
+                                    )
                                 self._cb_open_until = 0.0
                                 self._cb_failures = 0
                                 return result
 
                             if response.status != 200:
                                 error_text = await response.text()
-                                if response.status in {400, 404} and ("model_not_found" in error_text or "No models loaded" in error_text):
+                                if response.status in {400, 404} and (
+                                    "model_not_found" in error_text
+                                    or "No models loaded" in error_text
+                                ):
                                     try:
                                         _obs.warning(
                                             "lmstudio.model_not_loaded",
@@ -682,16 +745,22 @@ class LMStudioProvider(LLMProvider):
                                 if i < attempts - 1:
                                     try:
                                         import random as _rnd
+
                                         jitter = 0.8 + 0.4 * _rnd.random()
-                                        await asyncio.sleep(min(base_delay * (2 ** i) * jitter, 2.0))
+                                        await asyncio.sleep(
+                                            min(base_delay * (2**i) * jitter, 2.0)
+                                        )
                                     except Exception:
                                         pass
                                 continue
                                 if 500 <= response.status < 600 and i < attempts - 1:
                                     try:
                                         import random as _rnd
+
                                         jitter = 0.8 + 0.4 * _rnd.random()
-                                        await asyncio.sleep(min(base_delay * (2 ** i) * jitter, 2.5))
+                                        await asyncio.sleep(
+                                            min(base_delay * (2**i) * jitter, 2.5)
+                                        )
                                     except Exception:
                                         pass
                                     continue
@@ -711,14 +780,23 @@ class LMStudioProvider(LLMProvider):
                                 text=norm.get("text", ""),
                                 provider=ModelProvider.LMSTUDIO,
                                 provider_name="lmstudio",
-                                model=norm.get("meta", {}).get("effective_model") or data.get("model") or current_payload.get("model") or self.config.model,
-                                usage=norm.get("meta", {}).get("usage") or data.get("usage"),
+                                model=norm.get("meta", {}).get("effective_model")
+                                or data.get("model")
+                                or current_payload.get("model")
+                                or self.config.model,
+                                usage=norm.get("meta", {}).get("usage")
+                                or data.get("usage"),
                                 raw_response={
                                     "data": data,
                                     "headers": headers_map,
-                                    "normalized": {"reasoning": norm.get("reasoning", "")},
+                                    "normalized": {
+                                        "reasoning": norm.get("reasoning", "")
+                                    },
                                 },
-                                generation_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000,
+                                generation_time_ms=(
+                                    asyncio.get_event_loop().time() - start_time
+                                )
+                                * 1000,
                             )
                             try:
                                 # from ..common.observability import observe_metric, metric_event, inc_metric
@@ -737,13 +815,17 @@ class LMStudioProvider(LLMProvider):
                                         "provider": "lmstudio",
                                         "endpoint": self.config.endpoint,
                                         "model": result.model,
-                                        "elapsed_ms": int(result.generation_time_ms or 0),
+                                        "elapsed_ms": int(
+                                            result.generation_time_ms or 0
+                                        ),
                                         "len": len(result.text or ""),
                                         "ok": True,
                                         "attempt": int(i + 1),
                                         "reasoning_expected": expect_reasoning,
                                         "prompt_tokens": usage.get("prompt_tokens"),
-                                        "completion_tokens": usage.get("completion_tokens"),
+                                        "completion_tokens": usage.get(
+                                            "completion_tokens"
+                                        ),
                                         "total_tokens": usage.get("total_tokens"),
                                     },
                                 )
@@ -751,7 +833,9 @@ class LMStudioProvider(LLMProvider):
                                 pass
                             # Success resets circuit
                             if self._cb_open_until:
-                                _obs.info("circuit.reset", extra={"provider": "lmstudio"})
+                                _obs.info(
+                                    "circuit.reset", extra={"provider": "lmstudio"}
+                                )
                             self._cb_open_until = 0.0
                             self._cb_failures = 0
                             return result
@@ -760,8 +844,11 @@ class LMStudioProvider(LLMProvider):
                         if i < attempts - 1:
                             try:
                                 import random as _rnd
+
                                 jitter = 0.8 + 0.4 * _rnd.random()
-                                await asyncio.sleep(min(base_delay * (2 ** i) * jitter, 2.5))
+                                await asyncio.sleep(
+                                    min(base_delay * (2**i) * jitter, 2.5)
+                                )
                             except Exception:
                                 pass
                             continue
@@ -776,7 +863,11 @@ class LMStudioProvider(LLMProvider):
         except GenerationError as e:
             log_exception(
                 _obs,
-                code=ErrorCodes.GEN_TIMEOUT if "timeout" in str(e).lower() else ErrorCodes.AI_LB_UNAVAILABLE,
+                code=(
+                    ErrorCodes.GEN_TIMEOUT
+                    if "timeout" in str(e).lower()
+                    else ErrorCodes.AI_LB_UNAVAILABLE
+                ),
                 component="lmstudio",
                 exc=e,
                 endpoint=self.config.endpoint,
@@ -789,7 +880,10 @@ class LMStudioProvider(LLMProvider):
                 if self._cb_failures >= threshold:
                     self._cb_open_until = monotonic() + window
                     self._cb_failures = 0
-                    _obs.info("circuit.open", extra={"provider": "lmstudio", "window_sec": window})
+                    _obs.info(
+                        "circuit.open",
+                        extra={"provider": "lmstudio", "window_sec": window},
+                    )
             except Exception:
                 pass
             raise
@@ -810,7 +904,10 @@ class LMStudioProvider(LLMProvider):
                 if self._cb_failures >= threshold:
                     self._cb_open_until = monotonic() + window
                     self._cb_failures = 0
-                    _obs.info("circuit.open", extra={"provider": "lmstudio", "window_sec": window})
+                    _obs.info(
+                        "circuit.open",
+                        extra={"provider": "lmstudio", "window_sec": window},
+                    )
             except Exception:
                 pass
             raise GenerationError("lmstudio", e, {"failure": failure.to_dict()})
@@ -857,6 +954,7 @@ class KoboldCppProvider(LLMProvider):
         # Circuit breaker: fast-fail when open
         try:
             from time import monotonic as _mono
+
             now = _mono()
         except Exception:
             now = 0.0
@@ -868,7 +966,11 @@ class KoboldCppProvider(LLMProvider):
                 exc=RuntimeError(f"circuit open until {self._cb_open_until:.2f}"),
                 endpoint=self.config.endpoint,
             )
-            raise GenerationError("koboldcpp", RuntimeError("circuit_open"), {"until": self._cb_open_until})
+            raise GenerationError(
+                "koboldcpp",
+                RuntimeError("circuit_open"),
+                {"until": self._cb_open_until},
+            )
 
         start_time = asyncio.get_event_loop().time()
         url = f"{self.config.endpoint}/api/v1/generate"
@@ -916,8 +1018,11 @@ class KoboldCppProvider(LLMProvider):
                             if response.status != 200:
                                 error_text = await response.text()
                                 # Retry on 5xx
-                                if 500 <= response.status < 600 and attempt < attempts - 1:
-                                    await asyncio.sleep(base_delay * (2 ** attempt))
+                                if (
+                                    500 <= response.status < 600
+                                    and attempt < attempts - 1
+                                ):
+                                    await asyncio.sleep(base_delay * (2**attempt))
                                     continue
                                 raise GenerationError(
                                     "koboldcpp",
@@ -963,7 +1068,7 @@ class KoboldCppProvider(LLMProvider):
                             return result
                     except (aiohttp.ClientError, asyncio.TimeoutError) as ce:
                         if attempt < attempts - 1:
-                            await asyncio.sleep(base_delay * (2 ** attempt))
+                            await asyncio.sleep(base_delay * (2**attempt))
                             continue
                         raise GenerationError("koboldcpp", ce, {"error": str(ce)})
 
@@ -974,10 +1079,14 @@ class KoboldCppProvider(LLMProvider):
                 threshold = int(os.getenv("LLM_CB_THRESHOLD", "3") or 3)
                 window = float(os.getenv("LLM_CB_WINDOW_SEC", "15") or 15)
                 from time import monotonic as _mono
+
                 if self._cb_failures >= threshold:
                     self._cb_open_until = _mono() + window
                     self._cb_failures = 0
-                    _obs.info("circuit.open", extra={"provider": "koboldcpp", "window_sec": window})
+                    _obs.info(
+                        "circuit.open",
+                        extra={"provider": "koboldcpp", "window_sec": window},
+                    )
             except Exception:
                 pass
             raise
@@ -1006,9 +1115,15 @@ class KoboldCppProvider(LLMProvider):
                             "endpoint": self.config.endpoint,
                         }
                         # Optional deeper probe behind flag
-                        if os.getenv("KOBOLD_HEALTH_GEN", "").strip().lower() in {"1", "true", "yes"}:
+                        if os.getenv("KOBOLD_HEALTH_GEN", "").strip().lower() in {
+                            "1",
+                            "true",
+                            "yes",
+                        }:
                             try:
-                                tiny = await self.generate("ping", max_tokens=8, temperature=0.0)
+                                tiny = await self.generate(
+                                    "ping", max_tokens=8, temperature=0.0
+                                )
                                 result["gen_probe"] = bool(getattr(tiny, "text", ""))
                             except Exception:
                                 result["gen_probe"] = False
@@ -1122,18 +1237,24 @@ class LLMOrchestrator:
                     response = await task
                 except Exception:
                     # Optional follower retry toggle (defaults on)
-                    retry_followers = str(os.getenv("LM_SINGLEFLIGHT_FOLLOWER_RETRY", "1")).strip().lower() in {
+                    retry_followers = str(
+                        os.getenv("LM_SINGLEFLIGHT_FOLLOWER_RETRY", "1")
+                    ).strip().lower() in {
                         "1",
                         "true",
                         "yes",
                         "on",
                     }
                     if retry_followers:
-                        response = await provider.generate(prompt, system=system, **kwargs)
+                        response = await provider.generate(
+                            prompt, system=system, **kwargs
+                        )
                     else:
                         raise
             else:
-                task = asyncio.create_task(provider.generate(prompt, system=system, **kwargs))
+                task = asyncio.create_task(
+                    provider.generate(prompt, system=system, **kwargs)
+                )
                 self._inflight[sf_key] = task
                 response = await task
         except Exception as e:

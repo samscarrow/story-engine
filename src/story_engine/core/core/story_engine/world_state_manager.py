@@ -22,6 +22,7 @@ class WorldStateManager:
         # Centralized env parsing with optional .env(.oracle) support
         try:
             from story_engine.core.core.common.settings import get_db_settings
+
             s = get_db_settings()
         except Exception:
             # Fallback to legacy behavior
@@ -61,7 +62,9 @@ class WorldStateManager:
                 sslcert=s.get("sslcert"),
                 sslkey=s.get("sslkey"),
             )
-        return get_database_connection("sqlite", db_name=s.get("db_name", "workflow_outputs.db"))
+        return get_database_connection(
+            "sqlite", db_name=s.get("db_name", "workflow_outputs.db")
+        )
 
     def load_latest(self) -> WorldState:
         self.storage.connect()

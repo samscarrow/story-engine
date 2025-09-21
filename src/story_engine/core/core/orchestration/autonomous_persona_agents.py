@@ -523,7 +523,7 @@ class AutonomousPersonaAgent(ABC):
                 recursive_results.append(recursive_result)
 
             except Exception as e:
-                    logger.error(f"Recursive simulation failed: {e}")
+                logger.error(f"Recursive simulation failed: {e}")
 
         return recursive_results
 
@@ -752,6 +752,6 @@ class PersonaAgentFactory:
                 )
                 logger.info(f"Created agent for {persona.value}")
             except Exception as e:
-                    logger.error(f"Failed to create agent for {persona.value}: {e}")
+                logger.error(f"Failed to create agent for {persona.value}: {e}")
 
         return agents

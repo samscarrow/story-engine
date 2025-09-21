@@ -16,4 +16,3 @@ def normalize_kobold(data: Dict[str, Any], model: Optional[str]) -> Dict[str, An
         "reasoning": "",
     }
     return meta
-

@@ -26,7 +26,9 @@ class RecordReplayAI:
     callers in this project.
     """
 
-    def __init__(self, inner: SupportsGenerate, config: Optional[ReplayConfig] = None) -> None:
+    def __init__(
+        self, inner: SupportsGenerate, config: Optional[ReplayConfig] = None
+    ) -> None:
         self.inner = inner
         self.cfg = config or ReplayConfig()
         self._dir = Path(self.cfg.dir)
@@ -54,6 +56,7 @@ class RecordReplayAI:
 
         if mode in {"replay", "auto"} and path.exists():
             data = json.loads(path.read_text(encoding="utf-8"))
+
             # Minimal response shape expected by pipelines
             class _Replay:
                 def __init__(self, d: Dict[str, Any]):
@@ -73,7 +76,9 @@ class RecordReplayAI:
         }
         if mode in {"record", "auto"}:
             try:
-                path.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+                path.write_text(
+                    json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
             except Exception:
                 pass
         return resp

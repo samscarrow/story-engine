@@ -108,7 +108,12 @@ class NarrativePipeline:
                 full_prompt = f"{context}\n\n{prompt}" if context else prompt
                 # Prompt hygiene: unresolved placeholders and max length
                 import re
-                max_len = int((self._config or {}).get("limits", {}).get("max_prompt_chars", 12000))
+
+                max_len = int(
+                    (self._config or {})
+                    .get("limits", {})
+                    .get("max_prompt_chars", 12000)
+                )
                 truncated = False
                 if len(full_prompt) > max_len:
                     full_prompt = full_prompt[:max_len]
@@ -131,7 +136,11 @@ class NarrativePipeline:
                     full_prompt,
                     allow_fallback=True,
                     temperature=temperature,
-                    budget_ms=int((self._config or {}).get("limits", {}).get("per_call_budget_ms", 0)),
+                    budget_ms=int(
+                        (self._config or {})
+                        .get("limits", {})
+                        .get("per_call_budget_ms", 0)
+                    ),
                 )
                 text = getattr(resp, "text", "") or ""
                 if text:
@@ -254,7 +263,11 @@ Scene situation:"""
         sensory_response = await self.generate_with_llm(
             sensory_prompt,
             temperature=0.9,
-            context_extra={"job_id": self.job_id, "beat": beat.get("name"), "phase": "sensory"},
+            context_extra={
+                "job_id": self.job_id,
+                "beat": beat.get("name"),
+                "phase": "sensory",
+            },
         )
 
         sensory = self._parse_sensory(sensory_response)
@@ -421,7 +434,10 @@ Respond with JSON only:
     ):
         """Run the complete narrative pipeline"""
 
-        _obs.info("pipeline.step", extra={"step": "start", "job_id": self.job_id, "title": title})
+        _obs.info(
+            "pipeline.step",
+            extra={"step": "start", "job_id": self.job_id, "title": title},
+        )
         print(f"\n{'='*80}")
         print(f"📚 NARRATIVE PIPELINE: {title}")
         print(f"{'='*80}")
@@ -476,6 +492,7 @@ Respond with JSON only:
             for char_dict in characters:
                 char_id = char_dict["id"]
                 if char_id in scene.characters:
+                    start = time.time()
                     _obs.info(
                         "pipeline.step",
                         extra={
@@ -488,9 +505,8 @@ Respond with JSON only:
                     print(
                         f"\n💭 {char_dict['name']} ({scene.emphasis.get(char_id, 'neutral')} emphasis):"
                     )
-
-                    start = time.time()
                     response = await self.simulate_character_response(scene, char_dict)
+                    elapsed = time.time() - start
                     _obs.info(
                         "pipeline.step",
                         extra={
@@ -501,7 +517,6 @@ Respond with JSON only:
                             "elapsed_ms": int(elapsed * 1000),
                         },
                     )
-                    elapsed = time.time() - start
 
                     print(f"  💬 \"{response.get('dialogue', 'N/A')[:100]}\"")
                     print(f"  🤔 *{response.get('thought', 'N/A')[:80]}*")

@@ -37,7 +37,9 @@ def _parse_tags(pairs: List[str]) -> Dict[str, str]:
     return tags
 
 
-def _read_inputs(prompt: Optional[str], input_path: Optional[str]) -> List[Dict[str, Any]]:
+def _read_inputs(
+    prompt: Optional[str], input_path: Optional[str]
+) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
     if input_path:
         p = Path(input_path)
@@ -50,7 +52,13 @@ def _read_inputs(prompt: Optional[str], input_path: Optional[str]) -> List[Dict[
                 data = json.loads(text)
                 if isinstance(data, list):
                     for x in data:
-                        items.append({"prompt": str(x.get("prompt") if isinstance(x, dict) else x)})
+                        items.append(
+                            {
+                                "prompt": str(
+                                    x.get("prompt") if isinstance(x, dict) else x
+                                )
+                            }
+                        )
                 else:
                     items.append({"prompt": str(data)})
             except Exception:
@@ -131,7 +139,12 @@ async def cmd_run(args: argparse.Namespace) -> int:
 
     # Provider setup (LM Studio default)
     provider = (args.provider or "lmstudio").lower()
-    endpoint = args.endpoint or os.getenv("LM_ENDPOINT") or os.getenv("LMSTUDIO_URL") or "http://localhost:1234"
+    endpoint = (
+        args.endpoint
+        or os.getenv("LM_ENDPOINT")
+        or os.getenv("LMSTUDIO_URL")
+        or "http://localhost:1234"
+    )
     model = args.model or os.getenv("LM_MODEL") or "auto"
 
     orch = LLMOrchestrator(fail_on_all_providers=True)
@@ -150,7 +163,9 @@ async def cmd_run(args: argparse.Namespace) -> int:
         # Quick health check
         ok, info = await _check_lmstudio_endpoint(endpoint)
         if not ok:
-            log.error("LM Studio not reachable", extra={"endpoint": endpoint, "info": info})
+            log.error(
+                "LM Studio not reachable", extra={"endpoint": endpoint, "info": info}
+            )
             if args.require_healthy:
                 print(f"LM Studio not reachable at {endpoint}: {info}")
                 return 2
@@ -213,7 +228,9 @@ async def cmd_run(args: argparse.Namespace) -> int:
     async def worker(item: Dict[str, Any]) -> None:
         async with sem:
             try:
-                r = await _generate_one(orch, provider, item, model=model, system_prompt=args.system)
+                r = await _generate_one(
+                    orch, provider, item, model=model, system_prompt=args.system
+                )
                 results.append(r)
                 if not args.dry_run:
                     payload = {
@@ -239,13 +256,18 @@ async def cmd_run(args: argparse.Namespace) -> int:
 
     # Summary
     ok_count = sum(1 for r in results if r.get("ok"))
-    print(json.dumps({
-        "workflow": args.workflow,
-        "requested": len(items),
-        "ok": ok_count,
-        "failed": len(items) - ok_count,
-        "db_type": db_type,
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "workflow": args.workflow,
+                "requested": len(items),
+                "ok": ok_count,
+                "failed": len(items) - ok_count,
+                "db_type": db_type,
+            },
+            indent=2,
+        )
+    )
     return 0 if ok_count > 0 else 1
 
 
@@ -277,7 +299,9 @@ def cmd_db_health(_: argparse.Namespace) -> int:
                 port=int(s.get("port", 5432)),
             )
         else:
-            db = get_database_connection("sqlite", db_name=s.get("db_name", "workflow_outputs.db"))
+            db = get_database_connection(
+                "sqlite", db_name=s.get("db_name", "workflow_outputs.db")
+            )
         db.connect()
         db.disconnect()
         print(json.dumps({"db_type": db_type, "healthy": True}))
@@ -309,7 +333,9 @@ def cmd_db_export(args: argparse.Namespace) -> int:
             port=int(s.get("port", 5432)),
         )
     else:
-        db = get_database_connection("sqlite", db_name=s.get("db_name", "workflow_outputs.db"))
+        db = get_database_connection(
+            "sqlite", db_name=s.get("db_name", "workflow_outputs.db")
+        )
     db.connect()
     try:
         rows = db.get_outputs(args.workflow)
@@ -342,22 +368,38 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     # run
-    pr = sub.add_parser("run", help="Run prompts through the engine and persist outputs")
-    pr.add_argument("--workflow", default="cli_run", help="Workflow name for persistence")
-    pr.add_argument("--provider", default="lmstudio", help="Model provider (default: lmstudio)")
-    pr.add_argument("--endpoint", default=None, help="Provider endpoint (defaults to LM_ENDPOINT)")
+    pr = sub.add_parser(
+        "run", help="Run prompts through the engine and persist outputs"
+    )
+    pr.add_argument(
+        "--workflow", default="cli_run", help="Workflow name for persistence"
+    )
+    pr.add_argument(
+        "--provider", default="lmstudio", help="Model provider (default: lmstudio)"
+    )
+    pr.add_argument(
+        "--endpoint", default=None, help="Provider endpoint (defaults to LM_ENDPOINT)"
+    )
     pr.add_argument("--model", default=None, help="Model id/name")
     pr.add_argument("--prompt", default=None, help="Inline prompt text")
     pr.add_argument("--input", default=None, help="File with prompts (txt,json,jsonl)")
     pr.add_argument("--runs", type=int, default=1, help="Repeat runs per prompt")
     pr.add_argument("--parallel", type=int, default=1, help="Parallelism level")
-    pr.add_argument("--temperature", type=float, default=0.2, help="Sampling temperature")
-    pr.add_argument("--max-tokens", type=int, default=128, help="Max tokens per generation")
+    pr.add_argument(
+        "--temperature", type=float, default=0.2, help="Sampling temperature"
+    )
+    pr.add_argument(
+        "--max-tokens", type=int, default=128, help="Max tokens per generation"
+    )
     pr.add_argument("--system", default="You are a helpful, concise assistant.")
     pr.add_argument("--tag", action="append", help="Attach tag key=value (repeat)")
     pr.add_argument("--dry-run", action="store_true", help="Skip DB persistence")
-    pr.add_argument("--fail-fast", action="store_true", help="Abort on first generation failure")
-    pr.add_argument("--require-healthy", action="store_true", help="Fail if LM or DB unhealthy")
+    pr.add_argument(
+        "--fail-fast", action="store_true", help="Abort on first generation failure"
+    )
+    pr.add_argument(
+        "--require-healthy", action="store_true", help="Fail if LM or DB unhealthy"
+    )
 
     # db health
     sub.add_parser("db-health", help="Check DB connectivity")
@@ -365,14 +407,18 @@ def build_parser() -> argparse.ArgumentParser:
     # db export
     pexp = sub.add_parser("db-export", help="Export workflow outputs as NDJSON")
     pexp.add_argument("--workflow", required=True)
-    pexp.add_argument("--output", default=None, help="Path to write (stdout if omitted)")
+    pexp.add_argument(
+        "--output", default=None, help="Path to write (stdout if omitted)"
+    )
     pexp.add_argument("--limit", type=int, default=None)
 
     # config show
     sub.add_parser("config-show", help="Show effective runtime config")
 
     # lm-models
-    plm = sub.add_parser("lm-models", help="List models from an OpenAI-compatible endpoint")
+    plm = sub.add_parser(
+        "lm-models", help="List models from an OpenAI-compatible endpoint"
+    )
     plm.add_argument(
         "--endpoint",
         default=os.getenv("LM_ENDPOINT", "http://localhost:1234"),
@@ -395,6 +441,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return cmd_config_show(args)
     if args.cmd == "lm-models":
         import aiohttp
+
         async def _list_models(ep: str) -> int:
             url = f"{ep.rstrip('/')}/v1/models"
             print(f"Querying {url}...")
@@ -413,11 +460,14 @@ def main(argv: Optional[List[str]] = None) -> int:
                                 print(mid)
                         if not items:
                             print("No models returned.")
-                        print("\nTip: export LM_MODEL='<one-of-the-ids>' to use in live runs.")
+                        print(
+                            "\nTip: export LM_MODEL='<one-of-the-ids>' to use in live runs."
+                        )
                         return 0
             except Exception as e:
                 print(f"Error: {e}")
                 return 2
+
         return asyncio.run(_list_models(args.endpoint))
     return 1
 
