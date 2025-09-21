@@ -65,7 +65,8 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: lb-metrics-ndjson
+          # Make artifact name unique per matrix job/run to avoid 409 conflicts
+          name: lb-metrics-ndjson-${{ matrix.python-version }}-${{ github.job }}-${{ github.run_attempt }}
           path: lb_metrics.ndjson
           if-no-files-found: ignore
 
