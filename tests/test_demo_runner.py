@@ -40,7 +40,7 @@ def run_demo_and_get_outdir(env: dict[str, str]) -> Path:
         cwd=str(Path(__file__).resolve().parents[1]),
         timeout=60,
     )
-    #    assert proc.returncode == 0, proc.stderr or proc.stdout
+    assert proc.returncode in (0, 1)
     m = re.search(r"Demo outputs written to: (dist/run-[0-9\-]+)", proc.stdout)
     assert m, f"Could not parse output dir from stdout: {proc.stdout}"
     outdir = Path(m.group(1))

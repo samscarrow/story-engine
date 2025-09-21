@@ -2038,7 +2038,7 @@ class StoryEnginePOMLAdapter:
             return parsed_response
         except json.JSONDecodeError as e:
             try:
-                
+
                 log_exception(_obs, code="GEN_PARSE_ERROR", component="poml_integration", exc=e)
             except Exception:
                 pass

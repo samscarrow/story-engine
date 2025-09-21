@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from llm_observability import get_logger, observe_metric, log_exception
+from llm_observability import get_logger, observe_metric, log_exception, ErrorCodes
 from .interfaces import EngineContext, Plan, Step, StepKind, EngineResult
 from .results import StepResult, StepStatus
 

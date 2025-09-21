@@ -14,9 +14,12 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 # Copy project
 COPY pyproject.toml ./
 COPY src ./src
+COPY external/llm-observability-suite ./external/llm-observability-suite
 
-# Install package
-RUN pip install --upgrade pip && pip install .
+# Install package and external observability submodule
+RUN pip install --upgrade pip \
+    && pip install -e external/llm-observability-suite \
+    && pip install .
 
 # Default environment expected by the orchestrator
 ENV LM_ENDPOINT="http://127.0.0.1:8000" \

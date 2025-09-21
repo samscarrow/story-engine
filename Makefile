@@ -17,6 +17,15 @@ install:
 	pip install -e .
 	pip install pytest
 
+.PHONY: dev-setup
+dev-setup:
+	git submodule update --init --recursive
+	python -m pip install -U pip
+	if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+	pip install -e .
+	# Optional common dev tools (safe if already installed)
+	pip install -q pytest pytest-asyncio black ruff || true
+
 test:
 	$(PYTHON) -m pytest -q
 
@@ -30,10 +39,10 @@ test-live-e2e:
 	RUN_LIVE_E2E=1 $(PYTHON) -m pytest -q tests/e2e/test_e2e_lmstudio.py
 
 
-make test-golden-core:
+test-golden-core:
 	$(PYTHON) -m pytest -q -m golden_core
 
-make test-golden-extended:
+test-golden-extended:
 	$(PYTHON) -m pytest -q -m golden_extended
 
 live-poc:
