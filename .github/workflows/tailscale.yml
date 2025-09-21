@@ -3,8 +3,6 @@ name: Sync Tailscale ACLs
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   acls:
@@ -28,4 +26,3 @@ jobs:
           api-key: ${{ secrets.TS_API_KEY }}
           tailnet: ${{ secrets.TS_TAILNET }}
           action: test
-

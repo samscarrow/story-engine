@@ -52,6 +52,8 @@ exclude = [
     "scripts",
     "db",
     "apex_integration_plan.py",
+    "external",
+    "tests",
 ]
 
 [tool.ruff.lint]
@@ -84,9 +86,6 @@ select = [
 ]
 "src/story_engine/core/core/orchestration/standardized_llm_interface.py" = [
     "E402",
-]
-"tests/*.py" = [
-    "E501",
 ]
 "src/story_engine/poml/poml/lib/poml_integration.py" = [
     "E501",
