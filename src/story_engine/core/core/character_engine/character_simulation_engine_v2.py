@@ -31,7 +31,7 @@ except ImportError:
     # Cache manager is optional; proceed without warning to avoid noise in normal runs.
     # A cache will not be used unless provided.
 
-# Logger (configuration is handled by entrypoints)
+# Logger (configuration is typically handled during application initialization)
 logger = logging.getLogger(__name__)
 
 # ============================================================================
