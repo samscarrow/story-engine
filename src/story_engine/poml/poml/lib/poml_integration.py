@@ -32,6 +32,19 @@ except Exception:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 
+def _env_model(default: str = "auto") -> str:
+    """Resolve model preference from environment with a sensible default.
+
+    Checks `LM_MODEL` first, then `LMSTUDIO_MODEL`, else returns `default`.
+    Centralizing this avoids repeated patterns and keeps behavior consistent.
+    """
+    try:
+        model = os.environ.get("LM_MODEL") or os.environ.get("LMSTUDIO_MODEL")
+        return model or default
+    except Exception:
+        return default
+
+
 @dataclass
 class POMLConfig:
     """Configuration for POML engine"""
@@ -1948,11 +1961,7 @@ class StoryEnginePOMLAdapter:
         sim_user_prompt = situation
 
         # Flexible routing: prefer explicit LMSTUDIO_MODEL, else 'auto'
-        import os as _os
-
-        call_model = (
-            _os.environ.get("LM_MODEL") or _os.environ.get("LMSTUDIO_MODEL") or "auto"
-        )
+        call_model = _env_model()
         # Stage 1 request with fallback: if a concrete model fails with 404/no-healthy, retry with 'auto'
         try:
             sim_response = await orchestrator.generate(
