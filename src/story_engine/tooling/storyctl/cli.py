@@ -12,6 +12,10 @@ import click
 
 from . import config
 from .checks import CheckResult, run_preflight_checks
+import urllib.request
+import urllib.error
+import sqlite3
+from datetime import datetime
 
 
 @dataclass
@@ -246,3 +250,87 @@ def main() -> None:
 
 
 __all__ = ["app", "main"]
+
+
+# -----------------------------
+# Convenience Commands
+# -----------------------------
+
+
+@app.command("models")
+@click.option("--env", "env_name", default=None, help="Environment to use for LM endpoint")
+@click.option("--json", "json_output", is_flag=True, help="Print raw JSON response")
+@click.pass_obj
+def models_cmd(ctx: CLIContext, env_name: Optional[str], json_output: bool) -> None:
+    """List models from LM endpoint (/v1/models)."""
+
+    _def, res = _resolve_environment(ctx, env_name)
+    base = res.as_dict().get("LM_ENDPOINT") or os.getenv("LM_ENDPOINT")
+    if not base:
+        raise click.ClickException("LM_ENDPOINT not set in environment")
+    url = base.rstrip("/") + "/v1/models"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:  # nosec - internal tooling
+            body = resp.read().decode("utf-8", errors="replace")
+    except urllib.error.URLError as exc:
+        raise click.ClickException(f"Failed to reach {url}: {exc}") from exc
+    try:
+        payload = json.loads(body)
+    except Exception as exc:
+        raise click.ClickException(f"Invalid JSON from {url}") from exc
+
+    if json_output:
+        click.echo(json.dumps(payload, indent=2))
+        return
+
+    data = payload.get("data") or []
+    if not isinstance(data, list):
+        click.echo("(no models)")
+        return
+    for item in data:
+        mid = (item or {}).get("id")
+        if mid:
+            click.echo(mid)
+
+
+@app.command("status")
+@click.option("--db", "db_path", default=None, help="SQLite DB path (defaults to $SQLITE_DB or workflow_outputs.db)")
+@click.option("--limit", default=20, show_default=True, help="Max rows to show")
+@click.option("--workflow", default=None, help="Filter by workflow name")
+def status_cmd(db_path: Optional[str], limit: int, workflow: Optional[str]) -> None:
+    """Show recent workflow outputs from SQLite."""
+
+    path = db_path or os.getenv("SQLITE_DB") or "workflow_outputs.db"
+    if not os.path.exists(path):
+        raise click.ClickException(f"DB not found: {path}")
+    try:
+        conn = sqlite3.connect(path)
+    except Exception as exc:
+        raise click.ClickException(f"Cannot open SQLite DB: {path}") from exc
+
+    try:
+        cur = conn.cursor()
+        sql = "SELECT id, workflow_name, timestamp, LENGTH(output_data) FROM workflow_outputs"
+        params: list[object] = []
+        if workflow:
+            sql += " WHERE workflow_name = ?"
+            params.append(workflow)
+        sql += " ORDER BY timestamp DESC, id DESC LIMIT ?"
+        params.append(int(limit))
+        rows = cur.execute(sql, params).fetchall()
+        if not rows:
+            click.echo("(no rows)")
+            return
+        click.echo("id    when                  workflow             size")
+        click.echo("----- --------------------- ------------------- ----")
+        for rid, wname, ts, size in rows:
+            when = str(ts)
+            # Normalize if stored as text
+            if isinstance(ts, str):
+                when = ts[:19]
+            click.echo(f"{rid:5d} {when:21} {str(wname)[:19]:19} {int(size or 0):4d}")
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
