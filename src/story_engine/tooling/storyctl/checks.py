@@ -147,17 +147,21 @@ def _run_command_check(
     env.update(resolution.values)
 
     if command:
-        to_run = command if isinstance(command, str) else " ".join(map(str, command))
-        completed = (
-            subprocess.run(  # noqa: S603 # nosec B603 - command defined in repo config
-                to_run,
-                shell=True,
-                capture_output=True,
-                text=True,
-                cwd=cwd,
-                env=env,
-                check=False,
-            )
+        # Prefer shell=False to reduce injection risk; if string, split to argv
+        if isinstance(command, str):
+            import shlex
+
+            argv = shlex.split(command)
+        else:
+            argv = [str(x) for x in command]
+        completed = subprocess.run(  # noqa: S603 - argv provided by repo config
+            argv,
+            shell=False,
+            capture_output=True,
+            text=True,
+            cwd=cwd,
+            env=env,
+            check=False,
         )
     else:
         if not isinstance(args, (list, tuple)):

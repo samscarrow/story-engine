@@ -100,7 +100,7 @@ def oracle_env_is_healthy(
 
     try:
         proc = subprocess.run(
-            [sys.executable, "-c", code],
+            [sys.executable, "-I", "-c", code],
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

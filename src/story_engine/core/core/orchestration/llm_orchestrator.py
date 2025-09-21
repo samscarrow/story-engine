@@ -16,6 +16,7 @@ import logging
 import traceback
 from time import monotonic
 import hashlib
+import hmac
 
 from .model_filters import filter_models
 from .response_normalizer import normalize_openai_chat, _coerce_text
@@ -1225,10 +1226,19 @@ class LLMOrchestrator:
         start = asyncio.get_event_loop().time()
         # Single-flight key derived from hashed components to avoid leaking prompt/system
         model_key = kwargs.get("model") or getattr(provider.config, "model", None)
+        # Privacy-preserving signature: optionally include an HMAC over prompt/system
+        # if SINGLEFLIGHT_SALT is provided; otherwise omit content entirely.
+        sig = ""
+        try:
+            salt = os.getenv("SINGLEFLIGHT_SALT")
+            if salt:
+                msg = f"{system or ''}|{prompt or ''}".encode("utf-8")
+                sig = hmac.new(salt.encode("utf-8"), msg, hashlib.sha256).hexdigest()
+        except Exception:
+            sig = ""
         key_parts = (
             str(target or ""),
-            str((system or "")[:SF_SYSTEM_SNIPPET_LEN]),
-            str((prompt or "")[:SF_PROMPT_SNIPPET_LEN]),
+            sig,
             str(model_key or ""),
             str(kwargs.get("temperature", "")),
             str(kwargs.get("max_tokens", "")),
