@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from string import Template
+import logging
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
 import shlex
@@ -388,12 +389,26 @@ def _parse_checks_section(data: Iterable[Any]) -> List[PreflightCheck]:
     return checks
 
 
+def _truthy(val: str | None) -> bool:
+    if val is None:
+        return False
+    return str(val).strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _interpolate(value: str, context: Mapping[str, str]) -> str:
     if not isinstance(value, str) or "${" not in value:
         return value
     try:
         return Template(value).safe_substitute(context)
-    except Exception:
+    except Exception as e:
+        # Avoid leaking full templates/values in logs; report minimal error
+        log = logging.getLogger("storyctl.config")
+        try:
+            log.warning("template.interpolation_failed", extra={"error": str(e)})
+        except Exception:
+            pass
+        if _truthy(os.getenv("STORYCTL_TEMPLATE_STRICT")):
+            raise
         return value
 
 

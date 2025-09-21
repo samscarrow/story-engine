@@ -381,6 +381,13 @@ class OracleConnection(DatabaseConnection):
         self.wait_timeout = wait_timeout
         self.retry_attempts = max(1, retry_attempts)
         self.retry_backoff_seconds = max(0.0, retry_backoff_seconds)
+        # Cap exponential backoff to avoid unbounded waits (env-tunable)
+        try:
+            self.retry_max_backoff_seconds = float(
+                os.getenv("DB_RETRY_MAX_BACKOFF", "5.0") or 5.0
+            )
+        except Exception:
+            self.retry_max_backoff_seconds = 5.0
         self.ping_on_connect = ping_on_connect
 
     def connect(self):
@@ -501,6 +508,11 @@ class OracleConnection(DatabaseConnection):
                     try:
                         import random
                         backoff = backoff * (0.8 + 0.4 * random.random())
+                    except Exception:
+                        pass
+                    # apply maximum cap to avoid excessive delays
+                    try:
+                        backoff = min(backoff, float(self.retry_max_backoff_seconds))
                     except Exception:
                         pass
                     log_exception(

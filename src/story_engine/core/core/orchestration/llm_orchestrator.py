@@ -15,6 +15,7 @@ from datetime import datetime
 import logging
 import traceback
 from time import monotonic
+import hashlib
 
 from .model_filters import filter_models
 from .response_normalizer import normalize_openai_chat, _coerce_text
@@ -1102,21 +1103,35 @@ class LLMOrchestrator:
             logger.warning(f"Active provider appears unhealthy: {health}")
 
         start = asyncio.get_event_loop().time()
-        # Single-flight key (provider, system snippet, prompt snippet, model, core params)
+        # Single-flight key derived from hashed components to avoid leaking prompt/system
         model_key = kwargs.get("model") or getattr(provider.config, "model", None)
-        sf_key = "|".join(
-            [
-                target or "",
-                (system or "")[:64],
-                (prompt or "")[:128],
-                str(model_key or ""),
-                str(kwargs.get("temperature", "")),
-                str(kwargs.get("max_tokens", "")),
-            ]
+        key_parts = (
+            str(target or ""),
+            str((system or "")[:64]),
+            str((prompt or "")[:128]),
+            str(model_key or ""),
+            str(kwargs.get("temperature", "")),
+            str(kwargs.get("max_tokens", "")),
         )
+        sf_key = hashlib.sha256("|".join(key_parts).encode("utf-8")).hexdigest()
         try:
             if sf_key in self._inflight:
-                response = await self._inflight[sf_key]
+                # Follower: await leader; on error optionally retry once independently
+                task = self._inflight[sf_key]
+                try:
+                    response = await task
+                except Exception:
+                    # Optional follower retry toggle (defaults on)
+                    retry_followers = str(os.getenv("LM_SINGLEFLIGHT_FOLLOWER_RETRY", "1")).strip().lower() in {
+                        "1",
+                        "true",
+                        "yes",
+                        "on",
+                    }
+                    if retry_followers:
+                        response = await provider.generate(prompt, system=system, **kwargs)
+                    else:
+                        raise
             else:
                 task = asyncio.create_task(provider.generate(prompt, system=system, **kwargs))
                 self._inflight[sf_key] = task
