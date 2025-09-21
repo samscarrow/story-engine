@@ -507,10 +507,15 @@ class SimulationEngine:
         self.validate_schema = bool(
             self.config.get("simulation", {}).get("validate_schema", True)
         )
-        self.two_stage_character = bool(
-            self.config.get("simulation", {}).get("two_stage_character", True)
-            or str(os.environ.get("SIM_TWO_STAGE", "")).strip().lower() in {"1", "true", "yes", "on"}
-        )
+        env_two_stage = str(os.environ.get("SIM_TWO_STAGE", "")).strip().lower()
+        if env_two_stage in {"1", "true", "yes", "on"}:
+            self.two_stage_character = True
+        elif env_two_stage in {"0", "false", "no", "off"}:
+            self.two_stage_character = False
+        else:
+            self.two_stage_character = bool(
+                self.config.get("simulation", {}).get("two_stage_character", True)
+            )
         # Persona strict mode settings
         self.strict_persona = bool(
             self.config.get("features", {}).get("strict_persona_mode", False)
