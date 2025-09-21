@@ -31,8 +31,15 @@ jobs:
           pip install -e ".[postgres]"
           pip install pytest pytest-asyncio aiohttp click
 
+      - name: Show env and deps
+        run: |
+          python -V
+          pip --version
+          pip show click || true
+          pip show oracledb || true
+          pip show sqlalchemy || true
       - name: Run fast tests (exclude slow/oracle/acceptance)
         env:
           PYTHONPATH: src
         run: |
-          pytest -n auto --dist=loadfile -m "not slow and not oracle and not acceptance" -q
+          pytest -n auto --dist=loadfile -m "not slow and not oracle and not acceptance" -vv --maxfail=1
