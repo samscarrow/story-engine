@@ -217,6 +217,7 @@ class LLMProvider(ABC):
         self.failure_count = 0
         self.last_failure: Optional[ProviderFailure] = None
 
+    @abstractmethod
     async def generate(
         self, prompt: str, system: Optional[str] = None, **kwargs
     ) -> LLMResponse:
