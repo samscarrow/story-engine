@@ -30,5 +30,5 @@ def test_cli_smoke(tmp_path: Path):
         "text",
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
-    assert proc.returncode in (0, 1)
+    assert proc.returncode == 0
     assert proc.stdout.strip()
