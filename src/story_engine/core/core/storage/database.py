@@ -105,7 +105,7 @@ def oracle_env_is_healthy(
             text=True,
             timeout=timeout_seconds,
         )
-        return proc.returncode == 0 and "OK" in (proc.stdout or "")
+        return proc.returncode == 0 and (proc.stdout or "").strip() == "OK"
     except subprocess.TimeoutExpired:
         return False
     except Exception:
