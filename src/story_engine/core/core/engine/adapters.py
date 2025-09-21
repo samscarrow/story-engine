@@ -76,11 +76,11 @@ class NarrativePipelineEngine(BaseEngine):
                 )
             else:
                 prompt = (
-                    f"Create a dramatic scene for:\n"
-                    f"Beat: Setup - Establish normal\n"
-                    f"Tension level: 0.2\n"
+                    "Create a dramatic scene for:\n"
+                    "Beat: Setup - Establish normal\n"
+                    "Tension level: 0.2\n"
                     f"Characters: {', '.join([c['name'] for c in characters])}\n"
-                    f"Previous context: Opening scene\n\n"
+                    "Previous context: Opening scene\n\n"
                     "Provide a detailed situation description (2-3 sentences) that gives characters clear dramatic opportunities.\n"
                     "Include: location, time of day, immediate conflict or tension, and what's at stake.\n\n"
                     "Scene situation:"

@@ -40,6 +40,8 @@ jobs:
           fi
           # Install project (with Postgres extra for tests that import it)
           pip install -e ".[postgres]"
+          # Ensure CLI runtime deps present for src imports under Python 3.11 matrix
+          pip install click || true
 
       - name: Run fast tests (exclude slow/oracle/acceptance)
         env:

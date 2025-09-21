@@ -39,7 +39,7 @@ def test_oracle_config():
 
     # Test wallet files
     wallet_path = Path(settings['wallet_location']).resolve()
-    print(f"\n📁 Wallet Configuration:")
+    print("\n📁 Wallet Configuration:")
     print(f"   Path: {wallet_path}")
 
     required_files = [
@@ -89,7 +89,7 @@ def test_oracle_config():
         print(f"\n❌ Error creating OracleConnection: {e}")
         return False
 
-    print(f"\n📋 Summary:")
+    print("\n📋 Summary:")
     if all_files_exist:
         print("✅ All configuration files present")
         print("✅ Oracle connection should work once database is resumed")

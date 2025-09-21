@@ -113,7 +113,7 @@ def main():
         return 1
 
     # Resume database
-    print(f"\n🚀 Found database, attempting to resume...")
+    print("\n🚀 Found database, attempting to resume...")
     success = resume_database(db_ocid)
 
     if success:
