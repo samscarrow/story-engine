@@ -622,24 +622,7 @@ class LMStudioProvider(LLMProvider):
                                     },
                                     generation_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000,
                                 )
-                                try:
-                                    # observe_metric(
-                                    #     "llm.lmstudio.gen_ms",
-                                    #     result.generation_time_ms or 0.0,
-                                    #     endpoint=self.config.endpoint,
-                                    #     model=result.model,
-                                    # )
-                                    # metric_event(
-                                    #     "llm.lmstudio.attempts",
-                                    #     value=float(i + 1),
-                                    #     endpoint=self.config.endpoint,
-                                    #     model=result.model,
-                                    # )
-                                    # if i > 0:
-                                    #     inc_metric("llm.lmstudio.retries", n=i, endpoint=self.config.endpoint, model=result.model)
-                                    pass
-                                except Exception:
-                                    pass
+                                # Metrics code removed as it is no longer needed.
                                 try:
                                     _obs.info(
                                         "llm.response",
