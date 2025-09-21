@@ -45,7 +45,9 @@ jobs:
       - name: Run fast tests (exclude slow/oracle/acceptance)
         env:
           PYTHONPATH: src
-        run: pytest -n auto --dist=loadfile -m "not slow" -q
+          DB_TYPE: sqlite
+          SQLITE_DB: ${{ runner.temp }}/story-engine.test.db
+        run: pytest -n auto --dist=loadfile -m "not slow and not oracle and not acceptance" -q
         shell: bash
       - name: Rerun with stricter markers
         if: failure()
