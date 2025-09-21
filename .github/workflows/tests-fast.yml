@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,17 +28,8 @@ jobs:
           python -m pip install --upgrade pip
           # Submodule install
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
-          # Install project for >=3.12; otherwise run from src
-          PYOK=$(python - <<'PY'
-import sys; print(1 if sys.version_info[:2] >= (3,12) else 0)
-PY
-)
-          if [ "$PYOK" = "1" ]; then
-            pip install -e ".[postgres]"
-          else
-            echo "Skipping package install on Python < 3.12; tests will import from src"
-          fi
-          pip install pytest pytest-asyncio click
+          pip install -e ".[postgres]"
+          pip install pytest pytest-asyncio aiohttp click
 
       - name: Run fast tests (exclude slow/oracle/acceptance)
         env:
