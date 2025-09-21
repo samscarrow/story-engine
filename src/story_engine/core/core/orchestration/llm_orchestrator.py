@@ -31,6 +31,11 @@ from llm_observability import (
 logger = logging.getLogger(__name__)
 _obs = get_logger("orchestrator")
 
+# Single-flight key truncation lengths (applied before hashing). Kept small to
+# keep keys bounded while still differentiating most calls. Adjust as needed.
+SF_SYSTEM_SNIPPET_LEN = 64
+SF_PROMPT_SNIPPET_LEN = 128
+
 
 class ModelProvider(Enum):
     """Supported LLM providers"""
@@ -1222,8 +1227,8 @@ class LLMOrchestrator:
         model_key = kwargs.get("model") or getattr(provider.config, "model", None)
         key_parts = (
             str(target or ""),
-            str((system or "")[:64]),
-            str((prompt or "")[:128]),
+            str((system or "")[:SF_SYSTEM_SNIPPET_LEN]),
+            str((prompt or "")[:SF_PROMPT_SNIPPET_LEN]),
             str(model_key or ""),
             str(kwargs.get("temperature", "")),
             str(kwargs.get("max_tokens", "")),
