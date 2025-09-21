@@ -1,4 +1,4 @@
-name: tests-fast
+name: CI
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
 
 jobs:
   tests-fast:
+    name: tests-fast (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
