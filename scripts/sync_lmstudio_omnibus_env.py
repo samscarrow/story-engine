@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 from textwrap import dedent
 
-DEFAULT_TARGET = Path(__file__).resolve().parents[1] / ".." / "src" / "lmstudio-omnibus" / ".env"
+DEFAULT_TARGET = Path(__file__).resolve().parents[2] / "src" / "lmstudio-omnibus" / ".env"
 EXPORT_CMD = ["storyctl", "env", "export", "--env", "cluster", "--format", "json"]
 
 
