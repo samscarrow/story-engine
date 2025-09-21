@@ -571,7 +571,7 @@ class LMStudioProvider(LLMProvider):
                     # LB hints (best-effort, optional)
                     try:
                         import os as _os
-                        if _os.environ.get("LM_PREFER_SMALL", "").strip().lower() in {"1","true","yes","on"}:
+                        if _os.environ.get("LM_PREFER_SMALL", "").strip().lower() in {"1", "true", "yes", "on"}:
                             headers["x-prefer-small"] = "1"
                     except Exception:
                         pass
