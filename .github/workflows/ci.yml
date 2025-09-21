@@ -39,10 +39,8 @@ jobs:
           if [ -d external/llm-observability-suite ]; then
             pip install -e external/llm-observability-suite
           fi
-          # Install project (with Postgres extra) except on Python 3.13 where oracledb may be unsupported
-          if [ "$PYVER" != "3.13" ]; then
-            pip install -e ".[postgres]"
-          fi
+          # Install project (with Postgres extra) — Python 3.13 is supported by oracledb per latest releases
+          pip install -e ".[postgres]"
           # Ensure CLI runtime deps present for src imports under Python 3.11 matrix
           pip install click || true
 
