@@ -69,4 +69,21 @@
 - `GET /health` → LB health summary
 - `GET /metrics` → Prometheus text (requests, up, inflight, failures)
 
+## Client Resilience Knobs (engine)
+
+The Story Engine client includes resilience controls when calling ai-lb/LM Studio endpoints:
+
+- `LM_RETRY_ATTEMPTS` – max request attempts on network/timeout/5xx (default 1; implicitly 2 when using response_format)
+- `LM_RETRY_BASE_DELAY` – base exponential backoff in seconds with jitter (default 0.2)
+- `LM_REQUEST_BUDGET_MS` – end-to-end time budget per request; dynamically reduces per-attempt timeout
+- `LLM_CB_THRESHOLD` – consecutive failures to open client-side circuit (default 3)
+- `LLM_CB_WINDOW_SEC` – how long to keep the circuit open before half-open probe (default 15)
+
+Optional routing hints sent as headers (best‑effort):
+
+- `x-session-id` – sticky session for server-side routing affinity
+- `x-prefer-small: 1` – hint to prefer smaller models when available
+
+These are configured in the environment and do not require code changes. See `src/story_engine/core/core/orchestration/llm_orchestrator.py` for details.
+
 That’s it: send OpenAI-style payloads; use `model: "auto"` if you don’t want to pin; tune behavior via the env vars above.

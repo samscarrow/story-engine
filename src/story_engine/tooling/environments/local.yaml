@@ -1,0 +1,27 @@
+name: local
+extends: base
+default: true
+description: Local development settings for running Story Engine tooling.
+tags:
+  - local
+env:
+  DB_TYPE:
+    value: sqlite
+    description: Use local SQLite for CLI runs
+  SQLITE_DB:
+    value: workflow_outputs.db
+  LM_ENDPOINT:
+    value: http://localhost:1234
+    description: Default LM Studio endpoint
+  LM_MODEL:
+    value: gemma-2-27b
+  STORY_ENV:
+    value: local
+checks:
+  - name: docker
+    type: command
+    optional: true
+    description: Ensure docker compose is available for local spin-up
+    params:
+      command: "docker compose version"
+      returncode: 0

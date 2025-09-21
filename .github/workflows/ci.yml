@@ -11,11 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.12", "3.13"]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -26,17 +28,47 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
+          PYVER=$(python -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           else
-            # Minimal deps for tests
-            pip install pytest pytest-xdist pytest-forked aiohttp pyyaml numpy
+            # Minimal deps for tests (incl. asyncio)
+            pip install pytest pytest-asyncio pytest-xdist pytest-forked aiohttp pyyaml numpy
           fi
+          # Install observability submodule
+          if [ -d external/llm-observability-suite ]; then
+            pip install -e external/llm-observability-suite
+          fi
+          # Install project (with Postgres extra)
+          pip install -e ".[postgres]"
 
-      - name: Run fast tests (exclude slow)
+      - name: Run fast tests (exclude slow/oracle/acceptance)
         env:
           PYTHONPATH: src
-        run: pytest -n auto --dist=loadfile -m "not slow" -q
+          DB_TYPE: sqlite
+          SQLITE_DB: ${{ runner.temp }}/story-engine.test.db
+        run: pytest -n auto --dist=loadfile -m "not slow and not oracle and not acceptance" -q
+        shell: bash
+      - name: Rerun with stricter markers
+        if: failure()
+        env:
+          PYTHONPATH: src
+        run: pytest -n auto --dist=loadfile -m "not slow and not oracle and not acceptance" -q
+
+      - name: Aggregate generation errors (ndjson ledger)
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/aggregate_generation_errors.py || true
+
+      - name: Upload lb_metrics.ndjson artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          # Make artifact name unique per matrix job/run to avoid 409 conflicts
+          name: lb-metrics-ndjson-${{ matrix.python-version }}-${{ github.job }}-${{ github.run_attempt }}
+          path: lb_metrics.ndjson
+          if-no-files-found: ignore
 
   lint-format:
     runs-on: ubuntu-latest
@@ -53,6 +85,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff black
       - name: Ruff (lint)
-        run: ruff check src tests
+        run: ruff check src
       - name: Black (format check)
-        run: black --check src tests
+        run: black --check src

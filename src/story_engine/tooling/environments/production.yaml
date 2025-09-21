@@ -1,0 +1,55 @@
+name: production
+extends: base
+description: Production environment configuration for Story Engine operations.
+tags:
+  - production
+env:
+  DB_HOST:
+    value: prod-db.story-engine.internal
+  DB_PORT:
+    value: "5432"
+  DB_NAME:
+    value: story_engine
+  DB_USER:
+    value: story_engine_app
+  DB_PASSWORD:
+    from_env: PRODUCTION_DB_PASSWORD
+    required: true
+    description: Provisioned via secure secret distribution
+  DB_SSLMODE:
+    value: verify-full
+  DB_SSLROOTCERT:
+    value: /etc/story-engine/prod/root-ca.crt
+  LM_ENDPOINT:
+    value: https://ai.story-engine.example
+  AI_LB_ENDPOINT:
+    value: https://ai.story-engine.example
+  LM_MODEL:
+    value: gemma-2-27b
+  MQ_URL:
+    value: amqp://prod-mq.story-engine.example/story
+  STORY_ENV:
+    value: production
+  LOG_LEVEL:
+    value: WARNING
+    description: Reduce noise in production runs
+checks:
+  - name: database
+    type: db
+    description: Production database connectivity
+  - name: llm-endpoint
+    type: http
+    description: Verify production AI endpoint readiness
+    params:
+      url: "${AI_LB_ENDPOINT}/health"
+      method: GET
+      timeout: 5
+  - name: lb-metrics
+    type: command
+    optional: true
+    description: Fetch recent AI load balancer metrics snapshot
+    params:
+      args:
+        - python
+        - scripts/aggregate_healthcheck.py
+      returncode: 0

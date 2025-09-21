@@ -1,7 +1,14 @@
 import sqlite3
 import json
+import time
+import os
+import sys
+import subprocess
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+# Structured logging helpers
+from llm_observability import get_logger, log_exception, observe_metric
 
 # Note: You will need to install psycopg2-binary to use the PostgreSQL connection
 # pip install psycopg2-binary
@@ -14,6 +21,97 @@ try:
     import oracledb
 except ImportError:
     oracledb = None
+
+
+def _truthy(val: Optional[str]) -> bool:
+    if val is None:
+        return False
+    return val.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def oracle_env_is_healthy(
+    *,
+    require_opt_in: bool = False,
+    timeout_seconds: float = 1.5,
+) -> bool:
+    """Best-effort, fast Oracle reachability probe.
+
+    - Returns False unless environment looks minimally configured and a quick
+      connection attempt succeeds within ``timeout_seconds``.
+    - If ``require_opt_in`` is True, only runs when ``ORACLE_TESTS`` is truthy
+      to avoid unexpected connection attempts during generic test runs.
+
+    This probe intentionally uses a subprocess to enforce a hard timeout so a
+    misconfigured DSN cannot stall the process.
+    """
+    if require_opt_in and not _truthy(os.getenv("ORACLE_TESTS")):
+        return False
+
+    # Gather env values with Oracle aliases supported in tests
+    user = os.getenv("DB_USER") or os.getenv("ORACLE_USER")
+    password = os.getenv("DB_PASSWORD") or os.getenv("ORACLE_PASSWORD")
+    dsn = (
+        os.getenv("DB_DSN") or os.getenv("ORACLE_DSN") or os.getenv("DB_CONNECT_STRING")
+    )
+    wallet = (
+        os.getenv("DB_WALLET_LOCATION")
+        or os.getenv("ORACLE_WALLET_DIR")
+        or os.getenv("TNS_ADMIN")
+    )
+
+    # Minimal config requirements: DSN present, user/password typically required
+    if not dsn or not user or not password:
+        return False
+
+    # Build a short Python snippet to attempt a real connection and exit fast
+    code = (
+        "import os, sys\n"
+        "import oracledb\n"
+        "user=os.getenv('DB_USER') or os.getenv('ORACLE_USER')\n"
+        "pwd=os.getenv('DB_PASSWORD') or os.getenv('ORACLE_PASSWORD')\n"
+        "dsn=os.getenv('DB_DSN') or os.getenv('ORACLE_DSN') or os.getenv('DB_CONNECT_STRING')\n"
+        "# Avoid expensive defaults where possible\n"
+        "try:\n"
+        "    oracledb.defaults.fetch_lobs=False\n"
+        "except Exception:\n"
+        "    pass\n"
+        "conn=None\n"
+        "try:\n"
+        "    conn=oracledb.connect(user=user, password=pwd, dsn=dsn)\n"
+        "    # lightweight validation: round-trip a no-op\n"
+        "    cur=conn.cursor(); cur.execute('select 1 from dual'); cur.fetchone(); cur.close()\n"
+        "    print('OK')\n"
+        "    sys.exit(0)\n"
+        "except Exception as e:\n"
+        "    # print minimal error for diagnostics, but exit non-zero\n"
+        "    sys.stderr.write(str(e))\n"
+        "    sys.exit(2)\n"
+        "finally:\n"
+        "    try:\n"
+        "        conn and conn.close()\n"
+        "    except Exception:\n"
+        "        pass\n"
+    )
+
+    env = os.environ.copy()
+    # Ensure TNS_ADMIN is set if wallet dir provided
+    if wallet:
+        env.setdefault("TNS_ADMIN", wallet)
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-I", "-c", code],
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=timeout_seconds,
+        )
+        return proc.returncode == 0 and (proc.stdout or "").strip() == "OK"
+    except subprocess.TimeoutExpired:
+        return False
+    except Exception:
+        return False
 
 
 class DatabaseConnection(ABC):
@@ -198,7 +296,9 @@ class PostgreSQLConnection(DatabaseConnection):
                     )
                 """
                 )
-                self.conn.commit()
+                # Some test stubs or drivers may not require/implement commit
+                if hasattr(self.conn, "commit"):
+                    self.conn.commit()
                 cursor.close()
             except psycopg2.Error as e:
                 print(f"Error creating table: {e}")
@@ -252,6 +352,16 @@ class OracleConnection(DatabaseConnection):
         dsn: str,
         wallet_location: str | None = None,
         wallet_password: str | None = None,
+        *,
+        use_pool: bool = False,
+        pool_min: int = 1,
+        pool_max: int = 4,
+        pool_increment: int = 1,
+        pool_timeout: int = 60,
+        wait_timeout: Optional[int] = None,
+        retry_attempts: int = 3,
+        retry_backoff_seconds: float = 1.0,
+        ping_on_connect: bool = True,
     ):
         if not oracledb:
             raise ImportError(
@@ -263,48 +373,229 @@ class OracleConnection(DatabaseConnection):
         self.wallet_location = wallet_location
         self.wallet_password = wallet_password
         self.conn = None
+        # Connection stability settings
+        self.use_pool = use_pool
+        self._pool = None
+        self.pool_min = pool_min
+        self.pool_max = pool_max
+        self.pool_increment = pool_increment
+        self.pool_timeout = pool_timeout
+        self.wait_timeout = wait_timeout
+        self.retry_attempts = max(1, retry_attempts)
+        self.retry_backoff_seconds = max(0.0, retry_backoff_seconds)
+        # Cap exponential backoff to avoid unbounded waits (env-tunable)
+        try:
+            self.retry_max_backoff_seconds = float(
+                os.getenv("DB_RETRY_MAX_BACKOFF", "5.0") or 5.0
+            )
+        except Exception:
+            self.retry_max_backoff_seconds = 5.0
+        self.ping_on_connect = ping_on_connect
+        # Instance logger (avoid recreating per-call); attach per-call context via `extra`
+        try:
+            self._log = get_logger(__name__, component="db.oracle")
+        except Exception:  # fallback to stdlib logger if shim unavailable
+            import logging as _logging
+
+            self._log = _logging.getLogger(__name__)
 
     def connect(self):
-        """Connect to the Oracle database using wallet authentication."""
+        """Connect to the Oracle database with optional pooling and retries."""
+        from pathlib import Path
+        import os
+
+        log = self._log
+        base_extra = {
+            "workflow": "connect",
+            "dsn": self.dsn,
+            "use_pool": self.use_pool,
+            "pool_min": self.pool_min,
+            "pool_max": self.pool_max,
+        }
+
+        # Return CLOB/NCLOB as Python str instead of LOB objects
         try:
-            # Return CLOB/NCLOB as Python str instead of LOB objects
-            # to simplify JSON handling on fetch.
+            oracledb.defaults.fetch_lobs = False  # type: ignore[attr-defined]
+        except Exception:
+            pass
+
+        # Standard wallet env wiring for ADB
+        wallet_path: Optional[Path] = None
+        if self.wallet_location:
+            wallet_path = Path(self.wallet_location).resolve()
+            os.environ["TNS_ADMIN"] = str(wallet_path)
+            # Note: using env avoids having to pass config_dir explicitly
+            log.debug(
+                "set TNS_ADMIN for wallet",
+                extra={**base_extra, "TNS_ADMIN": str(wallet_path)},
+            )
+
+        # Create or reuse pool if requested
+        if self.use_pool and self._pool is None:
             try:
-                oracledb.defaults.fetch_lobs = False  # type: ignore[attr-defined]
-            except Exception:
-                pass
-            # Set environment variables for wallet location (Oracle standard)
-            if self.wallet_location:
-                import os
-                from pathlib import Path
+                pool_kwargs = dict(
+                    user=self.user,
+                    password=self.password,
+                    dsn=self.dsn,
+                    min=self.pool_min,
+                    max=self.pool_max,
+                    increment=self.pool_increment,
+                    timeout=self.pool_timeout,
+                    homogeneous=True,
+                )
+                # Some oracledb versions support wait_timeout
+                if self.wait_timeout is not None:
+                    pool_kwargs["wait_timeout"] = self.wait_timeout
+                t0 = time.time()
+                self._pool = oracledb.create_pool(**pool_kwargs)  # type: ignore[arg-type]
+                log.info(
+                    "oracle pool created",
+                    extra={**base_extra, "elapsed_ms": int((time.time() - t0) * 1000)},
+                )
+            except Exception as e:
+                log_exception(
+                    log,
+                    code="DB_CONN_FAIL",
+                    component="db.oracle",
+                    exc=e,
+                    stage="create_pool",
+                )
+                # Fall back to direct connect attempts
+                self._pool = None
+                self.use_pool = False
 
-                # Ensure TNS_ADMIN is absolute path
-                wallet_path = Path(self.wallet_location).resolve()
-                os.environ["TNS_ADMIN"] = str(wallet_path)
-                print(f"Set TNS_ADMIN to: {wallet_path}")
+        # Acquire a connection (from pool or direct) with retries
+        # Track last exception for debugging (optional)
+        # last_err: Optional[Exception] = None
+        for attempt in range(self.retry_attempts):
+            try:
+                t0 = time.time()
+                if self._pool is not None:
+                    self.conn = self._pool.acquire()
+                else:
+                    # In thin mode, config_dir can be provided; env TNS_ADMIN typically suffices
+                    self.conn = oracledb.connect(
+                        user=self.user,
+                        password=self.password,
+                        dsn=self.dsn,
+                        config_dir=str(wallet_path) if wallet_path else None,
+                    )
+                if self.ping_on_connect and self.conn:
+                    cur = self.conn.cursor()
+                    try:
+                        cur.execute("SELECT 1 FROM DUAL")
+                    finally:
+                        cur.close()
+                # Ensure base table exists
+                self._create_table()
+                elapsed_ms = int((time.time() - t0) * 1000)
+                log.info(
+                    "oracle connect ok",
+                    extra={
+                        **base_extra,
+                        "attempt": attempt + 1,
+                        "elapsed_ms": elapsed_ms,
+                    },
+                )
+                try:
+                    # Emit a lightweight timing metric
+                    observe_metric(
+                        "db.oracle.connect_ms",
+                        elapsed_ms,
+                        dsn=self.dsn,
+                        pooled=bool(self._pool),
+                    )
+                except Exception:
+                    pass
+                return
+            except Exception as e:
+                # Common transient/connectivity ORA codes to retry
+                msg = str(e)
+                retryable = any(
+                    code in msg
+                    for code in (
+                        "ORA-12154",  # TNS: could not resolve the connect identifier
+                        "ORA-12514",  # TNS: listener does not currently know of service
+                        "ORA-12541",  # TNS: no listener
+                        "ORA-12537",  # TNS: connection closed
+                        "ORA-12547",  # TNS: lost contact
+                        "ORA-12560",  # TNS: protocol adapter error
+                        "ORA-12506",  # TNS: listener refused the connection (ADB paused)
+                    )
+                )
+                if attempt < self.retry_attempts - 1 and retryable:
+                    backoff = self.retry_backoff_seconds * (2**attempt)
+                    # add small jitter
+                    try:
+                        import random
 
-            # For Oracle Autonomous Database, use connection with config_dir
-            # The wallet files handle SSL/TLS automatically
-            wallet_path = (
-                Path(self.wallet_location).resolve() if self.wallet_location else None
-            )
-
-            self.conn = oracledb.connect(
-                user=self.user,
-                password=self.password,
-                dsn=self.dsn,
-                config_dir=str(wallet_path) if wallet_path else None,
-            )
-            self._create_table()
-        except oracledb.Error as e:
-            print(f"Error connecting to Oracle database: {e}")
-            raise
+                        backoff = backoff * (0.8 + 0.4 * random.random())
+                    except Exception:
+                        pass
+                    # apply maximum cap to avoid excessive delays
+                    try:
+                        backoff = min(backoff, float(self.retry_max_backoff_seconds))
+                    except Exception:
+                        pass
+                    log_exception(
+                        log,
+                        code="DB_CONN_FAIL",
+                        component="db.oracle",
+                        exc=e,
+                        attempt=attempt + 1,
+                        retry_in_s=round(backoff, 2),
+                    )
+                    time.sleep(backoff)
+                    continue
+                log_exception(
+                    log,
+                    code="DB_CONN_FAIL",
+                    component="db.oracle",
+                    exc=e,
+                    attempt=attempt + 1,
+                    terminal=True,
+                )
+                raise
 
     def disconnect(self):
         """Disconnect from the Oracle database."""
         if self.conn:
             self.conn.close()
             self.conn = None
+        # Do not close the pool here; pool is process-wide and reused.
+
+    def close_pool(self):
+        """Close the session pool if one was created."""
+        try:
+            if self._pool is not None:
+                self._pool.close()
+                self._pool = None
+        except Exception:
+            pass
+
+    def healthy(self) -> bool:
+        """Lightweight health check for the connection/pool."""
+        try:
+            if self._pool is not None:
+                with self._pool.acquire() as conn:  # type: ignore[attr-defined]
+                    cur = conn.cursor()
+                    try:
+                        cur.execute("SELECT 1 FROM DUAL")
+                        _ = cur.fetchone()
+                    finally:
+                        cur.close()
+                return True
+            if self.conn is None:
+                return False
+            cur = self.conn.cursor()
+            try:
+                cur.execute("SELECT 1 FROM DUAL")
+                _ = cur.fetchone()
+                return True
+            finally:
+                cur.close()
+        except Exception:
+            return False
 
     def _create_table(self):
         """Create the outputs table if it doesn't exist."""
@@ -328,10 +619,16 @@ class OracleConnection(DatabaseConnection):
                     END;
                 """
                 )
-                self.conn.commit()
+                if hasattr(self.conn, "commit"):
+                    self.conn.commit()
                 cursor.close()
-            except oracledb.Error as e:
-                print(f"Error creating table: {e}")
+            except Exception as e:
+                get_logger(
+                    __name__, component="db.oracle", workflow="create_table"
+                ).error(
+                    "error creating workflow_outputs",
+                    extra={"error": str(e)},
+                )
                 raise
 
     def store_output(self, workflow_name: str, output_data: Dict[str, Any]):
@@ -349,10 +646,16 @@ class OracleConnection(DatabaseConnection):
                         "output_data": json.dumps(output_data),
                     },
                 )
-                self.conn.commit()
+                if hasattr(self.conn, "commit"):
+                    self.conn.commit()
                 cursor.close()
-            except oracledb.Error as e:
-                print(f"Error storing output: {e}")
+            except Exception as e:
+                get_logger(
+                    __name__, component="db.oracle", workflow="store_output"
+                ).error(
+                    "error storing output",
+                    extra={"error": str(e)},
+                )
                 raise
 
     def get_outputs(self, workflow_name: str) -> List[Dict[str, Any]]:
@@ -380,7 +683,12 @@ class OracleConnection(DatabaseConnection):
                     results.append(json.loads(text))
                 return results
             except oracledb.Error as e:
-                print(f"Error getting outputs: {e}")
+                get_logger(
+                    __name__, component="db.oracle", workflow="get_outputs"
+                ).error(
+                    "error getting outputs",
+                    extra={"error": str(e)},
+                )
                 raise
         return []
 

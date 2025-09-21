@@ -19,33 +19,52 @@ class WorldStateManager:
         self.storage = storage or self._build_db()
 
     def _build_db(self) -> DatabaseConnection:
-        db_user = os.getenv("DB_USER")
-        db_type = os.getenv("DB_TYPE", "postgresql").lower()
+        # Centralized env parsing with optional .env(.oracle) support
+        try:
+            from story_engine.core.core.common.settings import get_db_settings
 
-        if db_user:
-            if db_type == "oracle":
-                return get_database_connection(
-                    "oracle",
-                    user=db_user,
-                    password=os.getenv("DB_PASSWORD"),
-                    dsn=os.getenv("DB_DSN"),
-                    wallet_location=os.getenv("DB_WALLET_LOCATION"),
-                    wallet_password=os.getenv("DB_WALLET_PASSWORD"),
-                )
-            else:  # Default to PostgreSQL
-                return get_database_connection(
-                    "postgresql",
-                    db_name=os.getenv("DB_NAME", "story_db"),
-                    user=db_user,
-                    password=os.getenv("DB_PASSWORD"),
-                    host=os.getenv("DB_HOST", "127.0.0.1"),
-                    port=int(os.getenv("DB_PORT", "5432")),
-                    sslmode=os.getenv("DB_SSLMODE"),
-                    sslrootcert=os.getenv("DB_SSLROOTCERT"),
-                    sslcert=os.getenv("DB_SSLCERT"),
-                    sslkey=os.getenv("DB_SSLKEY"),
-                )
-        return get_database_connection("sqlite", db_name="workflow_outputs.db")
+            s = get_db_settings()
+        except Exception:
+            # Fallback to legacy behavior
+            s = {
+                "db_type": (os.getenv("DB_TYPE") or "postgresql").lower(),
+                "user": os.getenv("DB_USER"),
+            }
+        db_type = s.get("db_type")
+        if db_type == "oracle" and s.get("user"):
+            return get_database_connection(
+                "oracle",
+                user=s.get("user"),
+                password=s.get("password"),
+                dsn=s.get("dsn"),
+                wallet_location=s.get("wallet_location"),
+                wallet_password=s.get("wallet_password"),
+                use_pool=bool(s.get("use_pool", True)),
+                pool_min=int(s.get("pool_min", 1)),
+                pool_max=int(s.get("pool_max", 4)),
+                pool_increment=int(s.get("pool_increment", 1)),
+                pool_timeout=int(s.get("pool_timeout", 60)),
+                wait_timeout=s.get("wait_timeout"),
+                retry_attempts=int(s.get("retry_attempts", 3)),
+                retry_backoff_seconds=float(s.get("retry_backoff_seconds", 1.0)),
+                ping_on_connect=bool(s.get("ping_on_connect", True)),
+            )
+        if db_type == "postgresql" and s.get("user"):
+            return get_database_connection(
+                "postgresql",
+                db_name=s.get("db_name", "story_db"),
+                user=s.get("user"),
+                password=s.get("password"),
+                host=s.get("host", "127.0.0.1"),
+                port=int(s.get("port", 5432)),
+                sslmode=s.get("sslmode"),
+                sslrootcert=s.get("sslrootcert"),
+                sslcert=s.get("sslcert"),
+                sslkey=s.get("sslkey"),
+            )
+        return get_database_connection(
+            "sqlite", db_name=s.get("db_name", "workflow_outputs.db")
+        )
 
     def load_latest(self) -> WorldState:
         self.storage.connect()

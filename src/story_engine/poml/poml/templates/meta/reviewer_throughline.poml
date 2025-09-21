@@ -7,7 +7,7 @@
 
   <system>
     You are a rigorous story reviewer. Your job is to read multiple structured simulation outputs for a single character and extract candidate narrative throughlines that could unify them into a compelling meta‑narrative.
-    Be concise, analytical, and specific. Return a strict JSON object as described below; do not include extra commentary.
+    Be concise, analytical, and specific. Return a strict JSON object matching the schema in the Output section; do not include extra commentary.
   </system>
 
   <section>
@@ -34,6 +34,7 @@
 
   <output>
     Return strict JSON with this exact schema (fields marked optional may be omitted if no preferences are provided). If this is a subsequent review (e.g., after parameter adjustments), you MUST continue to include the scoring fields when preferences exist:
+    ```json
     {
       "throughlines": [
         {
@@ -62,6 +63,7 @@
         "observations": ["short"]
       }
     }
+    ```
     - Provide 3–5 throughlines; arc_strength is a comparative score.
     - If target_criteria are provided, score each throughline on those metrics (0–10) as criteria_scores (always include for subsequent reviews as well).
     - If weights_json is provided, compute weighted_score = sum(criteria_scores[m] * weights[m]) and include it (always include for subsequent reviews as well).

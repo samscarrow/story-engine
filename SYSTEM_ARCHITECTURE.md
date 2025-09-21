@@ -279,3 +279,6 @@ enhanced_story = await enhancer.iterative_story_enhancement(
 5. **Visual Generation**: Scene illustrations via image models
 6. **Voice Acting**: Character dialogue synthesis
 7. **Interactive Mode**: Reader choices affect story direction
+## AI Load Balancer Client
+
+The engine talks to an external AI load balancer (ai-lb) using an OpenAI‑style API. Client‑side resilience (retries, budgets, circuit breaker) and routing hints are documented in `docs/ai-lb-integration.md`.

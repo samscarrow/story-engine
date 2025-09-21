@@ -1,0 +1,51 @@
+name: staging
+extends: base
+description: Staging environment used for pre-production validation.
+tags:
+  - staging
+env:
+  DB_HOST:
+    value: staging-db.story-engine.internal
+    description: Managed staging database endpoint
+  DB_PORT:
+    value: "5432"
+  DB_NAME:
+    value: story_engine
+  DB_USER:
+    value: story_engine_app
+  DB_PASSWORD:
+    from_env: STAGING_DB_PASSWORD
+    required: true
+    description: Injected via secrets manager at runtime
+  DB_SSLMODE:
+    value: require
+  LM_ENDPOINT:
+    value: https://staging-ai.story-engine.example
+  AI_LB_ENDPOINT:
+    value: https://staging-ai.story-engine.example
+  LM_MODEL:
+    value: gemma-2-27b
+  MQ_URL:
+    value: amqp://staging-mq.story-engine.example/story
+  STORY_ENV:
+    value: staging
+checks:
+  - name: database
+    type: db
+    description: Staging database connectivity
+  - name: llm-endpoint
+    type: http
+    description: Ensure staging AI endpoint is reachable
+    params:
+      url: "${AI_LB_ENDPOINT}/health"
+      method: GET
+      timeout: 5
+  - name: db-smoke
+    type: command
+    optional: true
+    description: Run lightweight staging DB smoke test
+    params:
+      args:
+        - python
+        - scripts/db_smoke_test.py
+      returncode: 0

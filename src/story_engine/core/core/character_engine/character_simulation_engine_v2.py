@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 import random
 import traceback
+import os
 
 try:
     import yaml  # type: ignore
@@ -30,11 +31,17 @@ except ImportError:
     # Cache manager is optional; proceed without warning to avoid noise in normal runs.
     # A cache will not be used unless provided.
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+# Logger (configuration is typically handled during application initialization)
 logger = logging.getLogger(__name__)
+
+
+# Small helpers
+def _truthy(val: Optional[str]) -> bool:
+    """Parse common truthy env/flags: 1,true,yes,on (case-insensitive)."""
+    if val is None:
+        return False
+    return str(val).strip().lower() in {"1", "true", "yes", "on"}
+
 
 # ============================================================================
 # HIGH PRIORITY: LLM Interface Abstraction
@@ -510,6 +517,15 @@ class SimulationEngine:
         self.validate_schema = bool(
             self.config.get("simulation", {}).get("validate_schema", True)
         )
+        env_two_stage = str(os.environ.get("SIM_TWO_STAGE", "")).strip().lower()
+        if env_two_stage in {"1", "true", "yes", "on"}:
+            self.two_stage_character = True
+        elif env_two_stage in {"0", "false", "no", "off"}:
+            self.two_stage_character = False
+        else:
+            self.two_stage_character = bool(
+                self.config.get("simulation", {}).get("two_stage_character", True)
+            )
         # Persona strict mode settings
         self.strict_persona = bool(
             self.config.get("features", {}).get("strict_persona_mode", False)
@@ -579,21 +595,193 @@ class SimulationEngine:
                         "user": character.get_simulation_prompt(situation, emphasis),
                     }
 
-                # Prepare backend call
+                # Two-stage character simulation path (higher reliability)
+                if (
+                    self.use_poml
+                    and self.poml_adapter is not None
+                    and self.two_stage_character
+                    and self.orchestrator is not None
+                ):
+                    try:
+                        from dataclasses import asdict as _asdict
+
+                        two = await self.poml_adapter.get_two_stage_character_response(
+                            character=_asdict(character),
+                            situation=situation,
+                            emphasis=emphasis,
+                            orchestrator=self.orchestrator,
+                            world_brief=(world_pov or ""),
+                        )
+                        response_data = two if isinstance(two, dict) else {}
+                        schema_valid = True
+                        parse_fallback_used = False
+
+                        provider_name = None
+                        provider_type = None
+                        provider_model = None
+                        lb_headers = {}
+
+                        result = {
+                            "character_id": character.id,
+                            "situation": situation,
+                            "emphasis": emphasis,
+                            "temperature": temperature,
+                            "response": response_data,
+                            "metadata": {
+                                "provider_name": provider_name,
+                                "provider_type": getattr(provider_type, "value", None),
+                                "model": provider_model,
+                                "lb": lb_headers,
+                                "used_poml": self.use_poml,
+                                "template": "two_stage_character",
+                                "schema_valid": schema_valid,
+                                "parse_fallback_used": parse_fallback_used,
+                            },
+                            "timestamp": datetime.now().isoformat(),
+                        }
+
+                        # Update character state if emotional shift provided
+                        if "emotional_shift" in response_data:
+                            await self._apply_emotional_shift(
+                                character, response_data["emotional_shift"]
+                            )
+
+                        if self.cache:
+                            await self.cache.set_simulation(
+                                character.id, situation, emphasis, temperature, result
+                            )
+
+                        logger.info(
+                            f"Simulation completed (two-stage) for {character.name} with emphasis '{emphasis}'"
+                        )
+                        return result
+                    except Exception as _e:
+                        logger.warning(
+                            f"Two-stage character simulation failed, falling back to single-stage: {_e}"
+                        )
+
+                # Prepare backend call (single-stage)
                 if self.orchestrator is not None:
+                    # Prefer structured JSON via response_format when supported
+                    sim_response_schema = {
+                        "type": "json_schema",
+                        "json_schema": {
+                            "name": "character_response",
+                            "strict": True,
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": False,
+                                "properties": {
+                                    "dialogue": {"type": "string"},
+                                    "thought": {"type": "string"},
+                                    "action": {"type": "string"},
+                                    "emotional_shift": {
+                                        "type": "object",
+                                        "properties": {
+                                            "anger": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
+                                            "doubt": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
+                                            "fear": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
+                                            "compassion": {
+                                                "type": "number",
+                                                "minimum": -1,
+                                                "maximum": 1,
+                                            },
+                                        },
+                                        "required": [
+                                            "anger",
+                                            "doubt",
+                                            "fear",
+                                            "compassion",
+                                        ],
+                                    },
+                                },
+                                "required": [
+                                    "dialogue",
+                                    "thought",
+                                    "action",
+                                    "emotional_shift",
+                                ],
+                            },
+                        },
+                    }
 
                     async def _call(p: Dict[str, str], t: float, mt: Optional[int]):
                         kwargs = {
                             "allow_fallback": True,
                             "temperature": t,
-                            "session_id": character.id,
                         }
                         if mt is not None:
                             kwargs["max_tokens"] = mt
                         # Avoid provider-specific response_format toggles; rely on strict prompting + parser
-                        return await self.orchestrator.generate(
-                            p.get("user", ""), system=p.get("system", ""), **kwargs
+                        import os as _os
+
+                        call_model = (
+                            _os.environ.get("LM_MODEL")
+                            or _os.environ.get("LMSTUDIO_MODEL")
+                            or "auto"
                         )
+                        try:
+                            return await self.orchestrator.generate(
+                                p.get("user", ""),
+                                system=p.get("system", ""),
+                                response_format=sim_response_schema,
+                                model=call_model,
+                                **kwargs,
+                            )
+                        except Exception as e:
+                            msg = str(e)
+                            if call_model != "auto" and (
+                                "No healthy nodes found" in msg
+                                or "model_not_found" in msg
+                                or "HTTP 404" in msg
+                            ):
+                                return await self.orchestrator.generate(
+                                    p.get("user", ""),
+                                    system=p.get("system", ""),
+                                    response_format=sim_response_schema,
+                                    model="auto",
+                                    **kwargs,
+                                )
+                            elif call_model == "auto" and (
+                                "No healthy nodes found" in msg
+                                or "model_not_found" in msg
+                                or "HTTP 404" in msg
+                            ):
+                                try:
+                                    models = (
+                                        await self.orchestrator.list_models_filtered(
+                                            prefer_small=True
+                                        )
+                                    )
+                                    mid = None
+                                    for m in models:
+                                        mid = m.get("id") or m.get("name")
+                                        if mid:
+                                            break
+                                    if not mid:
+                                        raise RuntimeError("No viable model ids found")
+                                    return await self.orchestrator.generate(
+                                        p.get("user", ""),
+                                        system=p.get("system", ""),
+                                        response_format=sim_response_schema,
+                                        model=mid,
+                                        **kwargs,
+                                    )
+                                except Exception:
+                                    raise
+                            raise
 
                 else:
 
@@ -644,12 +832,16 @@ class SimulationEngine:
                         )
                     return out
 
+                schema_valid = False
+                parse_fallback_used = False
+
                 try:
                     response_data = json.loads(raw_text)
                     if not isinstance(response_data, dict):
                         raise ValueError("Top-level JSON is not an object")
                     if self.validate_schema:
                         self._validate_character_response_shape(response_data)
+                    schema_valid = True
                     logger.info("Parsed structured response successfully")
                 except Exception as e:
                     logger.error(f"Failed to parse/validate structured response: {e}")
@@ -666,8 +858,11 @@ class SimulationEngine:
                         try:
                             parsed = json.loads(m.group(0))
                             response_data = _coerce_payload(parsed)
+                            schema_valid = True
                         except Exception:
-                            pass
+                            parse_fallback_used = True
+                    else:
+                        parse_fallback_used = True
                     # As a last resort, embed the raw text into dialogue to avoid empty output
                     if not response_data.get("dialogue"):
                         response_data["dialogue"] = (raw_text or "").strip()[:800]
@@ -720,6 +915,23 @@ class SimulationEngine:
                         except Exception:
                             pass
 
+                # Extract provider and ai-lb headers when using unified orchestrator
+                provider_name = getattr(response, "provider_name", None)
+                provider_type = getattr(response, "provider", None)
+                provider_model = getattr(response, "model", None)
+                lb_headers: Dict[str, Any] = {}
+                try:
+                    raw = getattr(response, "raw_response", {}) or {}
+                    hdrs = raw.get("headers") or {}
+                    if isinstance(hdrs, dict):
+                        lb_headers = {
+                            "x_selected_model": hdrs.get("x-selected-model"),
+                            "x_routed_node": hdrs.get("x-routed-node"),
+                            "x_request_id": hdrs.get("x-request-id"),
+                        }
+                except Exception:
+                    lb_headers = {}
+
                 result = {
                     "character_id": character.id,
                     "situation": situation,
@@ -728,12 +940,18 @@ class SimulationEngine:
                     "response": response_data,
                     "metadata": {
                         **(getattr(response, "metadata", {}) or {}),
+                        "provider_name": provider_name,
+                        "provider_type": getattr(provider_type, "value", None),
+                        "model": provider_model,
+                        "lb": lb_headers,
                         "used_poml": self.use_poml,
                         "template": (
                             "character_response.poml"
                             if self.use_poml
                             else "string_based"
                         ),
+                        "schema_valid": schema_valid,
+                        "parse_fallback_used": parse_fallback_used,
                     },
                     "timestamp": getattr(
                         response, "timestamp", datetime.now().isoformat()
@@ -816,8 +1034,23 @@ class SimulationEngine:
         emphases: Optional[List[str]] = None,
         fixed_temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        world_pov: Optional[str] = None,
     ) -> List[Dict]:
         """Run multiple simulations with varied parameters"""
+
+        # Optional client-side model auto-pick (disabled by default)
+        try:
+            import os as _os
+
+            if str(_os.environ.get("LM_CLIENT_MODEL_AUTOPICK", "")).strip().lower() in {
+                "1",
+                "true",
+                "yes",
+                "on",
+            }:
+                await self._ensure_model_selected_env()
+        except Exception:
+            pass
 
         if emphases is None:
             emphases = ["power", "doubt", "fear", "duty", "compassion", "pragmatic"]
@@ -846,7 +1079,12 @@ class SimulationEngine:
                 char_copy = character
 
             task = self.run_simulation(
-                char_copy, situation, emphasis, temp, max_tokens=max_tokens
+                char_copy,
+                situation,
+                emphasis,
+                temp,
+                max_tokens=max_tokens,
+                world_pov=world_pov,
             )
             tasks.append(task)
 
@@ -863,6 +1101,38 @@ class SimulationEngine:
         self.simulation_results.extend(results)
         logger.info(f"Completed {len(results)}/{num_runs} simulations successfully")
         return results
+
+    async def _ensure_model_selected_env(self) -> None:
+        """Pick a model via orchestrator when LM_MODEL is unset (client-side auto).
+        Respects LMSTUDIO_MODEL and LM_PREFER_SMALL.
+        """
+        import os as _os
+
+        pinned = _os.environ.get("LMSTUDIO_MODEL")
+        if pinned:
+            _os.environ.setdefault("LM_MODEL", pinned)
+            return
+        if _os.environ.get("LM_MODEL"):
+            return
+        if not self.orchestrator:
+            return
+        prefer_small = str(_os.environ.get("LM_PREFER_SMALL", "")).strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        try:
+            models = await self.orchestrator.list_models_filtered(
+                prefer_small=prefer_small
+            )
+            for m in models:
+                mid = (m.get("id") or m.get("name")) if isinstance(m, dict) else None
+                if mid:
+                    _os.environ["LM_MODEL"] = str(mid)
+                    return
+        except Exception:
+            return
 
     async def run_iterative_simulation(
         self,
@@ -1092,14 +1362,23 @@ class SimulationEngine:
         return beats
 
     async def plan_scene(
-        self, beats: List[Dict[str, Any]], objective: str = "", style: str = ""
+        self,
+        beats: List[Dict[str, Any]],
+        objective: str = "",
+        style: str = "",
+        world_state: Optional[Dict[str, Any]] = None,
+        continuity_fix: str = "",
     ) -> Dict[str, Any]:
         """Create a compact scene plan from a list of beat atoms."""
         if not self.poml_adapter or not self.use_poml:
             raise SimulationError("POML adapter not available for scene planning")
 
         prompt = self.poml_adapter.get_scene_plan_prompt(
-            beats, objective=objective, style=style
+            beats,
+            objective=objective,
+            style=style,
+            continuity_fix=continuity_fix,
+            world_state=world_state or {},
         )
 
         if self.orchestrator is not None:
@@ -1166,21 +1445,24 @@ class SimulationEngine:
         attempt = 0
         continuity_fix = ""
         last_report: Dict[str, Any] = {}
+        last_plan: Dict[str, Any] = {}
         while attempt < max_attempts:
             plan = await self.plan_scene(
                 beats,
                 objective=objective,
-                style=style if not continuity_fix else f"{style} (respect continuity)",
+                style=style,
+                world_state=world_state,
+                continuity_fix=continuity_fix,
             )
             report = await self.continuity_check_scene(plan, world_state)
             last_report = report
+            last_plan = plan
             vcount = len(report.get("violations") or [])
             if report.get("ok") or vcount <= tolerance:
                 plan.setdefault("continuity_report", report)
                 return plan
             # Prepare fix guidance for retry
             guidance_list = report.get("fix_guidance") or []
-            # Fall back to concatenated suggested_fix strings
             if not guidance_list and report.get("violations"):
                 guidance_list = [
                     v.get("suggested_fix")
@@ -1189,15 +1471,10 @@ class SimulationEngine:
                 ]
             continuity_fix = "\n".join([g for g in guidance_list if g])[:800]
             attempt += 1
-            # Re-plan with continuity_fix injected
-            plan = await self.plan_scene(
-                beats,
-                objective=objective,
-                style=style,
-            )
-        # Return last plan attempt plus report if could not fix
-        plan.setdefault("continuity_report", last_report)
-        return plan
+            # Loop will re-plan with updated continuity_fix
+        # Return last attempt with attached report
+        last_plan.setdefault("continuity_report", last_report)
+        return last_plan
 
     def graph_from(
         self, beats: List[Dict[str, Any]], plan: Dict[str, Any]

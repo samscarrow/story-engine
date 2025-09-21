@@ -3,6 +3,7 @@ import json
 import sys
 from pathlib import Path
 from typing import Any, Dict
+from llm_observability import get_logger, init_logging_from_env
 
 try:
     import yaml  # type: ignore
@@ -24,6 +25,9 @@ def _load_data(path: str) -> Dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Initialize structured logging early based on env
+    init_logging_from_env()
+    log = get_logger("story_engine.poml.cli")
     parser = argparse.ArgumentParser(
         prog="story-engine-poml", description="Render POML templates"
     )
@@ -70,18 +74,22 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.write_golden:
         Path(args.write_golden).write_text(output, encoding="utf-8")
+        log.info("golden.write", extra={"path": args.write_golden})
         print(f"Wrote golden: {args.write_golden}")
         return 0
 
     if args.check_golden:
         golden = Path(args.check_golden)
         if not golden.exists():
+            log.error("golden.missing", extra={"path": args.check_golden})
             print(f"Golden missing: {args.check_golden}", file=sys.stderr)
             return 2
         expected = golden.read_text(encoding="utf-8")
         if expected != output:
+            log.error("golden.mismatch", extra={"path": args.check_golden})
             print("Output differs from golden", file=sys.stderr)
             return 1
+        log.info("golden.match", extra={"path": args.check_golden})
         print("Golden match")
         return 0
 

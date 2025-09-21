@@ -482,8 +482,8 @@ class OutputAuthenticityAuditor:
                     for match in matches:
                         metrics_content = match.group(0)
                         if (
-                            "success_rate.*0\." in metrics_content
-                            or "total_simulations.*\d+" in metrics_content
+                            re.search(r"success_rate.*0\.", metrics_content)
+                            or re.search(r"total_simulations.*\d+", metrics_content)
                         ):
                             # Check if metrics are static
                             if (

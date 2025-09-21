@@ -1,8 +1,9 @@
 Metadata-Version: 2.4
 Name: story-engine
-Version: 0.0.1
+Version: 0.0.2
 Requires-Python: >=3.12
 Requires-Dist: aiohttp>=3.12.15
+Requires-Dist: click>=8.1.7
 Requires-Dist: dotenv>=0.9.9
 Requires-Dist: oracledb>=3.3.0
 Requires-Dist: pyyaml>=6.0.2

@@ -1,23 +1,51 @@
 [build-system]
-requires = ["setuptools>=67", "wheel"]
+requires = [
+    "setuptools>=67",
+    "wheel",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "story-engine"
-version = "0.0.1"
+version = "0.0.2"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.12.15",
+    "click>=8.1.7",
     "dotenv>=0.9.9",
     "oracledb>=3.3.0",
     "pyyaml>=6.0.2",
 ]
 
+# Optional extras for environment-specific drivers
+[project.optional-dependencies]
+# PostgreSQL support (only needed if DB_TYPE=postgres/postgresql)
+postgres = [
+    "psycopg2-binary>=2.9",
+]
+
+[project.scripts]
+story-engine-poml = "story_engine.poml.cli:main"
+story-engine-demo = "story_engine.scripts.run_demo:main"
+story-engine-hpq = "story_engine.scripts.run_hpq:main"
+story = "story_engine.cli:main"
+storyctl = "story_engine.tooling.storyctl.cli:main"
+
 [dependency-groups]
-dev = ["uv","pytest","black","ruff","setuptools>=67","wheel"]
+dev = [
+    "uv",
+    "pytest",
+    "pytest-asyncio>=0.23",
+    "black",
+    "ruff",
+    "setuptools>=67",
+    "wheel",
+]
 
 [tool.uv]
-default-groups = ["dev"]
+default-groups = [
+    "dev",
+]
 
 [tool.ruff]
 line-length = 120
@@ -31,23 +59,61 @@ exclude = [
     "scripts",
     "db",
     "apex_integration_plan.py",
+    "external",
+    "tests",
 ]
 
 [tool.ruff.lint]
-select = ["E", "F"]
+select = [
+    "E",
+    "F",
+]
 
 [tool.ruff.lint.per-file-ignores]
-# Allow long lines in this implementation file for now; will refactor later.
-"src/story_engine/core/core/character_engine/character_simulation_engine_v2.py" = ["E501"]
-"src/story_engine/core/core/character_engine/complex_group_dynamics.py" = ["E501"]
-"src/story_engine/core/core/character_engine/meta_narrative_pipeline.py" = ["E501"]
-"src/story_engine/core/core/character_engine/multi_character_simulation.py" = ["E501"]
-"src/story_engine/core/core/orchestration/llm_orchestrator.py" = ["E501"]
-"src/story_engine/core/core/messaging/testutils.py" = ["E501"]
-"src/story_engine/core/core/orchestration/autonomous_persona_agents.py" = ["E501"]
-"src/story_engine/core/core/orchestration/standardized_llm_interface.py" = ["E402"]
-"tests/*.py" = ["E501"]
-"src/story_engine/poml/poml/lib/poml_integration.py" = ["E501"]
+"src/story_engine/core/core/character_engine/character_simulation_engine_v2.py" = [
+    "E501",
+]
+"src/story_engine/core/core/character_engine/complex_group_dynamics.py" = [
+    "E501",
+]
+"src/story_engine/core/core/character_engine/meta_narrative_pipeline.py" = [
+    "E501",
+]
+"src/story_engine/core/core/character_engine/multi_character_simulation.py" = [
+    "E501",
+]
+"src/story_engine/core/core/orchestration/llm_orchestrator.py" = [
+    "E501",
+]
+"src/story_engine/core/core/messaging/testutils.py" = [
+    "E501",
+]
+"src/story_engine/core/core/orchestration/autonomous_persona_agents.py" = [
+    "E501",
+]
+"src/story_engine/core/core/orchestration/standardized_llm_interface.py" = [
+    "E402",
+]
+"src/story_engine/poml/poml/lib/poml_integration.py" = [
+    "E501",
+]
 
-#[tool.ruff.lint.per-file-ignores]
-# (No per-file ignores; demo_prompt.py refactored to avoid E402.)
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = [
+    "src",
+]
+
+[tool.setuptools.package-data]
+story_engine = [
+    "poml/poml/templates/**/*.poml",
+    "poml/poml/config/*.yaml",
+    "poml/poml/**/*.md",
+    "tooling/environments/*.yaml",
+    "**/*.json",
+]

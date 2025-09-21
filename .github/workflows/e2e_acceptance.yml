@@ -1,0 +1,90 @@
+name: Release E2E Acceptance (Live)
+
+on:
+  workflow_dispatch:
+    inputs:
+      lm_endpoint:
+        description: "LM Studio base URL (e.g., http://host:1234)"
+        required: true
+        type: string
+      db_type:
+        description: "Database type for persistence"
+        required: false
+        default: sqlite
+        type: choice
+        options:
+          - sqlite
+          - oracle
+          - postgresql
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio aiohttp pyyaml
+          if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+          pip install -e ".[postgres]"
+
+      - name: Run acceptance tests (live, no skips)
+        env:
+          LOG_FORMAT: json
+          LM_ENDPOINT: ${{ inputs.lm_endpoint }}
+          DB_TYPE: ${{ inputs.db_type }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_DSN: ${{ secrets.DB_DSN }}
+          DB_WALLET_LOCATION: ${{ secrets.DB_WALLET_LOCATION }}
+          DB_WALLET_PASSWORD: ${{ secrets.DB_WALLET_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
+          DB_SSLROOTCERT: ${{ secrets.DB_SSLROOTCERT }}
+          DB_SSLCERT: ${{ secrets.DB_SSLCERT }}
+          DB_SSLKEY: ${{ secrets.DB_SSLKEY }}
+        run: |
+          set -o pipefail
+          pytest -q -m "acceptance" --disable-warnings --log-cli-level=INFO | tee pytest-acceptance.log
+
+      - name: Extract metrics to CSV
+        if: always()
+        run: |
+          python - <<'PY'
+import json, csv
+out = open('acceptance-metrics.csv','w',newline='')
+wr = csv.writer(out)
+wr.writerow(['metric','value','endpoint','model'])
+for line in open('pytest-acceptance.log','r',encoding='utf-8',errors='ignore'):
+    line=line.strip()
+    if not line or '{' not in line:
+        continue
+    try:
+        obj = json.loads(line[line.index('{'):])
+    except Exception:
+        continue
+    if obj.get('event')=='metric':
+        wr.writerow([obj.get('metric',''),obj.get('value',''),obj.get('endpoint',''),obj.get('model','')])
+out.close()
+PY
+
+      - name: Upload acceptance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-artifacts
+          path: |
+            pytest-acceptance.log
+            acceptance-metrics.csv

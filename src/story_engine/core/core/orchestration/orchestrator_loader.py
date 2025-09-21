@@ -17,6 +17,9 @@ def create_orchestrator_from_yaml(path: str = "config.yaml") -> LLMOrchestrator:
     orch = LLMOrchestrator(fail_on_all_providers=True)
 
     providers = cfg.get("llm", {}).get("providers", [])
+    # Optional environment overrides for local development
+    env_endpoint = os.environ.get("LM_ENDPOINT") or os.environ.get("LMSTUDIO_ENDPOINT")
+    env_model = os.environ.get("LM_MODEL") or os.environ.get("LMSTUDIO_MODEL")
     for p in providers:
         name = p.get("name")
         provider_key = p.get("provider")
@@ -27,6 +30,13 @@ def create_orchestrator_from_yaml(path: str = "config.yaml") -> LLMOrchestrator:
         max_tokens = defaults.get("max_tokens", 600)
         # Allow environment override to speed up tests or tighten SLAs
         timeout = int(os.environ.get("LLM_TIMEOUT_SECS", defaults.get("timeout", 60)))
+
+        # If LM_ENDPOINT/LMSTUDIO_MODEL are set, prefer them for LM Studio providers
+        if str(provider_key).lower() == "lmstudio":
+            if env_endpoint:
+                endpoint = env_endpoint
+            if env_model:
+                model = env_model
 
         llm_conf = LLMConfig(
             provider=ModelProvider(provider_key),

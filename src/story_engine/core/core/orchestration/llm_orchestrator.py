@@ -14,16 +14,28 @@ import os
 from datetime import datetime
 import logging
 import traceback
+from time import monotonic
+import hashlib
+import hmac
 
 from .model_filters import filter_models
-from .db_logging import GenerationDBLogger
-from .response_normalizer import normalize_openai_chat
-
-# Configure detailed logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+from .response_normalizer import normalize_openai_chat, _coerce_text
+from .kobold_normalizer import normalize_kobold
+from llm_observability import (
+    get_logger,
+    GenerationDBLogger,
+    log_exception,
+    ErrorCodes,
 )
+
+# Logger (configuration is handled by entrypoints)
 logger = logging.getLogger(__name__)
+_obs = get_logger("orchestrator")
+
+# Single-flight key truncation lengths (applied before hashing). Kept small to
+# keep keys bounded while still differentiating most calls. Adjust as needed.
+SF_SYSTEM_SNIPPET_LEN = 64
+SF_PROMPT_SNIPPET_LEN = 128
 
 
 class ModelProvider(Enum):
@@ -137,6 +149,70 @@ class LLMResponse:
                 raise ValueError(f"Mock/placeholder response detected: {pattern}")
 
 
+@dataclass
+class LMStudioCapabilities:
+    """Describes feature support advertised (or inferred) from an LM Studio endpoint."""
+
+    supports_reasoning: bool
+    supports_response_format: bool
+    supports_tools: bool
+    requires_model: bool
+    models: List[Dict[str, Any]] = field(default_factory=list)
+    obtained_at: float = 0.0
+
+
+@dataclass
+class LMStudioRequestPlan:
+    """Request parameters chosen after capability probing."""
+
+    payload: Dict[str, Any]
+    headers: Dict[str, str]
+    attempts: int
+    base_delay: float
+    expect_reasoning: bool
+    stream: bool
+
+
+def _model_supports_reasoning(model: Dict[str, Any]) -> bool:
+    """Heuristically determine if the model advertises reasoning/thinking output."""
+
+    caps = model.get("capabilities") or {}
+    if isinstance(caps, dict):
+        if caps.get("reasoning") is True:
+            return True
+        features = caps.get("features")
+        if isinstance(features, (list, tuple)) and any(
+            isinstance(item, str) and "reason" in item.lower() for item in features
+        ):
+            return True
+    tags = model.get("tags")
+    if isinstance(tags, (list, tuple)) and any(
+        isinstance(tag, str) and "reason" in tag.lower() for tag in tags
+    ):
+        return True
+    model_id = str(model.get("id", "")).lower()
+    return any(keyword in model_id for keyword in ("reason", "think", "r1", "deepseek"))
+
+
+def _model_supports_tools(model: Dict[str, Any]) -> bool:
+    caps = model.get("capabilities") or {}
+    if isinstance(caps, dict) and caps.get("tools"):
+        return True
+    tags = model.get("tags")
+    if isinstance(tags, (list, tuple)) and any(
+        isinstance(tag, str) and "tool" in tag.lower() for tag in tags
+    ):
+        return True
+    return False
+
+
+def _model_id_prefers_reasoning(model_id: Optional[str]) -> bool:
+    if not model_id:
+        return False
+    name = str(model_id).lower()
+    return any(token in name for token in ("reason", "think", "r1", "deepseek"))
+
+
 class LLMProvider(ABC):
     """Abstract base class for LLM providers"""
 
@@ -180,117 +256,609 @@ class LLMProvider(ABC):
 class LMStudioProvider(LLMProvider):
     """LMStudio API provider"""
 
-    async def generate(
-        self, prompt: str, system: Optional[str] = None, **kwargs
-    ) -> LLMResponse:
-        """Generate using LMStudio chat completions API"""
-        start_time = asyncio.get_event_loop().time()
-        url = f"{self.config.endpoint}/v1/chat/completions"
-        # Optional sticky session for ai-lb routing
-        session_id = kwargs.get("session_id")
+    def __init__(self, config: LLMConfig):
+        super().__init__(config)
+        self._cb_failures: int = 0
+        self._cb_open_until: float = 0.0
+        self._capabilities: Optional[LMStudioCapabilities] = None
+        try:
+            self._capabilities_ttl = float(
+                os.getenv("LM_CAPABILITIES_TTL", "300") or 300.0
+            )
+        except Exception:
+            self._capabilities_ttl = 300.0
 
-        messages = []
+    async def _consume_stream(
+        self,
+        response: aiohttp.ClientResponse,
+        expect_reasoning: bool,
+        *,
+        model: str,
+    ) -> tuple[str, str, Dict[str, Any], list[Dict[str, Any]]]:
+        """Consume an OpenAI-style streaming response and return text, reasoning, usage, and raw events."""
+
+        text_parts: list[str] = []
+        reasoning_parts: list[str] = []
+        usage: Dict[str, Any] = {}
+        events: list[Dict[str, Any]] = []
+
+        buffer = ""
+        done = False
+
+        def _process_event(block: str) -> bool:
+            nonlocal usage
+            data_lines: list[str] = []
+            for line in block.splitlines():
+                stripped = line.strip()
+                if not stripped or stripped.startswith(":"):
+                    continue
+                if stripped.startswith("data:"):
+                    data_lines.append(stripped[5:].lstrip())
+            if not data_lines:
+                return False
+
+            payload_text = "\n".join(data_lines).strip()
+            if not payload_text:
+                return False
+            if payload_text == "[DONE]":
+                return True
+
+            try:
+                payload = json.loads(payload_text)
+            except json.JSONDecodeError:
+                return False
+
+            events.append(payload)
+            for choice in payload.get("choices", []):
+                delta = choice.get("delta") or {}
+                content = _coerce_text(delta.get("content"))
+                if content:
+                    text_parts.append(content)
+                reason_delta = delta.get("reasoning")
+                reason_text = _coerce_text(reason_delta)
+                if reason_text:
+                    reasoning_parts.append(reason_text)
+                finish_reason = choice.get("finish_reason")
+                if finish_reason and finish_reason != "stop" and expect_reasoning:
+                    reasoning_parts.append(f"[finish_reason:{finish_reason}]")
+
+            payload_usage = payload.get("usage")
+            if isinstance(payload_usage, dict):
+                usage = payload_usage or usage
+
+            return False
+
+        async for raw in response.content:
+            try:
+                chunk = raw.decode("utf-8")
+            except Exception:
+                continue
+            buffer += chunk
+
+            while True:
+                idx_rn = buffer.find("\r\n\r\n")
+                idx_n = buffer.find("\n\n")
+                if idx_rn == -1 and idx_n == -1:
+                    break
+                if idx_rn != -1 and (idx_n == -1 or idx_rn < idx_n):
+                    event_block = buffer[:idx_rn]
+                    buffer = buffer[idx_rn + 4 :]
+                else:
+                    event_block = buffer[:idx_n]
+                    buffer = buffer[idx_n + 2 :]
+
+                if _process_event(event_block):
+                    done = True
+                    break
+            if done:
+                break
+
+        if not done and buffer.strip():
+            _process_event(buffer)
+
+        text = "".join(text_parts).strip()
+        reasoning = " ".join(reasoning_parts).strip()
+        return text, reasoning, usage, events
+
+    def _capabilities_fresh(self) -> bool:
+        return (
+            self._capabilities is not None
+            and self._capabilities.obtained_at > 0
+            and (monotonic() - self._capabilities.obtained_at) < self._capabilities_ttl
+        )
+
+    def _use_ssl(self) -> bool:
+        try:
+            return str(self.config.endpoint).lower().startswith("https")
+        except Exception:
+            return False
+
+    async def _get_capabilities(
+        self, force_refresh: bool = False
+    ) -> LMStudioCapabilities:
+        if not force_refresh and self._capabilities_fresh():
+            return self._capabilities  # type: ignore[return-value]
+
+        prefer_reasoning = _env_truthy(os.getenv("LM_PREFER_REASONING"))
+        default_caps = LMStudioCapabilities(
+            supports_reasoning=prefer_reasoning,
+            supports_response_format=prefer_reasoning,
+            supports_tools=False,
+            requires_model=False,
+            models=[],
+            obtained_at=monotonic(),
+        )
+
+        if not _env_truthy(os.getenv("LM_SKIP_CAPABILITIES_PROBE")):
+            url = f"{self.config.endpoint}/v1/models"
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url, timeout=5, ssl=self._use_ssl()) as resp:
+                        if resp.status == 200:
+                            data = await resp.json()
+                            models = []
+                            if isinstance(data, dict):
+                                models = data.get("data", []) or []
+                            supports_reasoning = prefer_reasoning or any(
+                                isinstance(item, dict)
+                                and _model_supports_reasoning(item)
+                                for item in models
+                            )
+                            supports_tools = any(
+                                isinstance(item, dict) and _model_supports_tools(item)
+                                for item in models
+                            )
+                            requires_model = bool(models)
+                            default_caps = LMStudioCapabilities(
+                                supports_reasoning=supports_reasoning,
+                                supports_response_format=supports_reasoning
+                                or prefer_reasoning
+                                or _env_truthy(os.getenv("LM_ASSUME_RESPONSE_FORMAT")),
+                                supports_tools=supports_tools,
+                                requires_model=requires_model,
+                                models=models,
+                                obtained_at=monotonic(),
+                            )
+                        else:
+                            # Keep defaults but refresh timestamp so we don't hammer endpoint
+                            default_caps.obtained_at = monotonic()
+            except Exception:
+                default_caps.obtained_at = monotonic()
+
+        # Allow manual overrides even when fetch succeeds
+        if _env_truthy(os.getenv("LM_FORCE_REASONING")):
+            default_caps.supports_reasoning = True
+            default_caps.supports_response_format = True
+        if _env_truthy(os.getenv("LM_DISABLE_REASONING")):
+            default_caps.supports_reasoning = False
+
+        self._capabilities = default_caps
+        return default_caps
+
+    def _select_model(
+        self, caps: LMStudioCapabilities, requested: Optional[str]
+    ) -> str:
+        if requested:
+            return requested
+        if self.config.model:
+            return self.config.model
+        env_model = os.getenv("LM_MODEL")
+        if env_model:
+            return env_model
+        for item in caps.models:
+            if isinstance(item, dict):
+                model_id = item.get("id")
+                if model_id:
+                    return str(model_id)
+        # fall back to auto routing
+        return "auto"
+
+    async def _build_request_plan(
+        self,
+        prompt: str,
+        system: Optional[str],
+        caps: LMStudioCapabilities,
+        kwargs: Dict[str, Any],
+    ) -> LMStudioRequestPlan:
+        messages: List[Dict[str, Any]] = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
 
-        payload = {
+        # Determine model
+        model_override = kwargs.get("model")
+        selected_model = self._select_model(caps, model_override)
+
+        stream_requested = bool(kwargs.get("stream") or kwargs.get("streaming"))
+        payload: Dict[str, Any] = {
             "messages": messages,
             "temperature": kwargs.get("temperature", self.config.temperature),
             "max_tokens": kwargs.get("max_tokens", self.config.max_tokens),
-            "stream": False,
+            "stream": stream_requested,
         }
-        # Delegate model choice to ai-lb if not explicitly configured
-        if self.config.model:
-            payload["model"] = self.config.model
-        else:
-            # Some ai-lb deployments require a model field; use 'auto' to
-            # signal server-side routing/selection.
-            payload["model"] = os.environ.get("LM_MODEL", "auto")
-        # Note: LM Studio JSON schema support varies by version; avoid response_format to prevent 400s.
+        if selected_model:
+            payload["model"] = selected_model
+
+        # Carry through explicit response_format if caller requested it
+        if "response_format" in kwargs and kwargs.get("response_format"):
+            payload["response_format"] = kwargs["response_format"]
+
+        headers = {"Content-Type": "application/json"}
+
+        try:
+            env_attempts = int(os.getenv("LM_RETRY_ATTEMPTS", "1") or 1)
+        except Exception:
+            env_attempts = 1
+        try:
+            base_delay = float(os.getenv("LM_RETRY_BASE_DELAY", "0.2") or 0.2)
+        except Exception:
+            base_delay = 0.2
+
+        attempts = max(env_attempts, 2 if "response_format" in payload else 1)
+
+        expect_reasoning = caps.supports_reasoning or _model_id_prefers_reasoning(
+            selected_model
+        )
+        if _env_truthy(os.getenv("LM_DISABLE_REASONING")):
+            expect_reasoning = False
+
+        if not stream_requested:
+            auto_stream = (
+                expect_reasoning
+                and caps.supports_reasoning
+                and _env_truthy(os.getenv("LM_STREAM_REASONING"))
+            )
+            if auto_stream:
+                stream_requested = True
+        payload["stream"] = stream_requested
+
+        return LMStudioRequestPlan(
+            payload=payload,
+            headers=headers,
+            attempts=attempts,
+            base_delay=base_delay,
+            expect_reasoning=expect_reasoning,
+            stream=stream_requested,
+        )
+
+    async def generate(
+        self, prompt: str, system: Optional[str] = None, **kwargs
+    ) -> LLMResponse:
+        """Generate using LMStudio chat completions API"""
+        # Simple circuit breaker
+        now = monotonic()
+        if self._cb_open_until and now < self._cb_open_until:
+            # Allow a half-open probe if scheduled
+            if getattr(self, "_cb_half_open_at", 0.0) and now >= self._cb_half_open_at:
+                pass  # allow single probe
+            else:
+                msg = f"circuit open until {self._cb_open_until:.2f}"
+                log_exception(
+                    _obs,
+                    code=ErrorCodes.AI_LB_UNAVAILABLE,
+                    component="lmstudio",
+                    exc=RuntimeError(msg),
+                )
+                raise GenerationError(
+                    "lmstudio",
+                    RuntimeError("circuit_open"),
+                    {"until": self._cb_open_until},
+                )
+
+        start_time = asyncio.get_event_loop().time()
+        caps = await self._get_capabilities()
+        plan = await self._build_request_plan(prompt, system, caps, kwargs)
+
+        model_for_log = (
+            plan.payload.get("model")
+            or kwargs.get("model")
+            or self.config.model
+            or os.getenv("LM_MODEL", "auto")
+        )
+        _obs.info(
+            "llm.request",
+            extra={
+                "provider": "lmstudio",
+                "endpoint": self.config.endpoint,
+                "model": model_for_log,
+                "expect_reasoning": plan.expect_reasoning,
+            },
+        )
+        url = f"{self.config.endpoint}/v1/chat/completions"
+        # Optional sticky session for ai-lb routing
+        session_id = kwargs.get("session_id")
+
+        payload_base = dict(plan.payload)
+        payload_without_response_format = (
+            {k: v for k, v in payload_base.items() if k != "response_format"}
+            if "response_format" in payload_base
+            else payload_base
+        )
+        payload_has_response_format = (
+            payload_without_response_format is not payload_base
+        )
+        expect_reasoning = plan.expect_reasoning
 
         try:
             async with aiohttp.ClientSession() as session:
-                attempts = 2 if "response_format" in payload else 1
-                from .db_logging import GenerationDBLogger
+                # attempts: env override or response_format fallback
+                attempts = plan.attempts
+                base_delay = plan.base_delay
 
                 _evt_logger = GenerationDBLogger()
+                # optional time budget in ms
+                budget_ms = kwargs.get("budget_ms") or int(
+                    os.getenv("LM_REQUEST_BUDGET_MS", "0") or 0
+                )
+                tb_start = asyncio.get_event_loop().time()
                 for i in range(attempts):
-                    current_payload = payload
-                    if i == 1:
-                        # Retry without response_format if the first attempt failed due to format type
-                        current_payload = {
-                            k: v for k, v in payload.items() if k != "response_format"
-                        }
+                    drop_response_format = i > 0 and payload_has_response_format
+                    current_payload = (
+                        payload_without_response_format
+                        if drop_response_format
+                        else payload_base
+                    )
+                    if drop_response_format:
                         logger.warning(
                             "Retrying LMStudio generation without response_format (text mode)"
                         )
+                        expect_reasoning = False
 
-                    headers = {"Content-Type": "application/json"}
+                    headers = dict(plan.headers)
+                    # LB hints (best-effort, optional)
+                    try:
+                        import os as _os
+
+                        if _os.environ.get("LM_PREFER_SMALL", "").strip().lower() in {
+                            "1",
+                            "true",
+                            "yes",
+                            "on",
+                        }:
+                            headers["x-prefer-small"] = "1"
+                    except Exception:
+                        pass
                     if isinstance(session_id, str) and session_id.strip():
                         headers["x-session-id"] = session_id.strip()
 
-                    async with session.post(
-                        url,
-                        headers=headers,
-                        json=current_payload,
-                        timeout=aiohttp.ClientTimeout(total=self.config.timeout),
-                    ) as response:
-                        if response.status != 200:
-                            error_text = await response.text()
-                            # On first attempt, if LM Studio rejects response_format, try text mode
-                            if (
-                                i == 0
-                                and response.status == 400
-                                and "response_format.type" in error_text
-                                and "response_format" in payload
-                            ):
-                                try:
-                                    _evt_logger.log_event(
-                                        kind="retry",
-                                        provider_name="lmstudio",
-                                        provider_type="lmstudio",
-                                        provider_endpoint=self.config.endpoint,
-                                        data={
-                                            "reason": "response_format_rejected",
+                    # compute remaining timeout if budget present
+                    total_timeout = self.config.timeout
+                    if budget_ms and budget_ms > 0:
+                        elapsed_ms = int(
+                            (asyncio.get_event_loop().time() - tb_start) * 1000
+                        )
+                        remaining_ms = max(0, budget_ms - elapsed_ms)
+                        if remaining_ms <= 0:
+                            raise asyncio.TimeoutError("time_budget_exhausted")
+                        total_timeout = min(total_timeout, remaining_ms / 1000.0)
+
+                    try:
+                        async with session.post(
+                            url,
+                            headers=headers,
+                            json=current_payload,
+                            timeout=aiohttp.ClientTimeout(total=total_timeout),
+                            ssl=self._use_ssl(),
+                        ) as response:
+                            if current_payload.get("stream"):
+                                if response.status != 200:
+                                    error_text = await response.text()
+                                    raise GenerationError(
+                                        "lmstudio",
+                                        Exception(
+                                            f"HTTP {response.status}: {error_text}"
+                                        ),
+                                        {
                                             "status": response.status,
-                                            "error": error_text,
+                                            "response": error_text,
                                         },
-                                        model_key=self.config.model,
+                                    )
+                                stream_text, stream_reasoning, usage, events = (
+                                    await self._consume_stream(
+                                        response, expect_reasoning, model=model_for_log
+                                    )
+                                )
+                                if (
+                                    not stream_text
+                                    and stream_reasoning
+                                    and not expect_reasoning
+                                ):
+                                    stream_text = stream_reasoning
+                                result = LLMResponse(
+                                    text=stream_text,
+                                    provider=ModelProvider.LMSTUDIO,
+                                    provider_name="lmstudio",
+                                    model=model_for_log,
+                                    usage=usage or {},
+                                    raw_response={
+                                        "stream": events,
+                                        "headers": {
+                                            k.lower(): v
+                                            for k, v in response.headers.items()
+                                        },
+                                        "normalized": {"reasoning": stream_reasoning},
+                                    },
+                                    generation_time_ms=(
+                                        asyncio.get_event_loop().time() - start_time
+                                    )
+                                    * 1000,
+                                )
+                                # Metrics code removed as it is no longer needed.
+                                try:
+                                    _obs.info(
+                                        "llm.response",
+                                        extra={
+                                            "provider": "lmstudio",
+                                            "endpoint": self.config.endpoint,
+                                            "model": result.model,
+                                            "elapsed_ms": int(
+                                                result.generation_time_ms or 0
+                                            ),
+                                            "len": len(result.text or ""),
+                                            "ok": True,
+                                            "attempt": int(i + 1),
+                                            "reasoning_expected": expect_reasoning,
+                                            "reasoning_present": bool(stream_reasoning),
+                                        },
                                     )
                                 except Exception:
                                     pass
+                                if self._cb_open_until:
+                                    _obs.info(
+                                        "circuit.reset", extra={"provider": "lmstudio"}
+                                    )
+                                self._cb_open_until = 0.0
+                                self._cb_failures = 0
+                                return result
+
+                            if response.status != 200:
+                                error_text = await response.text()
+                                if response.status in {400, 404} and (
+                                    "model_not_found" in error_text
+                                    or "No models loaded" in error_text
+                                ):
+                                    try:
+                                        _obs.warning(
+                                            "lmstudio.model_not_loaded",
+                                            extra={
+                                                "endpoint": self.config.endpoint,
+                                                "hint": "Load a model in LM Studio or set LM_MODEL to a valid model id (e.g., one from /v1/models).",
+                                            },
+                                        )
+                                    except Exception:
+                                        pass
+                                if (
+                                    i == 0
+                                    and response.status == 400
+                                    and "response_format.type" in error_text
+                                    and "response_format" in payload_base
+                                ):
+                                    try:
+                                        _evt_logger.log_event(
+                                            kind="retry",
+                                            provider_name="lmstudio",
+                                            provider_type="lmstudio",
+                                            provider_endpoint=self.config.endpoint,
+                                            data={
+                                                "reason": "response_format_rejected",
+                                                "status": response.status,
+                                                "error": error_text,
+                                            },
+                                            model_key=self.config.model,
+                                        )
+                                    except Exception:
+                                        pass
+                                if i < attempts - 1:
+                                    try:
+                                        import random as _rnd
+
+                                        jitter = 0.8 + 0.4 * _rnd.random()
+                                        await asyncio.sleep(
+                                            min(base_delay * (2**i) * jitter, 2.0)
+                                        )
+                                    except Exception:
+                                        pass
                                 continue
-                            raise GenerationError(
-                                "lmstudio",
-                                Exception(f"HTTP {response.status}: {error_text}"),
-                                {"status": response.status, "response": error_text},
-                            )
+                                if 500 <= response.status < 600 and i < attempts - 1:
+                                    try:
+                                        import random as _rnd
 
-                        data = await response.json()
-                        headers_map = {
-                            k.lower(): v for k, v in response.headers.items()
-                        }
-                        norm = normalize_openai_chat(data, headers=headers_map)
+                                        jitter = 0.8 + 0.4 * _rnd.random()
+                                        await asyncio.sleep(
+                                            min(base_delay * (2**i) * jitter, 2.5)
+                                        )
+                                    except Exception:
+                                        pass
+                                    continue
+                                raise GenerationError(
+                                    "lmstudio",
+                                    Exception(f"HTTP {response.status}: {error_text}"),
+                                    {"status": response.status, "response": error_text},
+                                )
 
-                        return LLMResponse(
-                            text=norm.get("text", ""),
-                            provider=ModelProvider.LMSTUDIO,
-                            provider_name="lmstudio",
-                            model=norm.get("meta", {}).get("effective_model")
-                            or data.get("model"),
-                            usage=norm.get("meta", {}).get("usage")
-                            or data.get("usage"),
-                            raw_response={
-                                "data": data,
-                                "headers": headers_map,
-                                "normalized": {"reasoning": norm.get("reasoning", "")},
-                            },
-                            generation_time_ms=(
-                                asyncio.get_event_loop().time() - start_time
+                            data = await response.json()
+                            headers_map = {
+                                k.lower(): v for k, v in response.headers.items()
+                            }
+                            norm = normalize_openai_chat(data, headers=headers_map)
+
+                            result = LLMResponse(
+                                text=norm.get("text", ""),
+                                provider=ModelProvider.LMSTUDIO,
+                                provider_name="lmstudio",
+                                model=norm.get("meta", {}).get("effective_model")
+                                or data.get("model")
+                                or current_payload.get("model")
+                                or self.config.model,
+                                usage=norm.get("meta", {}).get("usage")
+                                or data.get("usage"),
+                                raw_response={
+                                    "data": data,
+                                    "headers": headers_map,
+                                    "normalized": {
+                                        "reasoning": norm.get("reasoning", "")
+                                    },
+                                },
+                                generation_time_ms=(
+                                    asyncio.get_event_loop().time() - start_time
+                                )
+                                * 1000,
                             )
-                            * 1000,
-                        )
+                            try:
+                                # from ..common.observability import observe_metric, metric_event, inc_metric
+                                # observe_metric("llm.lmstudio.gen_ms", result.generation_time_ms or 0.0, endpoint=self.config.endpoint, model=result.model)
+                                # metric_event("llm.lmstudio.attempts", value=float(i + 1), endpoint=self.config.endpoint, model=result.model)
+                                # if i > 0:
+                                #     inc_metric("llm.lmstudio.retries", n=i, endpoint=self.config.endpoint, model=result.model)
+                                pass
+                            except Exception:
+                                pass
+                            try:
+                                usage = result.usage or {}
+                                _obs.info(
+                                    "llm.response",
+                                    extra={
+                                        "provider": "lmstudio",
+                                        "endpoint": self.config.endpoint,
+                                        "model": result.model,
+                                        "elapsed_ms": int(
+                                            result.generation_time_ms or 0
+                                        ),
+                                        "len": len(result.text or ""),
+                                        "ok": True,
+                                        "attempt": int(i + 1),
+                                        "reasoning_expected": expect_reasoning,
+                                        "prompt_tokens": usage.get("prompt_tokens"),
+                                        "completion_tokens": usage.get(
+                                            "completion_tokens"
+                                        ),
+                                        "total_tokens": usage.get("total_tokens"),
+                                    },
+                                )
+                            except Exception:
+                                pass
+                            # Success resets circuit
+                            if self._cb_open_until:
+                                _obs.info(
+                                    "circuit.reset", extra={"provider": "lmstudio"}
+                                )
+                            self._cb_open_until = 0.0
+                            self._cb_failures = 0
+                            return result
+                    except (aiohttp.ClientError, asyncio.TimeoutError) as ce:
+                        # Transport or timeout: backoff if attempts remain
+                        if i < attempts - 1:
+                            try:
+                                import random as _rnd
+
+                                jitter = 0.8 + 0.4 * _rnd.random()
+                                await asyncio.sleep(
+                                    min(base_delay * (2**i) * jitter, 2.5)
+                                )
+                            except Exception:
+                                pass
+                            continue
+                        raise GenerationError("lmstudio", ce, {"error": str(ce)})
                 # If loop completes without returning, raise last error
                 raise GenerationError(
                     "lmstudio",
@@ -298,11 +866,56 @@ class LMStudioProvider(LLMProvider):
                     {"status": 400},
                 )
 
-        except GenerationError:
+        except GenerationError as e:
+            log_exception(
+                _obs,
+                code=(
+                    ErrorCodes.GEN_TIMEOUT
+                    if "timeout" in str(e).lower()
+                    else ErrorCodes.AI_LB_UNAVAILABLE
+                ),
+                component="lmstudio",
+                exc=e,
+                endpoint=self.config.endpoint,
+            )
+            # Update circuit breaker after generation failure
+            try:
+                self._cb_failures += 1
+                threshold = int(os.getenv("LLM_CB_THRESHOLD", "3") or 3)
+                window = float(os.getenv("LLM_CB_WINDOW_SEC", "15") or 15)
+                if self._cb_failures >= threshold:
+                    self._cb_open_until = monotonic() + window
+                    self._cb_failures = 0
+                    _obs.info(
+                        "circuit.open",
+                        extra={"provider": "lmstudio", "window_sec": window},
+                    )
+            except Exception:
+                pass
             raise
         except Exception as e:
             failure = self.record_failure(e, prompt)
-            logger.error(f"LMStudio generation failed: {failure.to_dict()}")
+            log_exception(
+                _obs,
+                code=ErrorCodes.AI_LB_UNAVAILABLE,
+                component="lmstudio",
+                exc=e,
+                endpoint=self.config.endpoint,
+            )
+            # Update circuit breaker after failure
+            try:
+                self._cb_failures += 1
+                threshold = int(os.getenv("LLM_CB_THRESHOLD", "3") or 3)
+                window = float(os.getenv("LLM_CB_WINDOW_SEC", "15") or 15)
+                if self._cb_failures >= threshold:
+                    self._cb_open_until = monotonic() + window
+                    self._cb_failures = 0
+                    _obs.info(
+                        "circuit.open",
+                        extra={"provider": "lmstudio", "window_sec": window},
+                    )
+            except Exception:
+                pass
             raise GenerationError("lmstudio", e, {"failure": failure.to_dict()})
 
     async def health_check(self) -> Dict[str, Any]:
@@ -310,7 +923,7 @@ class LMStudioProvider(LLMProvider):
         try:
             url = f"{self.config.endpoint}/v1/models"
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=5) as response:
+                async with session.get(url, timeout=5, ssl=self._use_ssl()) as response:
                     if response.status == 200:
                         data = await response.json()
                         return {
@@ -337,8 +950,34 @@ class LMStudioProvider(LLMProvider):
 class KoboldCppProvider(LLMProvider):
     """KoboldCpp API provider"""
 
+    def __init__(self, config: LLMConfig):
+        super().__init__(config)
+        self._cb_failures: int = 0
+        self._cb_open_until: float = 0.0
+
     async def generate(self, prompt: str, **kwargs) -> LLMResponse:
         """Generate using KoboldCpp API"""
+        # Circuit breaker: fast-fail when open
+        try:
+            from time import monotonic as _mono
+
+            now = _mono()
+        except Exception:
+            now = 0.0
+        if getattr(self, "_cb_open_until", 0.0) and now < self._cb_open_until:
+            log_exception(
+                _obs,
+                code=ErrorCodes.AI_LB_UNAVAILABLE,
+                component="koboldcpp",
+                exc=RuntimeError(f"circuit open until {self._cb_open_until:.2f}"),
+                endpoint=self.config.endpoint,
+            )
+            raise GenerationError(
+                "koboldcpp",
+                RuntimeError("circuit_open"),
+                {"until": self._cb_open_until},
+            )
+
         start_time = asyncio.get_event_loop().time()
         url = f"{self.config.endpoint}/api/v1/generate"
 
@@ -360,48 +999,112 @@ class KoboldCppProvider(LLMProvider):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    url,
-                    json=payload,
-                    timeout=aiohttp.ClientTimeout(total=self.config.timeout),
-                ) as response:
-                    if response.status != 200:
-                        error_text = await response.text()
-                        raise GenerationError(
-                            "koboldcpp",
-                            Exception(f"HTTP {response.status}: {error_text}"),
-                            {"status": response.status, "response": error_text},
-                        )
-
-                    data = await response.json()
-
-                    # Validate KoboldCpp response
-                    if "results" not in data or len(data["results"]) == 0:
-                        raise GenerationError(
-                            "koboldcpp",
-                            ValueError("No results in response"),
-                            {"response": data},
-                        )
-
-                    text = data["results"][0].get("text", "")
-
-                    return LLMResponse(
-                        text=text,
-                        provider=ModelProvider.KOBOLDCPP,
-                        provider_name="koboldcpp",
-                        model=self.config.model,
-                        raw_response=data,
-                        generation_time_ms=(
-                            asyncio.get_event_loop().time() - start_time
-                        )
-                        * 1000,
+                # Request event
+                try:
+                    _obs.info(
+                        "llm.request",
+                        extra={
+                            "provider": "koboldcpp",
+                            "endpoint": self.config.endpoint,
+                            "model": self.config.model,
+                        },
                     )
+                except Exception:
+                    pass
+
+                attempts = int(os.getenv("KOBOLD_RETRY_ATTEMPTS", "1") or 1)
+                base_delay = float(os.getenv("KOBOLD_RETRY_BASE_DELAY", "0.2") or 0.2)
+                for attempt in range(max(1, attempts)):
+                    try:
+                        async with session.post(
+                            url,
+                            json=payload,
+                            timeout=aiohttp.ClientTimeout(total=self.config.timeout),
+                        ) as response:
+                            if response.status != 200:
+                                error_text = await response.text()
+                                # Retry on 5xx
+                                if (
+                                    500 <= response.status < 600
+                                    and attempt < attempts - 1
+                                ):
+                                    await asyncio.sleep(base_delay * (2**attempt))
+                                    continue
+                                raise GenerationError(
+                                    "koboldcpp",
+                                    Exception(f"HTTP {response.status}: {error_text}"),
+                                    {"status": response.status, "response": error_text},
+                                )
+
+                            data = await response.json()
+
+                            # Validate KoboldCpp response
+                            if "results" not in data or len(data["results"]) == 0:
+                                raise GenerationError(
+                                    "koboldcpp",
+                                    ValueError("No results in response"),
+                                    {"response": data},
+                                )
+
+                            text = data["results"][0].get("text", "")
+
+                            meta = normalize_kobold(data, self.config.model)
+                            result = LLMResponse(
+                                text=text,
+                                provider=ModelProvider.KOBOLDCPP,
+                                provider_name="koboldcpp",
+                                model=self.config.model,
+                                raw_response={"data": data, "normalized": meta},
+                                generation_time_ms=(
+                                    asyncio.get_event_loop().time() - start_time
+                                )
+                                * 1000,
+                            )
+                            try:
+                                # from ..common.observability import observe_metric
+                                # observe_metric(
+                                #     "llm.koboldcpp.gen_ms",
+                                #     result.generation_time_ms or 0.0,
+                                #     endpoint=self.config.endpoint,
+                                #     model=self.config.model,
+                                # )
+                                pass
+                            except Exception:
+                                pass
+                            return result
+                    except (aiohttp.ClientError, asyncio.TimeoutError) as ce:
+                        if attempt < attempts - 1:
+                            await asyncio.sleep(base_delay * (2**attempt))
+                            continue
+                        raise GenerationError("koboldcpp", ce, {"error": str(ce)})
 
         except GenerationError:
+            # update/open circuit on repeated failures
+            try:
+                self._cb_failures += 1
+                threshold = int(os.getenv("LLM_CB_THRESHOLD", "3") or 3)
+                window = float(os.getenv("LLM_CB_WINDOW_SEC", "15") or 15)
+                from time import monotonic as _mono
+
+                if self._cb_failures >= threshold:
+                    self._cb_open_until = _mono() + window
+                    self._cb_failures = 0
+                    _obs.info(
+                        "circuit.open",
+                        extra={"provider": "koboldcpp", "window_sec": window},
+                    )
+            except Exception:
+                pass
             raise
         except Exception as e:
             failure = self.record_failure(e, prompt)
-            logger.error(f"KoboldCpp generation failed: {failure.to_dict()}")
+            log_exception(
+                _obs,
+                code=ErrorCodes.AI_LB_UNAVAILABLE,
+                component="koboldcpp",
+                exc=e,
+                endpoint=self.config.endpoint,
+            )
             raise GenerationError("koboldcpp", e, {"failure": failure.to_dict()})
 
     async def health_check(self) -> Dict[str, Any]:
@@ -412,11 +1115,25 @@ class KoboldCppProvider(LLMProvider):
                 async with session.get(url, timeout=5) as response:
                     if response.status == 200:
                         data = await response.json()
-                        return {
+                        result = {
                             "healthy": True,
                             "model": data.get("result"),
                             "endpoint": self.config.endpoint,
                         }
+                        # Optional deeper probe behind flag
+                        if os.getenv("KOBOLD_HEALTH_GEN", "").strip().lower() in {
+                            "1",
+                            "true",
+                            "yes",
+                        }:
+                            try:
+                                tiny = await self.generate(
+                                    "ping", max_tokens=8, temperature=0.0
+                                )
+                                result["gen_probe"] = bool(getattr(tiny, "text", ""))
+                            except Exception:
+                                result["gen_probe"] = False
+                        return result
                     else:
                         return {
                             "healthy": False,
@@ -447,10 +1164,15 @@ class LLMOrchestrator:
         self.active_provider: Optional[str] = None
         self.fail_on_all_providers = fail_on_all_providers
         self.generation_history: List[Dict] = []
+        self._inflight: Dict[str, asyncio.Task] = {}
         # Preference for small models when selecting from /v1/models
         self.prefer_small_models: bool = _env_truthy(os.environ.get("LM_PREFER_SMALL"))
         # Optional DB logger (no-op unless DB_LOG_GENERATIONS is truthy and env is configured)
-        self._db_logger = GenerationDBLogger()
+        db_uri = os.environ.get("DB_URI")
+        if db_uri:
+            self._db_logger = GenerationDBLogger(db_uri)
+        else:
+            self._db_logger = None
 
     def register_provider(self, name: str, config: LLMConfig) -> None:
         """Register a new LLM provider"""
@@ -502,46 +1224,95 @@ class LLMOrchestrator:
             logger.warning(f"Active provider appears unhealthy: {health}")
 
         start = asyncio.get_event_loop().time()
+        # Single-flight key derived from hashed components to avoid leaking prompt/system
+        model_key = kwargs.get("model") or getattr(provider.config, "model", None)
+        # Privacy-preserving signature: optionally include an HMAC over prompt/system
+        # if SINGLEFLIGHT_SALT is provided; otherwise omit content entirely.
+        sig = ""
         try:
-            response = await provider.generate(prompt, system=system, **kwargs)
+            salt = os.getenv("SINGLEFLIGHT_SALT")
+            if salt:
+                msg = f"{system or ''}|{prompt or ''}".encode("utf-8")
+                sig = hmac.new(salt.encode("utf-8"), msg, hashlib.sha256).hexdigest()
+        except Exception:
+            sig = ""
+        key_parts = (
+            str(target or ""),
+            sig,
+            str(model_key or ""),
+            str(kwargs.get("temperature", "")),
+            str(kwargs.get("max_tokens", "")),
+        )
+        sf_key = hashlib.sha256("|".join(key_parts).encode("utf-8")).hexdigest()
+        try:
+            if sf_key in self._inflight:
+                # Follower: await leader; on error optionally retry once independently
+                task = self._inflight[sf_key]
+                try:
+                    response = await task
+                except Exception:
+                    # Optional follower retry toggle (defaults on)
+                    retry_followers = str(
+                        os.getenv("LM_SINGLEFLIGHT_FOLLOWER_RETRY", "1")
+                    ).strip().lower() in {
+                        "1",
+                        "true",
+                        "yes",
+                        "on",
+                    }
+                    if retry_followers:
+                        response = await provider.generate(
+                            prompt, system=system, **kwargs
+                        )
+                    else:
+                        raise
+            else:
+                task = asyncio.create_task(
+                    provider.generate(prompt, system=system, **kwargs)
+                )
+                self._inflight[sf_key] = task
+                response = await task
         except Exception as e:
             # Log failure path to DB if enabled, then re-raise
             latency_ms = (asyncio.get_event_loop().time() - start) * 1000
-            try:
-                self._db_logger.log_generation(
-                    provider_name=target,
-                    provider_type=provider.config.provider.value,
-                    provider_endpoint=provider.config.endpoint,
-                    prompt=prompt,
-                    system=system,
-                    request_params={
+            if self._db_logger:
+                event_data = {
+                    "provider_name": target,
+                    "provider_type": provider.config.provider.value,
+                    "provider_endpoint": provider.config.endpoint,
+                    "prompt": prompt,
+                    "system": system,
+                    "request_params": {
                         k: v
                         for k, v in kwargs.items()
                         if k in ("temperature", "max_tokens", "top_p", "top_k")
                     },
-                    response_text=None,
-                    response_json={"error": str(e)},
-                    status="error",
-                    latency_ms=latency_ms,
-                    model_key=getattr(provider.config, "model", None),
-                )
+                    "response_text": None,
+                    "response_json": {"error": str(e)},
+                    "status": "error",
+                    "latency_ms": latency_ms,
+                    "model_key": getattr(provider.config, "model", None),
+                }
+                self._db_logger.log_event("generations", event_data)
+
                 # Also record a metrics event if fallbacks were requested
                 if kwargs.get("allow_fallback") or kwargs.get("fallback_providers"):
-                    self._db_logger.log_event(
-                        kind="fallback_considered",
-                        provider_name=target,
-                        provider_type=provider.config.provider.value,
-                        provider_endpoint=provider.config.endpoint,
-                        data={
+                    fallback_event = {
+                        "kind": "fallback_considered",
+                        "provider_name": target,
+                        "provider_type": provider.config.provider.value,
+                        "provider_endpoint": provider.config.endpoint,
+                        "data": {
                             "allow_fallback": bool(kwargs.get("allow_fallback")),
                             "fallback_providers": kwargs.get("fallback_providers"),
                             "error": str(e),
                         },
-                        model_key=getattr(provider.config, "model", None),
-                    )
-            except Exception:
-                pass
+                        "model_key": getattr(provider.config, "model", None),
+                    }
+                    self._db_logger.log_event("events", fallback_event)
             raise
+        finally:
+            self._inflight.pop(sf_key, None)
 
         # Successful generation — record history and optionally to DB
         latency_ms = (asyncio.get_event_loop().time() - start) * 1000
@@ -558,27 +1329,26 @@ class LLMOrchestrator:
         )
 
         # DB log (best-effort)
-        try:
-            self._db_logger.log_generation(
-                provider_name=target,
-                provider_type=provider.config.provider.value,
-                provider_endpoint=provider.config.endpoint,
-                prompt=prompt,
-                system=system,
-                request_params={
+        if self._db_logger:
+            event_data = {
+                "provider_name": target,
+                "provider_type": provider.config.provider.value,
+                "provider_endpoint": provider.config.endpoint,
+                "prompt": prompt,
+                "system": system,
+                "request_params": {
                     k: v
                     for k, v in kwargs.items()
                     if k in ("temperature", "max_tokens", "top_p", "top_k")
                 },
-                response_text=getattr(response, "text", None),
-                response_json=getattr(response, "raw_response", None),
-                status="ok",
-                latency_ms=latency_ms,
-                model_key=getattr(response, "model", None)
+                "response_text": getattr(response, "text", None),
+                "response_json": getattr(response, "raw_response", None),
+                "status": "ok",
+                "latency_ms": latency_ms,
+                "model_key": getattr(response, "model", None)
                 or getattr(provider.config, "model", None),
-            )
-        except Exception:
-            pass
+            }
+            self._db_logger.log_event("generations", event_data)
 
         return response
 

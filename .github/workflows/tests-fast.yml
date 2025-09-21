@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests-fast:
+    name: tests-fast (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install deps
+        shell: bash
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pip install --upgrade pip
+          # Submodule install
+          if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+          pip install -e ".[postgres]"
+          pip install pytest pytest-asyncio pytest-xdist aiohttp click
+
+      - name: Show env and deps
+        run: |
+          python -V
+          pip --version
+          pip show click || true
+          pip show oracledb || true
+          pip show sqlalchemy || true
+      - name: Run fast tests (exclude slow/oracle/acceptance)
+        env:
+          PYTHONPATH: src
+        run: |
+          pytest -n auto --dist=loadfile -m "not slow and not oracle and not acceptance" -vv --maxfail=1

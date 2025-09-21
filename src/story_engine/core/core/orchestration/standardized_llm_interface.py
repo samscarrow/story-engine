@@ -164,8 +164,7 @@ class StandardizedLLMInterface:
             self._update_performance_metrics(
                 query_type_str, response_time, success=False
             )
-
-            logger.error(f"Query failed for {query_type_str}: {e}")
+            logger.error(f"Error in standardized llm interface: {e}")
             raise
 
     async def batch_query(

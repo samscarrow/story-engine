@@ -36,6 +36,31 @@ def _load_prompts() -> List[Dict[str, Any]]:
 PROMPTS = _load_prompts()
 
 
+CORE_GOLDEN_IDS = {
+    "pilate_oath",
+    "whispered_dream",
+    "sand_and_iron",
+    "voices_in_portico",
+}
+
+
+
+def _build_golden_params():
+    params = []
+    for idx, spec in enumerate(PROMPTS):
+        spec_id = spec.get("id", str(idx))
+        marks = []
+        if spec_id in CORE_GOLDEN_IDS:
+            marks.append(pytest.mark.golden_core)
+        else:
+            marks.append(pytest.mark.golden_extended)
+        params.append(pytest.param(spec, marks=marks, id=spec_id))
+    return params
+
+
+GOLDEN_PARAMS = _build_golden_params()
+
+
 def _parse_eval(text: str) -> Dict[str, float]:
     scores: Dict[str, float] = {}
     if not isinstance(text, str):
@@ -52,9 +77,7 @@ def _parse_eval(text: str) -> Dict[str, float]:
     return scores
 
 
-@pytest.mark.parametrize(
-    "spec", PROMPTS, ids=[p.get("id", str(i)) for i, p in enumerate(PROMPTS)]
-)
+@pytest.mark.parametrize("spec", GOLDEN_PARAMS)
 def test_golden_parallel_minimal(spec: Dict[str, Any]) -> None:
     engine = OrchestratedStoryEngine(use_poml=True)
 

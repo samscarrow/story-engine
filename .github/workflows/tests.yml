@@ -16,19 +16,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
-          pip install pytest
-      - name: Run tests (exclude slow)
+          if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+          pip install -e ".[postgres]"
+          pip install pytest pytest-asyncio
+      - name: Lint POML templates (self-contained)
+        run: |
+          python scripts/lint_poml_self_contained.py
+      - name: Run tests (exclude slow/oracle/acceptance)
         env:
           PYTHONPATH: src
         run: |
-          pytest -q
+          pytest -q -m "not slow and not oracle and not acceptance"
+
+  repro-harness:
+    name: Repro Harness (focused)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install minimal deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+          pip install -e ".[postgres]"
+          pip install pytest pytest-asyncio
+      - name: Run repro harness tests
+        env:
+          PYTHONPATH: src
+        run: |
+          pytest -q tests/test_repro_harness.py
 
   live:
     name: Live (slow, opt-in)
@@ -38,23 +66,27 @@ jobs:
       STORY_ENGINE_LIVE: '1'
       LLM_TEST_TIMEOUT: '20'
     steps:
-      - name: Join Tailscale
+      - name: Join Tailscale (auth key)
         uses: tailscale/github-action@v2
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
+          authkey: ${{ secrets.TS_AUTHKEY }}
+          # If your auth key doesn't embed tags, you can enable the next line
+          # but ensure TagOwners in your ACL allow this tag.
+          # tags: tag:ci
       - name: Verify Tailscale session
         run: tailscale status
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
-          pip install pytest
+          if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+          pip install -e ".[postgres]"
+          pip install pytest pytest-asyncio
       - name: Point config to ai-lb over Tailscale
         run: |
           sed -i 's#http://localhost:8000#http://pc-sam.dory-phrygian\.ts\.net:8000#' config.yaml
@@ -66,3 +98,29 @@ jobs:
           PYTHONPATH: src
         run: |
           pytest -q -m slow
+
+  db-live:
+    name: Live DB smoke (opt-in)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_live == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+          pip install -e .
+          pip install pytest pytest-asyncio
+      - name: Run DB smoke tests
+        env:
+          DB_WALLET_LOCATION: ${{ secrets.DB_WALLET_LOCATION }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_DSN: ${{ secrets.DB_DSN }}
+        run: |
+          pytest -q -m db_smoke

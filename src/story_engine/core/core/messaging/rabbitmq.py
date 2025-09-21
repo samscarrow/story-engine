@@ -23,6 +23,14 @@ import time
 from dataclasses import asdict
 from typing import Dict, Optional
 
+try:  # pragma: no cover
+    from story_engine.core.core.common.logging import set_correlation_id  # type: ignore
+except Exception:  # pragma: no cover
+
+    def set_correlation_id(_val: str) -> None:  # type: ignore
+        return
+
+
 from .interface import Consumer, Handler, Message, Publisher
 
 try:
@@ -250,6 +258,10 @@ class RabbitMQBus(Publisher, Consumer):
                         attempts = 0
                         while True:
                             try:
+                                try:
+                                    set_correlation_id(msg.correlation_id or msg.id)
+                                except Exception:
+                                    pass
                                 self._handlers[topic](msg, self)
                                 ch.basic_ack(delivery_tag=method.delivery_tag)
                                 break

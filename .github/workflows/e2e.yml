@@ -1,0 +1,76 @@
+name: E2E (LMStudio Live)
+
+on:
+  workflow_dispatch:
+    inputs:
+      lm_endpoint:
+        description: "LM Studio base URL (e.g., http://host:1234)"
+        required: true
+        type: string
+
+jobs:
+  e2e-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio aiohttp pyyaml
+          if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
+          pip install -e ".[postgres]"
+
+      - name: Run live E2E tests (LMStudio)
+        env:
+          LOG_FORMAT: json
+          LM_ENDPOINT: ${{ inputs.lm_endpoint }}
+        run: |
+          set -o pipefail
+          pytest -q -k "e2e" --maxfail=1 --disable-warnings --log-cli-level=INFO | tee pytest-e2e.log
+
+      - name: Extract metrics to CSV
+        run: |
+          python - <<'PY'
+import json, csv, sys
+out = open('metrics.csv', 'w', newline='')
+wr = csv.writer(out)
+wr.writerow(['metric','value','endpoint','model'])
+for line in open('pytest-e2e.log','r',encoding='utf-8',errors='ignore'):
+    line = line.strip()
+    if not line or '{' not in line:
+        continue
+    try:
+        obj = json.loads(line[line.index('{'):])
+    except Exception:
+        continue
+    if obj.get('event') == 'metric':
+        wr.writerow([
+            obj.get('metric',''),
+            obj.get('value',''),
+            obj.get('endpoint',''),
+            obj.get('model',''),
+        ])
+out.close()
+PY
+
+      - name: Upload E2E logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-logs
+          path: pytest-e2e.log
+
+      - name: Upload E2E metrics CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-metrics-csv
+          path: metrics.csv
