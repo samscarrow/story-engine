@@ -391,21 +391,27 @@ class OracleConnection(DatabaseConnection):
         except Exception:
             self.retry_max_backoff_seconds = 5.0
         self.ping_on_connect = ping_on_connect
+        # Instance logger (avoid recreating per-call); attach per-call context via `extra`
+        try:
+            self._log = get_logger(__name__, component="db.oracle")
+        except Exception:  # fallback to stdlib logger if shim unavailable
+            import logging as _logging
+
+            self._log = _logging.getLogger(__name__)
 
     def connect(self):
         """Connect to the Oracle database with optional pooling and retries."""
         from pathlib import Path
         import os
 
-        log = get_logger(
-            __name__,
-            component="db.oracle",
-            workflow="connect",
-            dsn=self.dsn,
-            use_pool=self.use_pool,
-            pool_min=self.pool_min,
-            pool_max=self.pool_max,
-        )
+        log = self._log
+        base_extra = {
+            "workflow": "connect",
+            "dsn": self.dsn,
+            "use_pool": self.use_pool,
+            "pool_min": self.pool_min,
+            "pool_max": self.pool_max,
+        }
 
         # Return CLOB/NCLOB as Python str instead of LOB objects
         try:
@@ -419,7 +425,10 @@ class OracleConnection(DatabaseConnection):
             wallet_path = Path(self.wallet_location).resolve()
             os.environ["TNS_ADMIN"] = str(wallet_path)
             # Note: using env avoids having to pass config_dir explicitly
-            log.debug("set TNS_ADMIN for wallet", extra={"TNS_ADMIN": str(wallet_path)})
+            log.debug(
+                "set TNS_ADMIN for wallet",
+                extra={**base_extra, "TNS_ADMIN": str(wallet_path)},
+            )
 
         # Create or reuse pool if requested
         if self.use_pool and self._pool is None:
@@ -441,7 +450,7 @@ class OracleConnection(DatabaseConnection):
                 self._pool = oracledb.create_pool(**pool_kwargs)  # type: ignore[arg-type]
                 log.info(
                     "oracle pool created",
-                    extra={"elapsed_ms": int((time.time() - t0) * 1000)},
+                    extra={**base_extra, "elapsed_ms": int((time.time() - t0) * 1000)},
                 )
             except Exception as e:
                 log_exception(
@@ -482,7 +491,11 @@ class OracleConnection(DatabaseConnection):
                 elapsed_ms = int((time.time() - t0) * 1000)
                 log.info(
                     "oracle connect ok",
-                    extra={"attempt": attempt + 1, "elapsed_ms": elapsed_ms},
+                    extra={
+                        **base_extra,
+                        "attempt": attempt + 1,
+                        "elapsed_ms": elapsed_ms,
+                    },
                 )
                 try:
                     # Emit a lightweight timing metric
