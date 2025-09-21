@@ -1050,7 +1050,7 @@ class LLMOrchestrator:
         # Optional DB logger (no-op unless DB_LOG_GENERATIONS is truthy and env is configured)
         db_uri = os.environ.get("DB_URI")
         if db_uri:
-            self._db_logger = DBLogger(db_uri)
+            self._db_logger = GenerationDBLogger(db_uri)
         else:
             self._db_logger = None
 
