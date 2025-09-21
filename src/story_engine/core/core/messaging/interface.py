@@ -14,6 +14,13 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional
 
+# Optional correlation context setter; fall back to no-op if unavailable
+try:  # pragma: no cover - optional
+    from story_engine.core.core.common.logging import set_correlation_id  # type: ignore
+except Exception:  # pragma: no cover
+    def set_correlation_id(_val: str) -> None:  # type: ignore
+        return
+
 
 # Optional contract enforcement
 try:

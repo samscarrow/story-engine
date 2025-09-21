@@ -7,4 +7,3 @@ Requires-Dist: click>=8.1.7
 Requires-Dist: dotenv>=0.9.9
 Requires-Dist: oracledb>=3.3.0
 Requires-Dist: pyyaml>=6.0.2
-Requires-Dist: llm-observability-suite@ git+https://github.com/samscarrow/llm-observability-suite@v0.1.0

@@ -16,7 +16,7 @@ jobs:
           python-version: '3.11'
       - run: pip install -U pip
       - run: pip install -e external/llm-observability-suite
-      - run: pip install -e .
+      - run: pip install -e ".[postgres]"
       - run: pip install pytest pytest-asyncio
       - name: Run unit tests
         run: pytest -q tests/unit

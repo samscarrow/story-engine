@@ -446,7 +446,8 @@ class OracleConnection(DatabaseConnection):
                 self.use_pool = False
 
         # Acquire a connection (from pool or direct) with retries
-        last_err: Optional[Exception] = None
+        # Track last exception for debugging (optional)
+        # last_err: Optional[Exception] = None
         for attempt in range(self.retry_attempts):
             try:
                 t0 = time.time()
@@ -480,7 +481,6 @@ class OracleConnection(DatabaseConnection):
                     pass
                 return
             except Exception as e:
-                last_err = e
                 # Common transient/connectivity ORA codes to retry
                 msg = str(e)
                 retryable = any(

@@ -4,7 +4,6 @@ Each persona is an autonomous agent that can create, modify, and optimize its ow
 """
 
 import logging
-from llm_observability import get_logger
 import json
 import hashlib
 from typing import Dict, Any, Optional, List

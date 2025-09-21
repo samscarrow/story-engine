@@ -51,7 +51,11 @@ class EngineOrchestrator:
                         completed[step.key] = {"skipped": True}
                         try:
                             ctx.results[step.key] = completed[step.key]
-                            ctx.meta[step.key] = StepResult(status=StepStatus.SKIPPED, elapsed_ms=0.0, summary={"idempotent": True})
+                            ctx.meta[step.key] = StepResult(
+                                status=StepStatus.SKIPPED,
+                                elapsed_ms=0.0,
+                                summary={"idempotent": True},
+                            )
                         except Exception:
                             pass
                         return
@@ -126,7 +130,17 @@ class EngineOrchestrator:
                         return
                     except Exception as e:  # noqa: PERF203 - different exception paths
                         last_err = e
-                        log_exception(self._log, code=ErrorCodes.GEN_TIMEOUT if "timeout" in str(e).lower() else ErrorCodes.CONFIG_INVALID, component="engine.step", exc=e, step=step.key)
+                        log_exception(
+                            self._log,
+                            code=(
+                                ErrorCodes.GEN_TIMEOUT
+                                if "timeout" in str(e).lower()
+                                else ErrorCodes.CONFIG_INVALID
+                            ),
+                            component="engine.step",
+                            exc=e,
+                            step=step.key,
+                        )
                         if attempt < attempts:
                             # compute backoff with jitter
                             delay = base_delay * (2 ** (attempt - 1))

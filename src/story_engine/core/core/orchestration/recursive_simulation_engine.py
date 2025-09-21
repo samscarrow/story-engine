@@ -5,7 +5,6 @@ Manages complex simulation workflows where persona agents spawn sub-simulations
 
 import asyncio
 import logging
-from llm_observability import get_logger
 from typing import Dict, Any, Optional, List, Callable
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta

@@ -25,6 +25,7 @@ import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
+import logging
 from story_engine.core.core.cache.response_cache import ResponseCache
 from llm_observability import get_logger, log_exception, observe_metric, inc_metric, ErrorCodes
 from story_engine.core.core.orchestration.unified_llm_orchestrator import (
@@ -35,6 +36,7 @@ from story_engine.core.common.config import load_config
 
 
 _obs = get_logger("hpq")
+logger = logging.getLogger(__name__)
 
 
 @dataclass

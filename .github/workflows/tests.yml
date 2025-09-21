@@ -25,7 +25,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
-          pip install -e .
+          pip install -e ".[postgres]"
           pip install pytest pytest-asyncio
       - name: Lint POML templates (self-contained)
         run: |
@@ -50,7 +50,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
-          pip install -e .
+          pip install -e ".[postgres]"
           pip install pytest pytest-asyncio
       - name: Run repro harness tests
         env:
@@ -85,7 +85,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -d external/llm-observability-suite ]; then pip install -e external/llm-observability-suite; fi
-          pip install -e .
+          pip install -e ".[postgres]"
           pip install pytest pytest-asyncio
       - name: Point config to ai-lb over Tailscale
         run: |

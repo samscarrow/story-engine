@@ -11,11 +11,10 @@ from typing import Iterable, Optional
 import click
 
 from . import config
-from .checks import CheckResult, run_preflight_checks
+from .checks import run_preflight_checks
 import urllib.request
 import urllib.error
 import sqlite3
-from datetime import datetime
 
 
 @dataclass

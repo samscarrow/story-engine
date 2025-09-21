@@ -5,7 +5,7 @@ import time
 import uuid
 
 from story_engine.core.core.common.config import load_config
-from llm_observability import get_logger, init_logging_from_env
+from llm_observability import init_logging_from_env
 from story_engine.core.core.common.observability import timing
 
 try:

@@ -17,7 +17,11 @@ class StandardizedAIAdapter:
     the project.
     """
 
-    def __init__(self, interface: StandardizedLLMInterface, default_query: QueryType = QueryType.NARRATIVE_ANALYSIS) -> None:
+    def __init__(
+        self,
+        interface: StandardizedLLMInterface,
+        default_query: QueryType = QueryType.NARRATIVE_ANALYSIS,
+    ) -> None:
         self.interface = interface
         self.default_query = default_query
 
@@ -44,4 +48,3 @@ class StandardizedAIAdapter:
             provider_preference=provider_name,
         )
         return await self.interface.query(q)
-

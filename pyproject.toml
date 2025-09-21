@@ -17,6 +17,13 @@ dependencies = [
     "pyyaml>=6.0.2",
 ]
 
+# Optional extras for environment-specific drivers
+[project.optional-dependencies]
+# PostgreSQL support (only needed if DB_TYPE=postgres/postgresql)
+postgres = [
+    "psycopg2-binary>=2.9",
+]
+
 [project.scripts]
 story-engine-poml = "story_engine.poml.cli:main"
 story-engine-demo = "story_engine.scripts.run_demo:main"

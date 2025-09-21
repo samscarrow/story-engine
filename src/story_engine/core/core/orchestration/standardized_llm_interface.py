@@ -6,7 +6,6 @@ Provides a unified API for all Story Engine components to interact with LLMs
 import asyncio
 import time as import_time
 import logging
-from llm_observability import get_logger
 from typing import Dict, Any, Optional, List, Protocol, runtime_checkable
 from dataclasses import dataclass
 from enum import Enum

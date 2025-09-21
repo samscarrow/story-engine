@@ -17,15 +17,13 @@ import traceback
 from time import monotonic
 
 from .model_filters import filter_models
-from .response_normalizer import normalize_openai_chat, extract_text_and_reasoning, _coerce_text
+from .response_normalizer import normalize_openai_chat, _coerce_text
 from .kobold_normalizer import normalize_kobold
 from llm_observability import (
     get_logger,
     GenerationDBLogger,
+    DBLogger,
     log_exception,
-    observe_metric,
-    metric_event,
-    inc_metric,
     ErrorCodes,
 )
 

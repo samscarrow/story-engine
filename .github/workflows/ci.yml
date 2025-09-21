@@ -38,6 +38,8 @@ jobs:
           if [ -d external/llm-observability-suite ]; then
             pip install -e external/llm-observability-suite
           fi
+          # Install project (with Postgres extra for tests that import it)
+          pip install -e ".[postgres]"
 
       - name: Run fast tests (exclude slow/oracle/acceptance)
         env:

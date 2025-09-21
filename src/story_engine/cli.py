@@ -360,7 +360,7 @@ def build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--require-healthy", action="store_true", help="Fail if LM or DB unhealthy")
 
     # db health
-    phealth = sub.add_parser("db-health", help="Check DB connectivity")
+    sub.add_parser("db-health", help="Check DB connectivity")
 
     # db export
     pexp = sub.add_parser("db-export", help="Export workflow outputs as NDJSON")
@@ -369,11 +369,15 @@ def build_parser() -> argparse.ArgumentParser:
     pexp.add_argument("--limit", type=int, default=None)
 
     # config show
-    pshow = sub.add_parser("config-show", help="Show effective runtime config")
+    sub.add_parser("config-show", help="Show effective runtime config")
 
     # lm-models
     plm = sub.add_parser("lm-models", help="List models from an OpenAI-compatible endpoint")
-    plm.add_argument("--endpoint", default=os.getenv("LM_ENDPOINT", "http://localhost:1234"), help="Base URL of LM endpoint")
+    plm.add_argument(
+        "--endpoint",
+        default=os.getenv("LM_ENDPOINT", "http://localhost:1234"),
+        help="Base URL of LM endpoint",
+    )
 
     return p
 

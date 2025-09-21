@@ -5,8 +5,6 @@ import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from llm_observability import get_logger
-from ..story_engine.narrative_pipeline import NarrativePipeline
 from story_engine.poml.lib.poml_integration import StoryEnginePOMLAdapter
 from .interfaces import (
     BaseEngine,
@@ -53,7 +51,7 @@ class NarrativePipelineEngine(BaseEngine):
         title = inputs.get("title") or "Untitled"
         premise = inputs.get("premise") or ""
         characters: List[Dict[str, Any]] = list(inputs.get("characters") or [])
-        num_beats = int(inputs.get("num_beats", 5))
+        int(inputs.get("num_beats", 5))  # parsed but not used directly in this simple plan
         artifact_key = inputs.get("artifact_key") or self._default_artifact_key(
             title, premise, characters
         )

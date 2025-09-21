@@ -33,6 +33,13 @@ except ImportError:
 # Logger (configuration is typically handled during application initialization)
 logger = logging.getLogger(__name__)
 
+# Small helpers
+def _truthy(val: Optional[str]) -> bool:
+    """Parse common truthy env/flags: 1,true,yes,on (case-insensitive)."""
+    if val is None:
+        return False
+    return str(val).strip().lower() in {"1", "true", "yes", "on"}
+
 # ============================================================================
 # HIGH PRIORITY: LLM Interface Abstraction
 # ============================================================================
